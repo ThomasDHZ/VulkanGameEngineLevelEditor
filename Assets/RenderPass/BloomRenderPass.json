@@ -1,0 +1,60 @@
+{
+  "Name": "BloomRenderPass",
+  "RenderPassId": "c4c99296-9df2-4373-ae85-f1a5c6acd018",
+  "RenderPipelineList": [
+    "Pipelines/BloomPipeline.json"
+  ],
+  "RenderPassResolution": [ 0, 0 ],
+  "SubPassCount": 1,
+  "UseGlobalBindlessSet": true,
+  "UseDefaultRenderResolution": true,
+  "UseCubeMapMultiView": false,
+  "IsRenderedToSwapchain": false,
+  "InputTextureList": [
+    "ca62ddec-30ff-49e2-b168-3cfeddcedb8e",
+    "a1c68b00-3fc5-4454-a639-852db3f82ce2"
+  ],
+  "SampleCount": 1,
+  "RenderAttachmentList": [
+    {
+      "RenderedTextureId": "2a87d23c-a051-4f43-8f2f-a36b6b5162e6",
+      "MipMapCount": 1,
+      "TextureType": 1,
+      "TextureUsageType": 1,
+      "RenderAttachmentTypes": [ 0 ],
+      "Format": 97,
+      "LoadOp": 1,
+      "StoreOp": 0,
+      "FinalLayout": 5,
+      "UseSampler": true,
+      "UseMipMaps": false,
+      "IsCubeMapAttachment": false,
+      "IsTextureToExport": false
+    }
+  ],
+  "SubpassDependencyList": [
+    {
+      "SrcSubpass": 4294967295,
+      "DstSubpass": 0,
+      "SrcStageMask": 1024,
+      "DstStageMask": 1024,
+      "SrcAccessMask": 0,
+      "DstAccessMask": 256,
+      "DependencyFlags": 0
+    }
+  ],
+  "ClearValueList": [
+    {
+      "Color": {
+        "Float32_0": 1.0,
+        "Float32_1": 0.0,
+        "Float32_2": 0.0,
+        "Float32_3": 1.0
+      },
+      "DepthStencil": {
+        "depth": 0.0,
+        "stencil": 0
+      }
+    }
+  ]
+}

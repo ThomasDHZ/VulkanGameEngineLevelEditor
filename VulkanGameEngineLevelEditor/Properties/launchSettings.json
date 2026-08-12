@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "VulkanGameEngineLevelEditor": {
+      "commandName": "Project",
+      "debugEngines": "managed,native"
+    }
+  }
+}

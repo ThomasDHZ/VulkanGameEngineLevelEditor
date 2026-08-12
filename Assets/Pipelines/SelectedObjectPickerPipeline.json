@@ -1,0 +1,118 @@
+{
+  "Name": "objectPickerRenderPassId",
+  "PipelineId": "3f7db895-9486-4259-93b3-cb0672f985ce",
+  "ShaderList": [
+    {
+      "ShaderId": "e3324225-219b-4864-8146-a649e95ed37d",
+      "ShaderFile": "Shaders/SelectedGameObjectPickerVert.spv",
+      "ShaderStage": 1
+    },
+    {
+      "ShaderId": "5ea3e499-320f-431c-9c94-0e534ca6099e",
+      "ShaderFile": "Shaders/SelectedGameObjectPickerFrag.spv",
+      "ShaderStage": 16
+    }
+  ],
+  "VertexType": 1,
+  "SubPassId": 0,
+  "UseDynamicColorWrite": false,
+  "ViewportList": [
+    {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.0,
+      "height": 0.0,
+      "minDepth": 0.0,
+      "maxDepth": 1.0
+    }
+  ],
+  "ScissorList": [
+    {
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "extent": {
+        "width": 0,
+        "height": 0
+      }
+    }
+  ],
+  "PipelineColorBlendAttachmentStateList": [
+    {
+      "TextureAttachment": "Attachment 0: Highlight",
+      "BlendEnable": true,
+      "SrcColorBlendFactor": 1,
+      "DstColorBlendFactor": 1, 
+      "ColorBlendOp": 0,
+      "SrcAlphaBlendFactor": 1,
+      "DstAlphaBlendFactor": 1,
+      "AlphaBlendOp": 0,
+      "ColorWriteMask": 15 
+    }
+  ],
+  "PipelineColorBlendStateCreateInfoModel": {
+    "sType": 26,
+    "LogicOpEnable": false,
+    "LogicOp": 0,
+    "AttachmentCount": 1,
+    "BlendConstants": { "FixedElementField": 0.0 }
+  },
+  "PipelineRasterizationStateCreateInfo": {
+    "sType": 23,
+    "depthClampEnable": 0,
+    "rasterizerDiscardEnable": 0,
+    "polygonMode": 0,
+    "cullMode": 2,
+    "frontFace": 0,
+    "depthBiasEnable": 0,
+    "depthBiasConstantFactor": 0.0,
+    "depthBiasClamp": 0.0,
+    "depthBiasSlopeFactor": 0.0,
+    "lineWidth": 1.0,
+    "flags": 0
+  },
+  "PipelineMultisampleStateCreateInfo": {
+    "sType": 24,
+    "rasterizationSamples": 1,
+    "sampleShadingEnable": false,
+    "minSampleShading": 0.0,
+    "alphaToCoverageEnable": false,
+    "alphaToOneEnable": false,
+    "flags": 0
+  },
+  "PipelineDepthStencilStateCreateInfo": {
+    "sType": 25,
+    "depthTestEnable": true,
+    "depthWriteEnable": true,
+    "depthCompareOp": 1,
+    "depthBoundsTestEnable": false,
+    "stencilTestEnable": false,
+    "front": {
+      "failOp": 0,
+      "passOp": 0,
+      "depthFailOp": 0,
+      "compareOp": 0,
+      "compareMask": 0,
+      "writeMask": 0,
+      "reference": 0
+    },
+    "back": {
+      "failOp": 0,
+      "passOp": 0,
+      "depthFailOp": 0,
+      "compareOp": 0,
+      "compareMask": 0,
+      "writeMask": 0,
+      "reference": 0
+    },
+    "minDepthBounds": 0.0,
+    "maxDepthBounds": 0.0,
+    "flags": 0
+  },
+  "PipelineInputAssemblyStateCreateInfo": {
+    "sType": 20,
+    "topology": 3,
+    "primitiveRestartEnable": 0
+  }
+}

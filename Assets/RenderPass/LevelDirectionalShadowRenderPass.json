@@ -1,0 +1,47 @@
+{
+  "Name": "SDFShadowRenderPass",
+  "RenderPassId": "208621ed-7291-40c4-92dd-2e2646aff84c",
+  "RenderPipelineList": [
+    "Pipelines/DirectionalShadowPipeline.json"
+  ],
+  "RenderPassWidth": 2048,
+  "RenderPassHeight": 2048,
+  "SubPassCount": 1,
+  "UseDefaultRenderResolution": false,
+  "UseCubeMapMultiView": false,
+  "IsRenderedToSwapchain": false,
+  "InputTextureList": [],
+  "RenderAttachmentList": [
+    {
+      "RenderedTextureId": "e114f0de-1b72-4e2d-b5a3-31ef3682d130",
+      "MipMapCount": 1,
+      "RenderTextureType": 1,
+      "RenderAttachmentTypes": [ 1 ],
+      "Format": 124,
+      "LoadOp": 1,
+      "StoreOp": 0,
+      "FinalLayout": 4,
+      "UseSampler": false,
+      "UseMipMaps": false,
+      "IsCubeMapAttachment": false,
+      "IsTextureToExport": false,
+      "SamplerCreateInfo": null
+    }
+  ],
+  "SubpassDependencyList": [
+    {
+      "Float32_0": 0.0,
+      "Float32_1": 0.0,
+      "Float32_2": 0.0,
+      "Float32_3": 0.0
+    }
+  ],
+  "ClearValueList": [
+    {
+      "DepthStencil": {
+        "depth": 1.0,
+        "stencil": 0
+      }
+    }
+  ]
+}

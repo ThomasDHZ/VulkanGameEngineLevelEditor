@@ -1,0 +1,93 @@
+{
+  "Name": "IrradiancePipeline",
+  "RenderPassId": "62504413-f55d-4a4f-9afe-71c915bf8e8b",
+  "RenderPassResolution": [ 128, 128 ],
+  "SubPasses": [
+    [
+      {
+        "PipelinePackage": {
+          "PipelinePackageId": "af0105b6-650a-4f4f-8163-ed7fdd9dadc9",
+          "Pipelines": [
+            {
+              "PipelineType": 0,
+              "Pipeline": "Pipelines/IrradiancePipeline.json"
+            }
+          ]
+        },
+        "MeshType": 1,
+        "ShaderPushConstant": "irradianceShaderConstants",
+        "InputTextureList": [],
+        "OutputTextureList": [],
+        "OffScreenRenderPass": false
+      }
+    ]
+  ],
+  "UseGlobalBindlessSet": true,
+  "UseCubeMapMultiView": true,
+  "IsRenderedToSwapchain": false,
+  "IsCubeMapRenderPass": true,
+  "SampleCount": 1,
+  "RenderAttachmentList": [
+    {
+      "RenderedTextureId": "ffc7c231-b3b8-4f47-98ad-147d45ca6dc0",
+      "MipMapCount": 1,
+      "TextureType": 5,
+      "TextureUsageType": 5,
+      "RenderAttachmentTypes": [ 0 ],
+      "Format": 109,
+      "LoadOp": 1,
+      "StoreOp": 0,
+      "FinalLayout": 5,
+      "UseSampler": true,
+      "UseMipMaps": false,
+      "SamplerCreateInfo": {
+        "SType": 31,
+        "MagFilter": 1,
+        "MinFilter": 1,
+        "MipmapMode": 1,
+        "AddressModeU": 2,
+        "AddressModeV": 2,
+        "AddressModeW": 2,
+        "MipLodBias": 0.0,
+        "AnisotropyEnable": true,
+        "MaxAnisotropy": 16.0,
+        "CompareEnable": false,
+        "CompareOp": 7,
+        "MinLod": 0.0,
+        "MaxLod": 1000.0,
+        "BorderColor": 2,
+        "UnnormalizedCoordinates": false
+      }
+    }
+  ],
+  "SubpassDependencyList": [
+    {
+      "SrcSubpass": 4294967295,
+      "DstSubpass": 0,
+      "SrcStageMask": 1,
+      "DstStageMask": 1024,
+      "SrcAccessMask": 0,
+      "DstAccessMask": 256,
+      "DependencyFlags": 1
+    },
+    {
+      "SrcSubpass": 0,
+      "DstSubpass": 4294967295,
+      "SrcStageMask": 1024,
+      "DstStageMask": 128,
+      "SrcAccessMask": 256,
+      "DstAccessMask": 32,
+      "DependencyFlags": 1
+    }
+  ],
+  "ClearValueList": [
+    {
+      "Color": {
+        "Float32_0": 0.0,
+        "Float32_1": 0.0,
+        "Float32_2": 0.0,
+        "Float32_3": 0.0
+      }
+    }
+  ]
+}

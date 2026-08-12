@@ -1,0 +1,70 @@
+{
+  "Name": "SDFShadowRenderPass",
+  "RenderPassId": "208621ed-7291-40c4-92dd-2e2646aff84c",
+  "RenderPipelineList": [
+    "Pipelines/SpriteInstanceDirectionalShadowPipeline.json",
+    "Pipelines/LevelDirectionalShadowPipeline.json"
+
+  ],
+  "RenderPassWidth": 2048,
+  "RenderPassHeight": 2048,
+  "SubPassCount": 1,
+  "UseDefaultRenderResolution": false,
+  "UseCubeMapMultiView": false,
+  "IsRenderedToSwapchain": false,
+  "InputTextureList": [],
+  "SampleCount": 1,
+  "RenderAttachmentList": [
+    {
+      "RenderedTextureId": "e114f0de-1b72-4e2d-b5a3-31ef3682d130",
+      "MipMapCount": 1,
+      "RenderTextureType": 1,
+      "RenderAttachmentTypes": [ 1 ],
+      "Format": 124,
+      "LoadOp": 1,
+      "StoreOp": 0,
+      "FinalLayout": 4,
+      "UseSampler": false,
+      "UseMipMaps": false,
+      "IsCubeMapAttachment": false,
+      "IsTextureToExport": false,
+      "SamplerCreateInfo": {
+        "SType": 31,
+        "MagFilter": 0,
+        "MinFilter": 0,
+        "MipmapMode": 1,
+        "AddressModeU": 2,
+        "AddressModeV": 2,
+        "AddressModeW": 2,
+        "MipLodBias": 0.0,
+        "AnisotropyEnable": true,
+        "MaxAnisotropy": 16.0,
+        "CompareEnable": false,
+        "CompareOp": 7,
+        "MinLod": 0.0,
+        "MaxLod": 1.0,
+        "BorderColor": 2,
+        "UnnormalizedCoordinates": false
+      }
+    }
+  ],
+  "SubpassDependencyList": [
+    {
+      "SrcSubpass": 4294967295,
+      "DstSubpass": 0,
+      "SrcStageMask": 1024,
+      "DstStageMask": 1024,
+      "SrcAccessMask": 0,
+      "DstAccessMask": 256,
+      "DependencyFlags": 0
+    }
+  ],
+  "ClearValueList": [
+    {
+      "DepthStencil": {
+        "depth": 1.0,
+        "stencil": 0
+      }
+    }
+  ]
+}

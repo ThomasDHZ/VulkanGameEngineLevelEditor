@@ -106,6 +106,16 @@ namespace VulkanGameEngineLevelEditor
                 double deltaTime = currentTime - lastTime;
                 lastTime = currentTime;
 
+                GameObjectSystem.Update((float)deltaTime);
+                LevelSystem.Update((float)deltaTime);
+                CollisionSystem.Update();
+                SpriteSystem.Update((float)deltaTime);
+                MeshSystem.Update((float)deltaTime);
+                MemoryPoolSystem.Update();
+                RenderSystem.Update(RenderBox.Handle.ToPointer(), (float)deltaTime);
+                InputSystem.Update((float)deltaTime);
+                //networkSystem.Update(deltaTime);
+
                 //GameSystem.Update((float)deltaTime);
                 //lock (LockObject)
                 //{

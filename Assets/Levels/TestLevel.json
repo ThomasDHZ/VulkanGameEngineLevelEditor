@@ -1,0 +1,66 @@
+{
+  "LevelID": "a4ff0086-0069-4265-9a81-b38fb9e6b5be",
+  "LoadTextures": [
+  ],
+  "LoadKTXTextures": [
+    "TextureLoader/HDRITexture.json"
+  ],
+  "LoadMaterials": [
+    "Materials/SparkManTileSetMaterial.json",
+    "Materials/LavaCubeMapMaterial.json"
+  ],
+  "LoadTileSetVRAM": [
+    "TileSets/SparkManTileSet.json"
+  ],
+  "LoadRenderPasses": [
+    "RenderPass/BRDFRenderPass.json",
+    "RenderPass/IrradianceRenderPass.json",
+    "RenderPass/PrefilterRenderPass.json",
+    "RenderPass/GBufferRenderPass.json",
+    "RenderPass/GBufferLightingRenderPass.json",
+    "RenderPass/VertGaussianBlurRenderPass.json",
+    "RenderPass/HorizontalGaussianBlurRenderPass.json",
+    "RenderPass/BloomRenderPass.json",
+    "RenderPass/HdrRenderPass.json",
+    "RenderPass/FrameBufferRenderPass.json",
+    "RenderPass/SelectedGameObjectPickerRenderPass.json"
+  ],
+  "LoadGameObjects": [
+    "GameObjects/TestGameObject.json",
+    "GameObjects/MegaManObject.json",
+    "GameObjects/MegaManShotObject.json",
+    "GameObjects/DirectionalLightGameObject.json",
+    "GameObjects/PointLightGameObject.json"
+  ],
+  "GameObjectList": [
+    {
+      "GameObjectType": 1,
+      "GameObjectPositionOverride": [
+        1450.0,
+        100.0
+      ]
+    },
+    {
+      "GameObjectType": 5,
+      "GameObjectPositionOverride": [
+        2425.0,
+        1200.0
+      ]
+    },
+    {
+      "GameObjectType": 3,
+      "GameObjectPositionOverride": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "GameObjectType": 4,
+      "GameObjectPositionOverride": [
+        960.0,
+        540.0
+      ]
+    }
+  ],
+  "LoadLevelLayout": "LevelMapLevelLayout/TestMapLevelLayout.json"
+}
