@@ -2,6 +2,7 @@ using GlmSharp;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using VulkanEngineCoreCS;
+using VulkanEngineCS;
 using static VulkanEngineCoreCS.VulkanSystem;
 
 namespace VulkanGameEngineLevelEditor
@@ -59,7 +60,8 @@ namespace VulkanGameEngineLevelEditor
                 MessageBox.Show($"Failed to initialize console redirection:\n{ex.Message}");
             }
         }
-        public void RenderViewForm_Load(object sender, EventArgs e)
+
+        private void RenderViewForm_Load(object sender, EventArgs e)
         {
             StartRenderer();
         }
@@ -70,7 +72,7 @@ namespace VulkanGameEngineLevelEditor
             RenderThread = new System.Threading.Thread(RenderLoop)
             {
                 IsBackground = true,
-                Name = "MaterialBaker"
+                Name = "VulkanLevelEditor"
             };
             RenderThread.Start();
         }
@@ -81,6 +83,11 @@ namespace VulkanGameEngineLevelEditor
             {
                 ivec2 windowSize = new ivec2(RenderBox.Width, RenderBox.Height);
                 VulkanSystem.RendererSetUp(RenderBox.Handle.ToPointer(), windowSize, RenderResolutionSize);
+                BufferSystem.SetUpVmaAllocator();
+                MemoryPoolSystem.StartUp();
+                CSharpScriptSystem.Initialize();
+                LevelSystem.LoadLevel("Levels/TestLevel.json");
+
             }));
 
             Stopwatch stopwatch = new Stopwatch();

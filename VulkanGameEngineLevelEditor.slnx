@@ -8,6 +8,7 @@
   <Project Path="../VulkanCS/VulkanCS/VulkanCS.csproj" />
   <Project Path="../VulkanEngineCore/VulkanEngineCore/VulkanEngineCore.vcxproj" Id="526bff96-6c33-482d-9bec-29a6d553f16a" />
   <Project Path="../VulkanEngineCore/VulkanEngineCoreCS/VulkanEngineCoreCS.csproj" />
+  <Project Path="../VulkanGameEngine/VulkanEngineCS/VulkanEngineCS.csproj" />
   <Project Path="../VulkanGameEngine/VulkanEngineDLL/VulkanEngineDLL.vcxproj" Id="d22b29fb-1f02-471c-81ac-a352862f6951" />
   <Project Path="VulkanGameEngineLevelEditor/VulkanGameEngineLevelEditor.csproj" />
 </Solution>

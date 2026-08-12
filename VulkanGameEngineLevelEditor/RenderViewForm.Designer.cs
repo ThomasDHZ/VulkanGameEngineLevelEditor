@@ -48,6 +48,7 @@
             Controls.Add(RenderBox);
             Name = "RenderViewForm";
             Text = "Form1";
+            Load += RenderViewForm_Load;
             ((System.ComponentModel.ISupportInitialize)RenderBox).EndInit();
             ResumeLayout(false);
         }
