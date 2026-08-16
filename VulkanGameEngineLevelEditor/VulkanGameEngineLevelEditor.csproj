@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\VulkanGameEngine\GameScriptLibraryDLL\GameScriptLibraryDLL.csproj" />
     <ProjectReference Include="..\..\VulkanGameEngine\VulkanEngineCS\VulkanEngineCS.csproj" />
     <ProjectReference Include="..\..\VulkanGameEngine\VulkanEngineDLL\VulkanEngineDLL.vcxproj" />
+    <ProjectReference Include="..\..\VulkanGameEngine\VulkanEngineInterop\VulkanEngineInterop.vcxproj" />
   </ItemGroup>
 
 </Project>
