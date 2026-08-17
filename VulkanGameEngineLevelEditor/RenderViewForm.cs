@@ -38,7 +38,7 @@ namespace VulkanGameEngineLevelEditor
         public static void LogVulkanMessage(string message, int severity)
         {
             Console.WriteLine(message);
-            //   MessageLogger.LogMessage(message, (DebugUtilsMessageSeverityFlagsEXT)severity);
+            //MessageLogger.LogMessage(message, (DebugUtilsMessageSeverityFlagsEXT)severity);
         }
 
         private static void InitializeConsole()
@@ -125,40 +125,29 @@ namespace VulkanGameEngineLevelEditor
                     SpriteSystem.Update((float)deltaTime);
                     MeshSystem.Update((float)deltaTime);
                     MemoryPoolSystem.Update();
-                    RenderSystem.Update(RenderBox.Handle.ToPointer(), (float)deltaTime);
+                    this.Invoke(new Action(() =>
+                    {
+                        RenderSystem.Update(RenderBox.Handle.ToPointer(), (float)deltaTime);
+                    }));
                     InputSystem.Update((float)deltaTime);
                     //networkSystem.Update(deltaTime);
 
                     VulkanSystem.StartFrame();
+                    LevelSystem.Draw(commandBuffer, (float)deltaTime);
                     VulkanSystem.EndFrame(commandBuffer);
                 }
             }
 
             // GameSystem.Destroy();
         }
-
-        [DllImport("kernel32.dll", SetLastError = true)] private static extern bool AllocConsole();
-        [DllImport("kernel32.dll", SetLastError = true)] private static extern IntPtr GetStdHandle(int nStdHandle);
-        [DllImport("kernel32.dll", SetLastError = true)] private static extern bool SetStdHandle(int nStdHandle, IntPtr hHandle);
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        void LoadExports(string dllPath)
+        private void LoadExports(string dllPath)
         {
             var list = DLLSystem.ListDllExport(dllPath);
 
             dataGridView1.DataSource = list;
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.Columns.Clear();
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = nameof(NativeExport.Name),
-                HeaderText = "Interop DLL Function",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
+
             dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
             {
                 DataPropertyName = nameof(NativeExport.Ordinal),
@@ -168,16 +157,21 @@ namespace VulkanGameEngineLevelEditor
             dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
             {
                 DataPropertyName = nameof(NativeExport.RvaHex),
-                HeaderText = "RVA",
+                HeaderText = "Realtive Address",
                 Width = 100
             });
-
+            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(NativeExport.Name),
+                HeaderText = "Interop DLL Function",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
         }
 
-        private void tabPage1_Click(object sender, EventArgs e)
-        {
+        [DllImport("kernel32.dll", SetLastError = true)] private static extern bool AllocConsole();
+        [DllImport("kernel32.dll", SetLastError = true)] private static extern IntPtr GetStdHandle(int nStdHandle);
+        [DllImport("kernel32.dll", SetLastError = true)] private static extern bool SetStdHandle(int nStdHandle, IntPtr hHandle);
 
-        }
     }
 }
 
