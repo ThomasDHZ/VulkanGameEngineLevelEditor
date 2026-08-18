@@ -2,9 +2,12 @@
 using GameScriptLibraryDLL.GameObjects;
 using GlmSharp;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using VulkanCS;
 using VulkanEngineCoreCS;
+using VulkanEngineCoreCS.Models;
+using VulkanEngineCoreCS.Vulkan;
 using VulkanEngineCS;
 using static VulkanEngineCoreCS.VulkanSystem;
 
@@ -21,7 +24,6 @@ namespace VulkanGameEngineLevelEditor
         private ivec2 RenderResolutionSize = new ivec2(3840, 2160);
         private const int STD_OUTPUT_HANDLE = -11;
         private const int STD_ERROR_HANDLE = -12;
-        private VkCommandBuffer commandBuffer = VulkanCSConst.VK_NULL_HANDLE;
 
         public RenderViewForm()
         {
@@ -129,11 +131,17 @@ namespace VulkanGameEngineLevelEditor
                     {
                         RenderSystem.Update(RenderBox.Handle.ToPointer(), (float)deltaTime);
                     }));
-                    InputSystem.Update((float)deltaTime);
+                   // InputSystem.Update((float)deltaTime);
                     //networkSystem.Update(deltaTime);
 
-                    VulkanSystem.StartFrame();
-                    LevelSystem.Draw(commandBuffer, (float)deltaTime);
+                  
+                    VkCommandBuffer commandBuffer = VulkanSystem.StartFrame();
+                    if (commandBuffer != VulkanCSConst.VK_NULL_HANDLE)
+                    {
+                        List<RenderPassNode> renderNodes = new List<RenderPassNode>(LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime));
+                        RenderSystem.Draw(commandBuffer, renderNodes);
+                        LevelSystem.RenderFrameBuffer(commandBuffer, Guid.Empty);
+                    }
                     VulkanSystem.EndFrame(commandBuffer);
                 }
             }
