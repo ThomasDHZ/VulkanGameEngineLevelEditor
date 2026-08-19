@@ -24,4 +24,10 @@
     <ProjectReference Include="..\..\VulkanGameEngine\VulkanEngineInterop\VulkanEngineInterop.vcxproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="EditorEnhancements\" />
+    <Folder Include="Attributes\" />
+    <Folder Include="RenderPassEditor\" />
+  </ItemGroup>
+
 </Project>

@@ -98,8 +98,8 @@ namespace VulkanGameEngineLevelEditor
                 CSharpScriptSystem.RegisterBehavior<Player>();
                 CSharpScriptSystem.RegisterBehavior<PlayerShot>();
                 CSharpScriptSystem.RegisterBehavior<GameEnemy>();
-                CSharpScriptSystem.RegisterBehavior<DirectionalLight>();
-                CSharpScriptSystem.RegisterBehavior<PointLight>();
+                CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
+                CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
                 LevelSystem.LoadLevel("Levels/TestLevel.json");
 
             }));
@@ -134,7 +134,6 @@ namespace VulkanGameEngineLevelEditor
                    // InputSystem.Update((float)deltaTime);
                     //networkSystem.Update(deltaTime);
 
-                  
                     VkCommandBuffer commandBuffer = VulkanSystem.StartFrame();
                     if (commandBuffer != VulkanCSConst.VK_NULL_HANDLE)
                     {
