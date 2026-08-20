@@ -52,7 +52,6 @@ namespace VulkanGameEngineLevelEditor
             panel2 = new Panel();
             propertiesPanel1 = new PropertiesPanel();
             panel3 = new Panel();
-            levelEditorTreeView1 = new VulkanGameEngineLevelEditor.LevelEditor.LevelEditorTreeView();
             panel4 = new Panel();
             RenderBox = new PictureBox();
             panel1.SuspendLayout();
@@ -65,7 +64,6 @@ namespace VulkanGameEngineLevelEditor
             tabPage7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             panel2.SuspendLayout();
-            panel3.SuspendLayout();
             panel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)RenderBox).BeginInit();
             SuspendLayout();
@@ -281,22 +279,11 @@ namespace VulkanGameEngineLevelEditor
             // 
             // panel3
             // 
-            panel3.Controls.Add(levelEditorTreeView1);
             panel3.Dock = DockStyle.Left;
             panel3.Location = new Point(0, 24);
             panel3.Name = "panel3";
             panel3.Size = new Size(300, 714);
             panel3.TabIndex = 6;
-            // 
-            // levelEditorTreeView1
-            // 
-            levelEditorTreeView1.BackColor = Color.FromArgb(40, 40, 40);
-            levelEditorTreeView1.Dock = DockStyle.Fill;
-            levelEditorTreeView1.Location = new Point(0, 0);
-            levelEditorTreeView1.Name = "levelEditorTreeView1";
-            levelEditorTreeView1.PropertiesPanel = null;
-            levelEditorTreeView1.Size = new Size(300, 714);
-            levelEditorTreeView1.TabIndex = 0;
             // 
             // panel4
             // 
@@ -340,7 +327,6 @@ namespace VulkanGameEngineLevelEditor
             tabPage7.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             panel2.ResumeLayout(false);
-            panel3.ResumeLayout(false);
             panel4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)RenderBox).EndInit();
             ResumeLayout(false);
@@ -368,7 +354,6 @@ namespace VulkanGameEngineLevelEditor
         private Panel panel2;
         private RichTextBox VulkanLoggerBox;
         private Panel panel3;
-        private LevelEditor.LevelEditorTreeView levelEditorTreeView1;
         private Panel panel4;
         private PictureBox RenderBox;
         private PropertiesPanel propertiesPanel1;

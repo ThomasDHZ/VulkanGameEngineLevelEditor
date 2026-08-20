@@ -1,6 +1,7 @@
 
 using GameScriptLibraryDLL.GameObjects;
 using GlmSharp;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -9,6 +10,7 @@ using VulkanEngineCoreCS;
 using VulkanEngineCoreCS.Models;
 using VulkanEngineCoreCS.Vulkan;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.Model;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static VulkanEngineCoreCS.VulkanSystem;
 
@@ -39,6 +41,10 @@ namespace VulkanGameEngineLevelEditor
             VulkanSystem.CreateLogMessageCallback(callback);
          
             LoadExports("VulkanEngineInterop.dll");
+            List<System.String> gameObjectPrefabList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Pipelines").ToList();
+            string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\HdrRenderPass.json");
+            RenderPassLoader awer = JsonConvert.DeserializeObject<RenderPassLoader>(jsonContent);
+            propertiesPanel1.SetSelectedObject(awer);
         }
         public static void LogVulkanMessage(string message, int severity)
         {

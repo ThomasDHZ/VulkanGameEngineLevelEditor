@@ -25,9 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="EditorEnhancements\" />
     <Folder Include="Attributes\" />
     <Folder Include="RenderPassEditor\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
 </Project>
