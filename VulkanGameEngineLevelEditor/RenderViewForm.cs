@@ -9,6 +9,7 @@ using VulkanEngineCoreCS;
 using VulkanEngineCoreCS.Models;
 using VulkanEngineCoreCS.Vulkan;
 using VulkanEngineCS;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static VulkanEngineCoreCS.VulkanSystem;
 
 namespace VulkanGameEngineLevelEditor
@@ -30,17 +31,19 @@ namespace VulkanGameEngineLevelEditor
 #if DEBUG
             InitializeConsole();
 #endif
+            InitializeComponent();
+
+            MessageLogger.RichTextBox = VulkanLoggerBox;
             LogVulkanMessageDelegate callback = LogVulkanMessage;
             _callbackHandle = GCHandle.Alloc(callback);
             VulkanSystem.CreateLogMessageCallback(callback);
-            InitializeComponent();
+         
             LoadExports("VulkanEngineInterop.dll");
         }
-
         public static void LogVulkanMessage(string message, int severity)
         {
             Console.WriteLine(message);
-            //MessageLogger.LogMessage(message, (DebugUtilsMessageSeverityFlagsEXT)severity);
+            MessageLogger.LogMessage(message, (VkDebugUtilsMessageSeverityFlagBitsEXT)severity);
         }
 
         private static void InitializeConsole()

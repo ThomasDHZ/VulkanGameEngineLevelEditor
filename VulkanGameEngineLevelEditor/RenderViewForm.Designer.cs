@@ -1,4 +1,8 @@
-﻿namespace VulkanGameEngineLevelEditor
+﻿using VulkanGameEngineLevelEditor.EditorEnhancements;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using ListView = System.Windows.Forms.ListView;
+
+namespace VulkanGameEngineLevelEditor
 {
     partial class RenderViewForm
     {
@@ -31,6 +35,7 @@
             panel1 = new Panel();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
+            VulkanLoggerBox = new RichTextBox();
             tabPage2 = new TabPage();
             GameObjectListView = new ListView();
             tabPage3 = new TabPage();
@@ -44,19 +49,24 @@
             dataGridView1 = new DataGridView();
             LightListView = new ListView();
             menuStrip1 = new MenuStrip();
-            flowLayoutPanel1 = new FlowLayoutPanel();
             panel2 = new Panel();
+            propertiesPanel1 = new PropertiesPanel();
             panel3 = new Panel();
+            levelEditorTreeView1 = new VulkanGameEngineLevelEditor.LevelEditor.LevelEditorTreeView();
+            panel4 = new Panel();
             RenderBox = new PictureBox();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
+            tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
             tabPage3.SuspendLayout();
             tabPage4.SuspendLayout();
             tabPage5.SuspendLayout();
             tabPage7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            panel2.SuspendLayout();
             panel3.SuspendLayout();
+            panel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)RenderBox).BeginInit();
             SuspendLayout();
             // 
@@ -89,6 +99,7 @@
             // 
             tabPage1.BackColor = Color.FromArgb(40, 40, 40);
             tabPage1.BorderStyle = BorderStyle.Fixed3D;
+            tabPage1.Controls.Add(VulkanLoggerBox);
             tabPage1.Location = new Point(4, 34);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
@@ -96,8 +107,19 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Vulkan Logger";
             // 
+            // VulkanLoggerBox
+            // 
+            VulkanLoggerBox.BackColor = Color.FromArgb(40, 40, 40);
+            VulkanLoggerBox.Dock = DockStyle.Fill;
+            VulkanLoggerBox.Location = new Point(3, 3);
+            VulkanLoggerBox.Name = "VulkanLoggerBox";
+            VulkanLoggerBox.Size = new Size(1880, 238);
+            VulkanLoggerBox.TabIndex = 0;
+            VulkanLoggerBox.Text = "";
+            // 
             // tabPage2
             // 
+            tabPage2.BackColor = Color.FromArgb(60, 60, 60);
             tabPage2.Controls.Add(GameObjectListView);
             tabPage2.Location = new Point(4, 34);
             tabPage2.Name = "tabPage2";
@@ -143,6 +165,7 @@
             // 
             // tabPage4
             // 
+            tabPage4.BackColor = Color.FromArgb(60, 60, 60);
             tabPage4.Controls.Add(TextureListView);
             tabPage4.Location = new Point(4, 34);
             tabPage4.Name = "tabPage4";
@@ -164,6 +187,7 @@
             // 
             // tabPage5
             // 
+            tabPage5.BackColor = Color.FromArgb(60, 60, 60);
             tabPage5.Controls.Add(SceneListView);
             tabPage5.Location = new Point(4, 34);
             tabPage5.Name = "tabPage5";
@@ -186,6 +210,7 @@
             // 
             // tabPage6
             // 
+            tabPage6.BackColor = Color.FromArgb(60, 60, 60);
             tabPage6.Location = new Point(4, 34);
             tabPage6.Name = "tabPage6";
             tabPage6.Padding = new Padding(3);
@@ -196,6 +221,7 @@
             // 
             // tabPage7
             // 
+            tabPage7.BackColor = Color.FromArgb(60, 60, 60);
             tabPage7.Controls.Add(dataGridView1);
             tabPage7.Controls.Add(LightListView);
             tabPage7.Location = new Point(4, 34);
@@ -232,41 +258,61 @@
             menuStrip1.ImageScalingSize = new Size(24, 24);
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(1898, 32);
+            menuStrip1.Size = new Size(1898, 24);
             menuStrip1.TabIndex = 3;
             menuStrip1.Text = "menuStrip1";
             // 
-            // flowLayoutPanel1
-            // 
-            flowLayoutPanel1.Dock = DockStyle.Left;
-            flowLayoutPanel1.Location = new Point(0, 32);
-            flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(300, 706);
-            flowLayoutPanel1.TabIndex = 4;
-            // 
             // panel2
             // 
+            panel2.Controls.Add(propertiesPanel1);
             panel2.Dock = DockStyle.Right;
-            panel2.Location = new Point(1598, 32);
+            panel2.Location = new Point(1598, 24);
             panel2.Name = "panel2";
-            panel2.Size = new Size(300, 706);
+            panel2.Size = new Size(300, 714);
             panel2.TabIndex = 5;
+            // 
+            // propertiesPanel1
+            // 
+            propertiesPanel1.Dock = DockStyle.Fill;
+            propertiesPanel1.Location = new Point(0, 0);
+            propertiesPanel1.Name = "propertiesPanel1";
+            propertiesPanel1.Size = new Size(300, 714);
+            propertiesPanel1.TabIndex = 0;
             // 
             // panel3
             // 
-            panel3.Controls.Add(RenderBox);
-            panel3.Dock = DockStyle.Fill;
-            panel3.Location = new Point(300, 32);
+            panel3.Controls.Add(levelEditorTreeView1);
+            panel3.Dock = DockStyle.Left;
+            panel3.Location = new Point(0, 24);
             panel3.Name = "panel3";
-            panel3.Size = new Size(1298, 706);
+            panel3.Size = new Size(300, 714);
             panel3.TabIndex = 6;
+            // 
+            // levelEditorTreeView1
+            // 
+            levelEditorTreeView1.BackColor = Color.FromArgb(40, 40, 40);
+            levelEditorTreeView1.Dock = DockStyle.Fill;
+            levelEditorTreeView1.Location = new Point(0, 0);
+            levelEditorTreeView1.Name = "levelEditorTreeView1";
+            levelEditorTreeView1.PropertiesPanel = null;
+            levelEditorTreeView1.Size = new Size(300, 714);
+            levelEditorTreeView1.TabIndex = 0;
+            // 
+            // panel4
+            // 
+            panel4.Controls.Add(RenderBox);
+            panel4.Dock = DockStyle.Fill;
+            panel4.Location = new Point(300, 24);
+            panel4.Name = "panel4";
+            panel4.Size = new Size(1298, 714);
+            panel4.TabIndex = 7;
             // 
             // RenderBox
             // 
             RenderBox.Dock = DockStyle.Fill;
             RenderBox.Location = new Point(0, 0);
             RenderBox.Name = "RenderBox";
-            RenderBox.Size = new Size(1298, 706);
+            RenderBox.Size = new Size(1298, 714);
             RenderBox.TabIndex = 0;
             RenderBox.TabStop = false;
             // 
@@ -275,9 +321,9 @@
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1898, 1024);
+            Controls.Add(panel4);
             Controls.Add(panel3);
             Controls.Add(panel2);
-            Controls.Add(flowLayoutPanel1);
             Controls.Add(panel1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
@@ -286,20 +332,22 @@
             Load += RenderViewForm_Load;
             panel1.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
             tabPage2.ResumeLayout(false);
             tabPage3.ResumeLayout(false);
             tabPage4.ResumeLayout(false);
             tabPage5.ResumeLayout(false);
             tabPage7.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            panel2.ResumeLayout(false);
             panel3.ResumeLayout(false);
+            panel4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)RenderBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
-        private System.Windows.Forms.RichTextBox VulkanLoggerBox;
         private Panel panel1;
         private TabControl tabControl1;
         private TabPage tabPage1;
@@ -317,9 +365,12 @@
         private System.Windows.Forms.ListView LightListView;
         private MenuStrip menuStrip1;
         private DataGridView dataGridView1;
-        private FlowLayoutPanel flowLayoutPanel1;
         private Panel panel2;
+        private RichTextBox VulkanLoggerBox;
         private Panel panel3;
+        private LevelEditor.LevelEditorTreeView levelEditorTreeView1;
+        private Panel panel4;
         private PictureBox RenderBox;
+        private PropertiesPanel propertiesPanel1;
     }
 }
