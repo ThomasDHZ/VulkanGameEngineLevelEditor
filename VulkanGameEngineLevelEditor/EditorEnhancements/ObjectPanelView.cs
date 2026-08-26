@@ -11,6 +11,7 @@ using VulkanGameEngineLevelEditor.Attributes;
 using VulkanGameEngineLevelEditor.ControlSubForms;
 using VulkanGameEngineLevelEditor.LevelEditor;
 using VulkanGameEngineLevelEditor.Registries;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace VulkanGameEngineLevelEditor.EditorEnhancements
 {
@@ -347,16 +348,14 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
             foreach (var member in members)
             {
-                if (ShouldIgnoreResolvedMember(member)) continue;
-
                 Type memberType = member is FieldInfo f ? f.FieldType : (member is PropertyInfo p ? p.PropertyType : null);
                 if (memberType == null) continue;
 
                 string displayName = member.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName ?? member.Name;
                 bool isReadOnly = member.GetCustomAttribute<ReadOnlyAttribute>()?.IsReadOnly ?? false;
+                if (!IsMemberVisible(targetObject, member)) continue;
 
                 var control = CreateEditorControl(memberType, targetObject, member, RowHeight, isReadOnly);
-
                 if (control != null)
                 {
                     int row = _propTable.RowCount++;
@@ -386,12 +385,6 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                    member.Name == "GameObjectId" ||
                    member.Name == "ComponentType" ||
                    member.Name == "DisplayName";
-        }
-
-        private static bool ShouldIgnoreResolvedMember(MemberInfo member)
-        {
-            return member.Name == "GameObjectId" ||
-                   member.GetCustomAttribute<IgnorePropertyAttribute>() != null;
         }
 
         private Type GetResolvedTypeFromHandle(Type handleType)
@@ -479,19 +472,40 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
         private Control? CreateEditorControl(Type memberType, object targetObject, MemberInfo member, int height, bool readOnly)
         {
-            if (memberType == typeof(vec3))
-            {
-                return new TypeOfVec3(this, targetObject, member, height, readOnly, _nativePtr).CreateControl();
-            }
-            if (memberType == typeof(vec2))
-            {
-                return ControlRegistry.CreateControl(this, memberType, targetObject, member, height, readOnly);
-            }
-            if (memberType == typeof(float))
-            {
-                return new TypeOfFloat(this, targetObject, member, height, readOnly, _nativePtr).CreateControl();
-            }
+            if (memberType == typeof(vec3))  return new TypeOfVec3(this, targetObject, member, height, readOnly, _nativePtr).CreateControl();
+            if (memberType == typeof(vec2))  return ControlRegistry.CreateControl(this, memberType, targetObject, member, height, readOnly);
+            if (memberType == typeof(float)) return new TypeOfFloat(this, targetObject, member, height, readOnly, _nativePtr).CreateControl();
             return ControlRegistry.CreateControl(this, memberType, targetObject, member, height, readOnly);
+        }
+
+        private bool IsMemberVisible(object target, MemberInfo member)
+        {
+            var attrs = member.GetCustomAttributes<VisibleWhenAttribute>().ToArray();
+            if (attrs.Length == 0) return true;
+
+            foreach (var attr in attrs)
+            {
+                object? current = GetMemberValueByName(target, attr.PropertyName);
+                if (!Equals(current, attr.ExpectedValue)) return false;  
+            }
+            return true;
+        }
+
+        private object? GetMemberValueByName(object target, string name)
+        {
+            if (target is DynamicComponentWrapper wrapper)
+            {
+                var m = wrapper.ComponentStructType
+                    .GetMember(name, BindingFlags.Public | BindingFlags.Instance)
+                    .FirstOrDefault();
+                return m != null ? wrapper.GetMemberValue(m) : null;
+            }
+
+            var prop = target.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+            if (prop != null) return prop.GetValue(target);
+
+            var field = target.GetType().GetField(name, BindingFlags.Public | BindingFlags.Instance);
+            return field?.GetValue(target);
         }
     }
 }

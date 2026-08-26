@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using VulkanEngineCS;
 using VulkanGameEngineLevelEditor.LevelEditor;
+using VulkanGameEngineLevelEditor.Model;
 namespace VulkanGameEngineLevelEditor.EditorEnhancements
 {
     public unsafe class PropertiesPanel : UserControl
@@ -45,9 +46,9 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             RefreshGameObjectPanel();
         }
 
-        public void SetSelectedObject(object renderPassObject)
+        public void SetSelectedObject(object selectedObject)
         {
-            _selectedObject = renderPassObject;
+            _selectedObject = selectedObject;
             _renderPassEditorMode = true;
             RefreshRenderPassPanel();
         }
@@ -103,7 +104,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             {
                 _flowComponents.Controls.Add(new Label
                 {
-                    Text = "No entity selected",
+                    Text = "No RenderPass selected",
                     ForeColor = Color.Silver,
                     AutoSize = true,
                     Padding = new Padding(20)

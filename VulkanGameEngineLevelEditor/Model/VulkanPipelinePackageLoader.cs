@@ -12,6 +12,7 @@ namespace VulkanGameEngineLevelEditor.Model
 {
     public struct VulkanPipelinePackageLoader
     {
+        public string Name { get; set; } = string.Empty;
         public Guid PipelinePackageId { get; set; } = new Guid();
         public Guid RenderPassId { get; set; } = new Guid();
         public ivec2 RenderPassResolution { get; set; } = new ivec2();

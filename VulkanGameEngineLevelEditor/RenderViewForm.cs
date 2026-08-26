@@ -10,6 +10,7 @@ using VulkanEngineCoreCS;
 using VulkanEngineCoreCS.Models;
 using VulkanEngineCoreCS.Vulkan;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.LevelEditor;
 using VulkanGameEngineLevelEditor.Model;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static VulkanEngineCoreCS.VulkanSystem;
@@ -42,9 +43,12 @@ namespace VulkanGameEngineLevelEditor
          
             LoadExports("VulkanEngineInterop.dll");
             List<System.String> gameObjectPrefabList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Pipelines").ToList();
-            string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\HdrRenderPass.json");
+            string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\GBufferRenderPass.json");
             RenderPassLoader awer = JsonConvert.DeserializeObject<RenderPassLoader>(jsonContent);
-            propertiesPanel1.SetSelectedObject(awer);
+
+
+            renderPassTreeView1.PropertiesPanel = propertiesPanel1;
+            renderPassTreeView1.Populate(awer);
         }
         public static void LogVulkanMessage(string message, int severity)
         {
@@ -110,7 +114,7 @@ namespace VulkanGameEngineLevelEditor
                 CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
                 CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
                 LevelSystem.LoadLevel("Levels/TestLevel.json");
-
+                var b = 34;
             }));
 
             Stopwatch stopwatch = new Stopwatch();
@@ -140,15 +144,15 @@ namespace VulkanGameEngineLevelEditor
                     {
                         RenderSystem.Update(RenderBox.Handle.ToPointer(), (float)deltaTime);
                     }));
-                   // InputSystem.Update((float)deltaTime);
-                    //networkSystem.Update(deltaTime);
+                    //InputSystem.Update((float)deltaTime);
+                    //        //networkSystem.Update(deltaTime);
 
                     VkCommandBuffer commandBuffer = VulkanSystem.StartFrame();
                     if (commandBuffer != VulkanCSConst.VK_NULL_HANDLE)
                     {
-                        List<RenderPassNode> renderNodes = new List<RenderPassNode>(LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime));
-                        RenderSystem.Draw(commandBuffer, renderNodes);
-                        LevelSystem.RenderFrameBuffer(commandBuffer, Guid.Empty);
+                        //List<RenderPassNode> renderNodes = new List<RenderPassNode>(LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime));
+                        //RenderSystem.Draw(commandBuffer, renderNodes);
+                        //LevelSystem.RenderFrameBuffer(commandBuffer, Guid.Empty);
                     }
                     VulkanSystem.EndFrame(commandBuffer);
                 }

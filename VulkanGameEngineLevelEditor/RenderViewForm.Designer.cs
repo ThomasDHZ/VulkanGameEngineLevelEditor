@@ -54,6 +54,7 @@ namespace VulkanGameEngineLevelEditor
             panel3 = new Panel();
             panel4 = new Panel();
             RenderBox = new PictureBox();
+            renderPassTreeView1 = new VulkanGameEngineLevelEditor.LevelEditor.RenderPassTreeView();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -64,6 +65,7 @@ namespace VulkanGameEngineLevelEditor
             tabPage7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             panel2.SuspendLayout();
+            panel3.SuspendLayout();
             panel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)RenderBox).BeginInit();
             SuspendLayout();
@@ -279,6 +281,7 @@ namespace VulkanGameEngineLevelEditor
             // 
             // panel3
             // 
+            panel3.Controls.Add(renderPassTreeView1);
             panel3.Dock = DockStyle.Left;
             panel3.Location = new Point(0, 24);
             panel3.Name = "panel3";
@@ -302,6 +305,16 @@ namespace VulkanGameEngineLevelEditor
             RenderBox.Size = new Size(1298, 714);
             RenderBox.TabIndex = 0;
             RenderBox.TabStop = false;
+            // 
+            // renderPassTreeView1
+            // 
+            renderPassTreeView1.BackColor = Color.FromArgb(40, 40, 40);
+            renderPassTreeView1.Dock = DockStyle.Fill;
+            renderPassTreeView1.Location = new Point(0, 0);
+            renderPassTreeView1.Name = "renderPassTreeView1";
+            renderPassTreeView1.PropertiesPanel = null;
+            renderPassTreeView1.Size = new Size(300, 714);
+            renderPassTreeView1.TabIndex = 0;
             // 
             // RenderViewForm
             // 
@@ -327,6 +340,7 @@ namespace VulkanGameEngineLevelEditor
             tabPage7.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             panel2.ResumeLayout(false);
+            panel3.ResumeLayout(false);
             panel4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)RenderBox).EndInit();
             ResumeLayout(false);
@@ -357,5 +371,6 @@ namespace VulkanGameEngineLevelEditor
         private Panel panel4;
         private PictureBox RenderBox;
         private PropertiesPanel propertiesPanel1;
+        private LevelEditor.RenderPassTreeView renderPassTreeView1;
     }
 }

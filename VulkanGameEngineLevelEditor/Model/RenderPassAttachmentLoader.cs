@@ -11,6 +11,7 @@ namespace VulkanGameEngineLevelEditor.Model
 {
     public struct RenderPassAttachmentLoader
     {
+        public string AttachmentName = string.Empty;
         public Guid RenderedTextureId { get; set; } = new Guid();
         public uint MipMapCount { get; set; } = uint.MaxValue;
         public TextureTypeEnum TextureType { get; set; } = TextureTypeEnum.kTextureType_Undefined;
