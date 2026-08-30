@@ -52,9 +52,9 @@ namespace VulkanGameEngineLevelEditor
             panel2 = new Panel();
             propertiesPanel1 = new PropertiesPanel();
             panel3 = new Panel();
+            renderPassTreeView1 = new VulkanGameEngineLevelEditor.LevelEditor.RenderPassTreeView();
             panel4 = new Panel();
             RenderBox = new PictureBox();
-            renderPassTreeView1 = new VulkanGameEngineLevelEditor.LevelEditor.RenderPassTreeView();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -288,6 +288,16 @@ namespace VulkanGameEngineLevelEditor
             panel3.Size = new Size(300, 714);
             panel3.TabIndex = 6;
             // 
+            // renderPassTreeView1
+            // 
+            renderPassTreeView1.BackColor = Color.FromArgb(40, 40, 40);
+            renderPassTreeView1.Dock = DockStyle.Fill;
+            renderPassTreeView1.Location = new Point(0, 0);
+            renderPassTreeView1.Name = "renderPassTreeView1";
+            renderPassTreeView1.PropertiesPanel = null;
+            renderPassTreeView1.Size = new Size(300, 714);
+            renderPassTreeView1.TabIndex = 0;
+            // 
             // panel4
             // 
             panel4.Controls.Add(RenderBox);
@@ -305,16 +315,7 @@ namespace VulkanGameEngineLevelEditor
             RenderBox.Size = new Size(1298, 714);
             RenderBox.TabIndex = 0;
             RenderBox.TabStop = false;
-            // 
-            // renderPassTreeView1
-            // 
-            renderPassTreeView1.BackColor = Color.FromArgb(40, 40, 40);
-            renderPassTreeView1.Dock = DockStyle.Fill;
-            renderPassTreeView1.Location = new Point(0, 0);
-            renderPassTreeView1.Name = "renderPassTreeView1";
-            renderPassTreeView1.PropertiesPanel = null;
-            renderPassTreeView1.Size = new Size(300, 714);
-            renderPassTreeView1.TabIndex = 0;
+            RenderBox.ClientSizeChanged += RenderBox_ClientSizeChanged;
             // 
             // RenderViewForm
             // 

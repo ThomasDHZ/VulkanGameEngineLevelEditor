@@ -40,7 +40,7 @@ namespace VulkanGameEngineLevelEditor
             LogVulkanMessageDelegate callback = LogVulkanMessage;
             _callbackHandle = GCHandle.Alloc(callback);
             VulkanSystem.CreateLogMessageCallback(callback);
-         
+
             LoadExports("VulkanEngineInterop.dll");
             List<System.String> gameObjectPrefabList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Pipelines").ToList();
             string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\GBufferRenderPass.json");
@@ -150,9 +150,9 @@ namespace VulkanGameEngineLevelEditor
                     VkCommandBuffer commandBuffer = VulkanSystem.StartFrame();
                     if (commandBuffer != VulkanCSConst.VK_NULL_HANDLE)
                     {
-                        //List<RenderPassNode> renderNodes = new List<RenderPassNode>(LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime));
-                        //RenderSystem.Draw(commandBuffer, renderNodes);
-                        //LevelSystem.RenderFrameBuffer(commandBuffer, Guid.Empty);
+                        List<RenderPassNode> renderNodes = new List<RenderPassNode>(LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime));
+                        RenderSystem.Draw(commandBuffer, renderNodes);
+                        LevelSystem.RenderFrameBuffer(commandBuffer, Guid.Empty);
                     }
                     VulkanSystem.EndFrame(commandBuffer);
                 }
@@ -192,6 +192,12 @@ namespace VulkanGameEngineLevelEditor
         [DllImport("kernel32.dll", SetLastError = true)] private static extern IntPtr GetStdHandle(int nStdHandle);
         [DllImport("kernel32.dll", SetLastError = true)] private static extern bool SetStdHandle(int nStdHandle, IntPtr hHandle);
 
+        private void RenderBox_ClientSizeChanged(object sender, EventArgs e)
+        {
+            if (RenderBox.Width <= 0 || RenderBox.Height <= 0) return;
+            VulkanSystem.SetCustomFrameBufferSize(new ivec2(RenderBox.Width, RenderBox.Height));
+
+        }
     }
 }
 
