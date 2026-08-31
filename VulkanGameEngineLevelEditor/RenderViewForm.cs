@@ -10,8 +10,10 @@ using VulkanEngineCoreCS;
 using VulkanEngineCoreCS.Models;
 using VulkanEngineCoreCS.Vulkan;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.EditorEnhancements;
 using VulkanGameEngineLevelEditor.LevelEditor;
 using VulkanGameEngineLevelEditor.Model;
+using WeifenLuo.WinFormsUI.Docking;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static VulkanEngineCoreCS.VulkanSystem;
 
@@ -28,59 +30,65 @@ namespace VulkanGameEngineLevelEditor
         private ivec2 RenderResolutionSize = new ivec2(3840, 2160);
         private const int STD_OUTPUT_HANDLE = -11;
         private const int STD_ERROR_HANDLE = -12;
-
+        ViewPortWindow viewportWindow = new ViewPortWindow();
+        TreeWindow treeWindow = new TreeWindow();
+        PropertiesWindow propertiesWindow = new PropertiesWindow();
+        BottomToolsWindow toolsWindow = new BottomToolsWindow();
         public RenderViewForm()
         {
 #if DEBUG
-            InitializeConsole();
+            //InitializeConsole();
 #endif
             InitializeComponent();
+            viewportWindow.Show(dockPanel1, DockState.Document);
+            treeWindow.Show(dockPanel1, DockState.DockLeft);
+            propertiesWindow.Show(dockPanel1, DockState.DockRight);
+            toolsWindow.Show(dockPanel1, DockState.DockBottom);
+            //MessageLogger.RichTextBox = VulkanLoggerBox;
+            //LogVulkanMessageDelegate callback = LogVulkanMessage;
+            //_callbackHandle = GCHandle.Alloc(callback);
+            //VulkanSystem.CreateLogMessageCallback(callback);
 
-            MessageLogger.RichTextBox = VulkanLoggerBox;
-            LogVulkanMessageDelegate callback = LogVulkanMessage;
-            _callbackHandle = GCHandle.Alloc(callback);
-            VulkanSystem.CreateLogMessageCallback(callback);
-
-            LoadExports("VulkanEngineInterop.dll");
-            List<System.String> gameObjectPrefabList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Pipelines").ToList();
-            string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\GBufferRenderPass.json");
-            RenderPassLoader awer = JsonConvert.DeserializeObject<RenderPassLoader>(jsonContent);
+        //    LoadExports("VulkanEngineInterop.dll");
+            //List<System.String> gameObjectPrefabList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Pipelines").ToList();
+            //string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\GBufferRenderPass.json");
+            //RenderPassLoader awer = JsonConvert.DeserializeObject<RenderPassLoader>(jsonContent);
 
 
-            renderPassTreeView1.PropertiesPanel = propertiesPanel1;
-            renderPassTreeView1.Populate(awer);
+            //renderPassTreeView1.PropertiesPanel = propertiesPanel1;
+            //renderPassTreeView1.Populate(awer);
         }
-        public static void LogVulkanMessage(string message, int severity)
-        {
-            Console.WriteLine(message);
-            MessageLogger.LogMessage(message, (VkDebugUtilsMessageSeverityFlagBitsEXT)severity);
-        }
+        //public static void LogVulkanMessage(string message, int severity)
+        //{
+        //    Console.WriteLine(message);
+        //    MessageLogger.LogMessage(message, (VkDebugUtilsMessageSeverityFlagBitsEXT)severity);
+        //}
 
-        private static void InitializeConsole()
-        {
-            if (!AllocConsole()) return;
-            try
-            {
-                IntPtr outHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-                IntPtr errHandle = GetStdHandle(STD_ERROR_HANDLE);
+        //private static void InitializeConsole()
+        //{
+        //    if (!AllocConsole()) return;
+        //    try
+        //    {
+        //        IntPtr outHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        //        IntPtr errHandle = GetStdHandle(STD_ERROR_HANDLE);
 
-                var stdout = new System.IO.FileStream(outHandle, System.IO.FileAccess.Write, false);
-                var stderr = new System.IO.FileStream(errHandle, System.IO.FileAccess.Write, false);
+        //        var stdout = new System.IO.FileStream(outHandle, System.IO.FileAccess.Write, false);
+        //        var stderr = new System.IO.FileStream(errHandle, System.IO.FileAccess.Write, false);
 
-                var writerOut = new System.IO.StreamWriter(stdout) { AutoFlush = true };
-                var writerErr = new System.IO.StreamWriter(stderr) { AutoFlush = true };
+        //        var writerOut = new System.IO.StreamWriter(stdout) { AutoFlush = true };
+        //        var writerErr = new System.IO.StreamWriter(stderr) { AutoFlush = true };
 
-                Console.SetOut(writerOut);
-                Console.SetError(writerErr);
+        //        Console.SetOut(writerOut);
+        //        Console.SetError(writerErr);
 
-                Console.WriteLine("=== Console successfully initialized ===");
-                Console.WriteLine("Console output should now work from all threads.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to initialize console redirection:\n{ex.Message}");
-            }
-        }
+        //        Console.WriteLine("=== Console successfully initialized ===");
+        //        Console.WriteLine("Console output should now work from all threads.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Failed to initialize console redirection:\n{ex.Message}");
+        //    }
+        //}
 
         private void RenderViewForm_Load(object sender, EventArgs e)
         {
@@ -102,8 +110,8 @@ namespace VulkanGameEngineLevelEditor
         {
             this.Invoke(new Action(() =>
             {
-                ivec2 windowSize = new ivec2(RenderBox.Width, RenderBox.Height);
-                VulkanSystem.RendererSetUp(RenderBox.Handle.ToPointer(), windowSize, RenderResolutionSize);
+                ivec2 windowSize = new ivec2(viewportWindow.RenderBox.Width, viewportWindow.RenderBox.Height);
+                VulkanSystem.RendererSetUp(viewportWindow.RenderBox.Handle.ToPointer(), windowSize, RenderResolutionSize);
                 BufferSystem.SetUpVmaAllocator();
                 MemoryPoolSystem.StartUp();
                 CSharpScriptSystem.Initialize();
@@ -142,7 +150,7 @@ namespace VulkanGameEngineLevelEditor
                     MemoryPoolSystem.Update();
                     this.Invoke(new Action(() =>
                     {
-                        RenderSystem.Update(RenderBox.Handle.ToPointer(), (float)deltaTime);
+                        RenderSystem.Update(viewportWindow.RenderBox.Handle.ToPointer(), (float)deltaTime);
                     }));
                     //InputSystem.Update((float)deltaTime);
                     //        //networkSystem.Update(deltaTime);
@@ -152,7 +160,7 @@ namespace VulkanGameEngineLevelEditor
                     {
                         List<RenderPassNode> renderNodes = new List<RenderPassNode>(LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime));
                         RenderSystem.Draw(commandBuffer, renderNodes);
-                        LevelSystem.RenderFrameBuffer(commandBuffer, Guid.Empty);
+                        RenderSystem.PresentToSwapChain(commandBuffer, new Guid("de6ca646-874f-4986-9daf-912dbc3aa7d0"));
                     }
                     VulkanSystem.EndFrame(commandBuffer);
                 }
@@ -160,44 +168,45 @@ namespace VulkanGameEngineLevelEditor
 
             // GameSystem.Destroy();
         }
-        private void LoadExports(string dllPath)
-        {
-            var list = DLLSystem.ListDllExport(dllPath);
 
-            dataGridView1.DataSource = list;
-            dataGridView1.AutoGenerateColumns = false;
-            dataGridView1.Columns.Clear();
+        //private void LoadExports(string dllPath)
+        //{
+        //    var list = DLLSystem.ListDllExport(dllPath);
 
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = nameof(NativeExport.Ordinal),
-                HeaderText = "Ordinal",
-                Width = 80
-            });
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = nameof(NativeExport.RvaHex),
-                HeaderText = "Realtive Address",
-                Width = 100
-            });
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = nameof(NativeExport.Name),
-                HeaderText = "Interop DLL Function",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-        }
+        //    dataGridView1.DataSource = list;
+        //    dataGridView1.AutoGenerateColumns = false;
+        //    dataGridView1.Columns.Clear();
 
-        [DllImport("kernel32.dll", SetLastError = true)] private static extern bool AllocConsole();
-        [DllImport("kernel32.dll", SetLastError = true)] private static extern IntPtr GetStdHandle(int nStdHandle);
-        [DllImport("kernel32.dll", SetLastError = true)] private static extern bool SetStdHandle(int nStdHandle, IntPtr hHandle);
+        //    dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+        //    {
+        //        DataPropertyName = nameof(NativeExport.Ordinal),
+        //        HeaderText = "Ordinal",
+        //        Width = 80
+        //    });
+        //    dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+        //    {
+        //        DataPropertyName = nameof(NativeExport.RvaHex),
+        //        HeaderText = "Realtive Address",
+        //        Width = 100
+        //    });
+        //    dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+        //    {
+        //        DataPropertyName = nameof(NativeExport.Name),
+        //        HeaderText = "Interop DLL Function",
+        //        AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+        //    });
+        //}
 
-        private void RenderBox_ClientSizeChanged(object sender, EventArgs e)
-        {
-            if (RenderBox.Width <= 0 || RenderBox.Height <= 0) return;
-            VulkanSystem.SetCustomFrameBufferSize(new ivec2(RenderBox.Width, RenderBox.Height));
+        //[DllImport("kernel32.dll", SetLastError = true)] private static extern bool AllocConsole();
+        //[DllImport("kernel32.dll", SetLastError = true)] private static extern IntPtr GetStdHandle(int nStdHandle);
+        //[DllImport("kernel32.dll", SetLastError = true)] private static extern bool SetStdHandle(int nStdHandle, IntPtr hHandle);
 
-        }
+        //private void RenderBox_ClientSizeChanged(object sender, EventArgs e)
+        //{
+        //    if (RenderBox.Width <= 0 || RenderBox.Height <= 0) return;
+        //    VulkanSystem.SetCustomFrameBufferSize(new ivec2(RenderBox.Width, RenderBox.Height));
+
+        //}
     }
 }
 

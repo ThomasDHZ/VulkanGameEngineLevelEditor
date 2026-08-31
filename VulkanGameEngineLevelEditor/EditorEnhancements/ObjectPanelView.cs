@@ -55,10 +55,8 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                 return (null, IntPtr.Zero);
 
             object handle = currentId;
-            if (attr.HandleType == typeof(PointLightHandle))
-                handle = new PointLightHandle(new IntPtr(currentId));
-            else if (attr.HandleType == typeof(DirectionalLightHandle))
-                handle = new DirectionalLightHandle(new IntPtr(currentId));
+            if (attr.HandleType == typeof(PointLightHandle)) handle = new PointLightHandle(new IntPtr(currentId));
+            else if (attr.HandleType == typeof(DirectionalLightHandle)) handle = new DirectionalLightHandle(new IntPtr(currentId));
 
             object result = LinkObjectRegistry.Resolve(attr.HandleType, handle);
             if (result is IntPtr ptr && ptr != IntPtr.Zero)
