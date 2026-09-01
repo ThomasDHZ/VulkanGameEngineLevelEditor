@@ -1,4 +1,7 @@
-﻿using VulkanGameEngineLevelEditor.EditorEnhancements;
+﻿using GlmSharp;
+using VulkanEngineCoreCS;
+using VulkanGameEngineLevelEditor.EditorEnhancements;
+using VulkanGameEngineLevelEditor.LevelEditor;
 using WeifenLuo.WinFormsUI.Docking;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ListView = System.Windows.Forms.ListView;
@@ -35,6 +38,16 @@ namespace VulkanGameEngineLevelEditor
         {
             menuStrip1 = new MenuStrip();
             dockPanel1 = new DockPanel();
+            VulkanLoggerBox = new RichTextBox();
+            GameObjectListView = new ListView();
+            MaterialListView = new ListView();
+            TextureListView = new ListView();
+            SceneListView = new ListView();
+            LightListView = new ListView();
+            dataGridView1 = new DataGridView();
+            renderPassTreeView = new RenderPassTreeView();
+            propertiesPanel = new PropertiesPanel();
+
             SuspendLayout();
             // 
             // menuStrip1
@@ -58,6 +71,99 @@ namespace VulkanGameEngineLevelEditor
             dockPanel1.TabIndex = 4;
             dockPanel1.Theme = new VS2015DarkTheme();
             // 
+            // GameObjectListView
+            // 
+            GameObjectListView.BackColor = Color.FromArgb(40, 40, 40);
+            GameObjectListView.Dock = DockStyle.Fill;
+            GameObjectListView.ForeColor = Color.White;
+            GameObjectListView.Location = new Point(3, 3);
+            GameObjectListView.Name = "GameObjectListView";
+            GameObjectListView.Size = new Size(1884, 242);
+            GameObjectListView.TabIndex = 0;
+            GameObjectListView.UseCompatibleStateImageBehavior = false;
+            // 
+            // MaterialListView
+            // 
+            MaterialListView.BackColor = Color.FromArgb(40, 40, 40);
+            MaterialListView.Dock = DockStyle.Fill;
+            MaterialListView.ForeColor = SystemColors.Window;
+            MaterialListView.Location = new Point(3, 3);
+            MaterialListView.Name = "MaterialListView";
+            MaterialListView.Size = new Size(1884, 242);
+            MaterialListView.TabIndex = 0;
+            MaterialListView.UseCompatibleStateImageBehavior = false;
+            // 
+            // TextureListView
+            // 
+            TextureListView.BackColor = Color.FromArgb(40, 40, 40);
+            TextureListView.Dock = DockStyle.Fill;
+            TextureListView.Location = new Point(3, 3);
+            TextureListView.Name = "TextureListView";
+            TextureListView.Size = new Size(1884, 242);
+            TextureListView.TabIndex = 0;
+            TextureListView.UseCompatibleStateImageBehavior = false;
+            // 
+            // SceneListView
+            // 
+            SceneListView.BackColor = Color.FromArgb(40, 40, 40);
+            SceneListView.Dock = DockStyle.Fill;
+            SceneListView.ForeColor = Color.White;
+            SceneListView.Location = new Point(3, 3);
+            SceneListView.Name = "SceneListView";
+            SceneListView.Size = new Size(1884, 242);
+            SceneListView.TabIndex = 1;
+            SceneListView.UseCompatibleStateImageBehavior = false;
+            // 
+            // LightListView
+            // 
+            LightListView.BackColor = Color.FromArgb(40, 40, 40);
+            LightListView.Dock = DockStyle.Fill;
+            LightListView.ForeColor = Color.White;
+            LightListView.Location = new Point(3, 3);
+            LightListView.Name = "LightListView";
+            LightListView.Size = new Size(1884, 242);
+            LightListView.TabIndex = 1;
+            LightListView.UseCompatibleStateImageBehavior = false;
+            // 
+            // VulkanLoggerBox
+            // 
+            VulkanLoggerBox.BackColor = Color.FromArgb(40, 40, 40);
+            VulkanLoggerBox.Dock = DockStyle.Fill;
+            VulkanLoggerBox.Location = new Point(3, 3);
+            VulkanLoggerBox.Name = "VulkanLoggerBox";
+            VulkanLoggerBox.Size = new Size(1880, 238);
+            VulkanLoggerBox.TabIndex = 0;
+            VulkanLoggerBox.Text = "";
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Dock = DockStyle.Fill;
+            dataGridView1.Location = new Point(3, 3);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.RowHeadersWidth = 62;
+            dataGridView1.Size = new Size(1884, 242);
+            dataGridView1.TabIndex = 2;
+            // 
+            // renderPassTreeView
+            // 
+            renderPassTreeView.BackColor = Color.FromArgb(40, 40, 40);
+            renderPassTreeView.Dock = DockStyle.Fill;
+            renderPassTreeView.Location = new Point(0, 0);
+            renderPassTreeView.ForeColor = Color.FromArgb(255, 255, 255);
+            renderPassTreeView.Name = "renderPassTreeView1";
+            renderPassTreeView.PropertiesPanel = null;
+            renderPassTreeView.Size = new Size(300, 714);
+            renderPassTreeView.TabIndex = 0;
+            // 
+            // propertiesPanel
+            // 
+            propertiesPanel.Dock = DockStyle.Fill;
+            propertiesPanel.Location = new Point(0, 0);
+            propertiesPanel.Name = "propertiesPanel1";
+            propertiesPanel.Size = new Size(300, 714);
+            propertiesPanel.TabIndex = 0;
+            // 
             // RenderViewForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -77,5 +183,14 @@ namespace VulkanGameEngineLevelEditor
         private ImageList imageList1;
         private MenuStrip menuStrip1;
         private WeifenLuo.WinFormsUI.Docking.DockPanel dockPanel1;
+        private System.Windows.Forms.ListView GameObjectListView;
+        private System.Windows.Forms.ListView MaterialListView;
+        private System.Windows.Forms.ListView TextureListView;
+        private System.Windows.Forms.ListView SceneListView;
+        private System.Windows.Forms.ListView LightListView;
+        private LevelEditor.RenderPassTreeView renderPassTreeView;
+        private PropertiesPanel propertiesPanel;
+        private DataGridView dataGridView1;
+        private RichTextBox VulkanLoggerBox;
     }
 }
