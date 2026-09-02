@@ -58,7 +58,7 @@ namespace VulkanGameEngineLevelEditor
         public RenderViewForm()
         {
 #if DEBUG
-          //  InitializeConsole();
+            InitializeConsole();
 #endif
             InitializeComponent();
             BuildToolWindows();
@@ -142,7 +142,7 @@ namespace VulkanGameEngineLevelEditor
                 CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
                 CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
                 LevelSystem.LoadLevel("Levels/TestLevel.json");
-                var b = 34;
+                LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
             }));
 
             Stopwatch stopwatch = new Stopwatch();
