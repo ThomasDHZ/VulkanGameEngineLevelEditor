@@ -10,14 +10,14 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 {
     public class ListViewWindow : ToolsWindow
     {
+        private ListView _listView = new ListView();
+        private ImageList _imageList = new ImageList();
+
         public ListViewWindow(string title)
         {
             Text = title;
             InitializeComponent();
         }
-
-        private ListView _listView = new ListView();
-        private ImageList _imageList = new ImageList();
 
         private void InitializeComponent()
         {
@@ -48,10 +48,9 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
         public void AddListItem(string name, AssetDataTypeEnum assetType, string jsonPath, Image icon = null)
         {
-            icon ??= SystemIcons.Application.ToBitmap();
             string key = name;
-            if (!_imageList.Images.ContainsKey(key))
-                _imageList.Images.Add(key, icon);
+            icon ??= SystemIcons.Application.ToBitmap();
+            if (!_imageList.Images.ContainsKey(key))  _imageList.Images.Add(key, icon);
 
             _listView.Items.Add(new ListViewItem(name)
             {

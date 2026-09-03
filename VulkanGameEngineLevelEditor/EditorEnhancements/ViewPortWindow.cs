@@ -56,6 +56,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             RenderBox.Size = new Size(278, 244);
             RenderBox.TabIndex = 0;
             RenderBox.TabStop = false;
+            RenderBox.AllowDrop = true;
             RenderBox.ClientSizeChanged += RenderBox_ClientSizeChanged;
             RenderBox.DragDrop += RenderBox_DragDrop;
             RenderBox.DragEnter += RenderBox_DragEnter;
@@ -123,20 +124,14 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
         {
             if (e.Data.GetData(typeof(DragAssetData)) is not DragAssetData asset) return;
 
-            Point clientPos = RenderBox.PointToClient(new Point(e.X, e.Y));
-            ivec2 worldPos = ClientToWorld(clientPos);
-            ivec2 dropPos = new ivec2(worldPos.x / 2, worldPos.y / 2);
+            Point client = RenderBox.PointToClient(new Point(e.X, e.Y));
+            vec2 dropPos = ClientToWorld(client);
+
             if (asset.AssetType == AssetDataTypeEnum.kAssetTypeGameObject)
             {
-                int a = 234;
-              //  uint newGoId = GameObjectSystem.CreateGameObject(asset.JsonPath, dropPos);
-               // _treeView.AddGameObject(newGoId);
+                uint id = GameObjectSystem.CreateGameObject(asset.JsonPath, dropPos);
+                TreeView?.AddGameObject(id);
             }
-            //else if (asset.AssetType == AssetDataTypeEnum.kAssetTypeLight)
-            //{
-            //    uint newLightId = LightSystem.LoadLight(asset.JsonPath);
-            //    _treeView.AddDirectionalLightObject(newLightId);
-            //}
         }
 
         private void RendererBox_MouseMove(object sender, MouseEventArgs e)
@@ -150,45 +145,24 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                 int deltaX = currentPos.X - LastMousePosition.X;
                 int deltaY = currentPos.Y - LastMousePosition.Y;
 
-                //ivec2 texSize = RenderSystem.GetAttachmentSize(ObjectSamplerTexture);
-                //int cw = Math.Max(1, RenderBox.ClientSize.Width);
-                //int ch = Math.Max(1, RenderBox.ClientSize.Height);
-
-                //float worldDx = deltaX * (texSize.x / (float)cw);
-                //float worldDy = deltaY * (texSize.y / (float)ch);
-
-                //ref var camera = ref CameraSystem.UpdateActiveCamera();
-                //float zoom = camera.Zoom != 0 ? camera.Zoom : 1.0f;
-
-                //worldDx /= zoom;
-                //worldDy /= zoom;
-
                 int cw = Math.Max(1, RenderBox.ClientSize.Width);
                 int ch = Math.Max(1, RenderBox.ClientSize.Height);
 
                 ref var camera = ref CameraSystem.UpdateActiveCamera();
 
-                // width/height of what the 2D camera shows, in the same units as transform.Position
-                float worldW = camera.Width;   // or RenderPassResolution.x if position is in render pixels
-                float worldH = camera.Height;  // or RenderPassResolution.y
+                float worldW = camera.Width;  
+                float worldH = camera.Height;
                 float zoom = camera.Zoom != 0 ? camera.Zoom : 1f;
 
                 float worldDx = deltaX * (worldW / cw) / zoom;
                 float worldDy = deltaY * (worldH / ch) / zoom;
 
                 List<ComponentTypeEnum> gameObjectComponents = GameObjectSystem.GetGameObjectComponentList(SelectedSpriteIndex);
-                //if (gameObjectComponents.Contains(ComponentTypeEnum.kPointLightComponent))
-                //{
-                //    ref var pointLightComponent = ref GameObjectSystem.UpdateGameObjectComponent<PointLightComponent>(SelectedSpriteIndex, ComponentTypeEnum.kPointLightComponent);
-                //    ref var pointLight = ref ConvertPtrToObject<PointLight>(LightSystem.GetPointLight(pointLightComponent.PointLightId));
-                //    pointLight.LightPosition = new vec3(pointLight.LightPosition.x + deltaX, pointLight.LightPosition.y - deltaY, pointLight.LightPosition.z);
-                //}
                 if (gameObjectComponents.Contains(ComponentTypeEnum.kTransform2DComponent))
                 {
                     ref var transform = ref GameObjectSystem.UpdateGameObjectComponent<Transform2DComponent>(SelectedSpriteIndex, ComponentTypeEnum.kTransform2DComponent);
                     transform.Position = new vec2(transform.Position.x + worldDx, transform.Position.y - worldDy);
                 }
-                //if (Math.Abs(deltaX) > 1 || Math.Abs(deltaY) > 1)
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -226,34 +200,31 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
         private void RenderBox_KeyDown(object sender, KeyEventArgs e)
         {
             ref var cameraTransform = ref CameraSystem.UpdateActiveCamera();
-            if (e.KeyCode == Keys.W) cameraTransform.Position = new vec3(cameraTransform.Position.x, cameraTransform.Position.y + KeyBoardCameraSpeed, 0.0f);
-            if (e.KeyCode == Keys.A) cameraTransform.Position = new vec3(cameraTransform.Position.x - KeyBoardCameraSpeed, cameraTransform.Position.y, 0.0f);
-            if (e.KeyCode == Keys.D) cameraTransform.Position = new vec3(cameraTransform.Position.x + KeyBoardCameraSpeed, cameraTransform.Position.y, 0.0f);
-            if (e.KeyCode == Keys.S) cameraTransform.Position = new vec3(cameraTransform.Position.x, cameraTransform.Position.y - KeyBoardCameraSpeed, 0.0f);
+            if (e.KeyCode == Keys.W) cameraTransform.Position = new vec3(cameraTransform.Position.x, cameraTransform.Position.y - KeyBoardCameraSpeed, 0.0f);
+            if (e.KeyCode == Keys.A) cameraTransform.Position = new vec3(cameraTransform.Position.x + KeyBoardCameraSpeed, cameraTransform.Position.y, 0.0f);
+            if (e.KeyCode == Keys.D) cameraTransform.Position = new vec3(cameraTransform.Position.x - KeyBoardCameraSpeed, cameraTransform.Position.y, 0.0f);
+            if (e.KeyCode == Keys.S) cameraTransform.Position = new vec3(cameraTransform.Position.x, cameraTransform.Position.y + KeyBoardCameraSpeed, 0.0f);
             if ((e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back) && SelectedSpriteIndex != uint.MaxValue)
             {
                 GameObjectSystem.DestroyGameObject(SelectedSpriteIndex);
             }
         }
 
-        private ivec2 ClientToWorld(System.Drawing.Point clientPos)
+        private vec2 ClientToWorld(Point clientPos)
         {
-            ref Camera camera = ref CameraSystem.UpdateActiveCamera();
+            int cw = Math.Max(1, RenderBox.ClientSize.Width);
+            int ch = Math.Max(1, RenderBox.ClientSize.Height);
 
-            float camX = camera.Position.x;
-            float camY = camera.Position.y;
+            ref var camera = ref CameraSystem.UpdateActiveCamera();
+            float zoom = camera.Zoom != 0f ? camera.Zoom : 1f;
 
-            ivec2 texSize = RenderSystem.GetAttachmentSize(ObjectSamplerTexture);
-            float scaleX = texSize.x / (float)RenderBox.ClientSize.Width;
-            float scaleY = texSize.y / (float)RenderBox.ClientSize.Height;
+            float sx = camera.Width / cw / zoom;
+            float sy = camera.Height / ch / zoom;
 
-            float renderX = clientPos.X * scaleX;
-            float renderY = (RenderBox.ClientSize.Height - clientPos.Y) * scaleY;
+            float worldX = camera.Position.x + clientPos.X * sx;
+            float worldY = camera.Position.y + (ch - clientPos.Y) * sy;
 
-            float worldX = camX + renderX;
-            float worldY = camY + renderY;
-
-            return new ivec2((int)Math.Round(worldX), (int)Math.Round(worldY));
+            return new vec2(worldX, worldY);
         }
 
         private System.Drawing.Point WorldToClient(vec2 worldPos)

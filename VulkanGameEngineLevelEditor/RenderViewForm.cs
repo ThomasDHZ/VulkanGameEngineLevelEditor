@@ -34,7 +34,7 @@ namespace VulkanGameEngineLevelEditor
         {
             public string Name { get; set; }
             public AssetDataTypeEnum AssetType { get; set; }
-            public System.String JsonPath { get; set; }
+            public string JsonPath { get; set; }
         };
 
         private volatile bool Running;
@@ -264,25 +264,29 @@ namespace VulkanGameEngineLevelEditor
             List<System.String> gameObjectPrefabList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\GameObjects").ToList();
             foreach (var gameObjectPrefab in gameObjectPrefabList)
             {
-                _gameObjectListView.AddListItem(gameObjectPrefab, AssetDataTypeEnum.kAssetTypeGameObject, gameObjectPrefab);
+                string fileName = Path.GetFileName(gameObjectPrefab);
+                _gameObjectListView.AddListItem(fileName, AssetDataTypeEnum.kAssetTypeGameObject, gameObjectPrefab);
             }
 
             List<System.String> sceneLevelList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Levels").ToList();
             foreach (var sceneLevel in sceneLevelList)
             {
-                _sceneListView.AddListItem(sceneLevel, AssetDataTypeEnum.kAssetTypeScene, sceneLevel);
+                string fileName = Path.GetFileName(sceneLevel);
+                _sceneListView.AddListItem(fileName, AssetDataTypeEnum.kAssetTypeScene, sceneLevel);
             }
 
             List<System.String> textureList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Textures").ToList();
             foreach (var texture in textureList)
             {
-                _texturesListView.AddListItem(texture, AssetDataTypeEnum.kAssetTypeTexture, texture);
+                string fileName = Path.GetFileName(texture);
+                _texturesListView.AddListItem(fileName, AssetDataTypeEnum.kAssetTypeTexture, texture);
             }
 
             List<System.String> materialList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Materials").ToList();
             foreach (var material in materialList)
             {
-                _materialsListView.AddListItem(material, AssetDataTypeEnum.kAssetTypeMaterial, material);
+                string fileName = Path.GetFileName(material);
+                _materialsListView.AddListItem(fileName, AssetDataTypeEnum.kAssetTypeMaterial, material);
             }
         }
 
