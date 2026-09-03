@@ -45,8 +45,10 @@ namespace VulkanGameEngineLevelEditor
         private ivec2 RenderResolutionSize = new ivec2(3840, 2160);
         private const int STD_OUTPUT_HANDLE = -11;
         private const int STD_ERROR_HANDLE = -12;
+
         private DockPanel _dockPanel;
-        private ToolsWindow _treeWindow;
+        private ToolsWindow _renderPassTreeWindow;
+        private ToolsWindow _levelEditorTreeWindow;
         private ToolsWindow _propertiesWindow;
         private ToolsWindow _loggerWindow;
         private ToolsWindow _dllViewWindow;
@@ -74,6 +76,9 @@ namespace VulkanGameEngineLevelEditor
 
             this.Text = "Vulkan Level Editor - RenderPassEditorView";
 
+            _viewportWindow.PropertiesPanel = propertiesPanel;
+            _viewportWindow.TreeView = levelEditorTreeView;
+            levelEditorTreeView.PropertiesPanel = propertiesPanel;
             renderPassTreeView.PropertiesPanel = propertiesPanel;
             renderPassTreeView.Populate(awer);
         }
@@ -144,6 +149,7 @@ namespace VulkanGameEngineLevelEditor
                 LevelSystem.LoadLevel("Levels/TestLevel.json");
                 LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
             }));
+            levelEditorTreeView.PopulateWithGameObjects();
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -233,7 +239,8 @@ namespace VulkanGameEngineLevelEditor
             _dockPanel.BringToFront();
 
             _viewportWindow = new ViewPortWindow("Viewport");
-            _treeWindow = new ToolsWindow("Render Passes", renderPassTreeView);
+            _renderPassTreeWindow = new ToolsWindow("Render Passes", renderPassTreeView);
+            _levelEditorTreeWindow = new ToolsWindow("Level Editor Objects", levelEditorTreeView);
             _propertiesWindow = new ToolsWindow("Properties", propertiesPanel);
             _loggerWindow = new ToolsWindow("Vulkan Logger", VulkanLoggerBox);
             _dllViewWindow = new ToolsWindow("DLL View", dataGridView1);
@@ -243,7 +250,8 @@ namespace VulkanGameEngineLevelEditor
             _texturesListView = new ListViewWindow("Textures");
 
             _viewportWindow.Show(_dockPanel, DockState.Document);
-            _treeWindow.Show(_dockPanel, DockState.DockLeft);
+            _renderPassTreeWindow.Show(_dockPanel, DockState.DockLeft);
+            _levelEditorTreeWindow.Show(_dockPanel, DockState.DockLeft);
             _propertiesWindow.Show(_dockPanel, DockState.DockRight);
 
             _loggerWindow.Show(_dockPanel, DockState.DockBottom);

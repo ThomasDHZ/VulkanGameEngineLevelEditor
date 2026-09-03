@@ -3,7 +3,6 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using VulkanEngineCS;
-using ComponentTypeEnum = VulkanEngineCS.ComponentTypeEnum;
 
 namespace VulkanGameEngineLevelEditor.LevelEditor
 {

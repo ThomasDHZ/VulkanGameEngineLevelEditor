@@ -46,6 +46,7 @@ namespace VulkanGameEngineLevelEditor
             LightListView = new ListView();
             dataGridView1 = new DataGridView();
             renderPassTreeView = new RenderPassTreeView();
+            levelEditorTreeView = new LevelEditorTreeView();
             propertiesPanel = new PropertiesPanel();
 
             SuspendLayout();
@@ -156,6 +157,17 @@ namespace VulkanGameEngineLevelEditor
             renderPassTreeView.Size = new Size(300, 714);
             renderPassTreeView.TabIndex = 0;
             // 
+            // renderPassTreeView
+            // 
+            levelEditorTreeView.BackColor = Color.FromArgb(40, 40, 40);
+            levelEditorTreeView.Dock = DockStyle.Fill;
+            levelEditorTreeView.Location = new Point(0, 0);
+            levelEditorTreeView.ForeColor = Color.FromArgb(255, 255, 255);
+            levelEditorTreeView.Name = "levelEditorTreeView";
+            levelEditorTreeView.PropertiesPanel = null;
+            levelEditorTreeView.Size = new Size(300, 714);
+            levelEditorTreeView.TabIndex = 0;
+            // 
             // propertiesPanel
             // 
             propertiesPanel.Dock = DockStyle.Fill;
@@ -189,6 +201,7 @@ namespace VulkanGameEngineLevelEditor
         private System.Windows.Forms.ListView SceneListView;
         private System.Windows.Forms.ListView LightListView;
         private LevelEditor.RenderPassTreeView renderPassTreeView;
+        private LevelEditor.LevelEditorTreeView levelEditorTreeView;
         private PropertiesPanel propertiesPanel;
         private DataGridView dataGridView1;
         private RichTextBox VulkanLoggerBox;

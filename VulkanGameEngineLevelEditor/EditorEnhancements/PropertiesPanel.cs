@@ -12,7 +12,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
     public unsafe class PropertiesPanel : UserControl
     {
         private bool _renderPassEditorMode = false;
-        private GameObject* _selectedGameObject;
+        private GameObjecLevelEditor* _selectedGameObject;
         private object _selectedObject;
         private readonly FlowLayoutPanel _flowComponents;
         private readonly ToolTip _toolTip = new ToolTip();
