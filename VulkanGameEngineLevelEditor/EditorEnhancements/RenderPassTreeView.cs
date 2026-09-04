@@ -196,10 +196,8 @@ namespace VulkanGameEngineLevelEditor.LevelEditor
 
         private void OnAfterSelect(object sender, TreeViewEventArgs e)
         {
-            if (e.Node?.Tag is not RenderPassTreeNodeTag tag)
-                return;
-
-             PropertiesPanel.SetSelectedObject(tag.RenderPassObject);
+            if (e.Node?.Tag is not RenderPassTreeNodeTag tag) return;
+        //    PropertiesPanel.SetSelectedObject(tag.RenderPassObject);
         }
 
         public void ClearTree()

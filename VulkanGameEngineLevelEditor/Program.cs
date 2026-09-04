@@ -1,3 +1,5 @@
+using VulkanGameEngineLevelEditor.Registries;
+
 namespace VulkanGameEngineLevelEditor
 {
     internal static class Program
@@ -10,6 +12,7 @@ namespace VulkanGameEngineLevelEditor
         {
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
+            ComponentRegistry.Initialize();
             ApplicationConfiguration.Initialize();
             Application.Run(new RenderViewForm());
         }

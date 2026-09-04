@@ -7,16 +7,16 @@ using System.Windows.Forms;
 using VulkanEngineCS;
 using VulkanGameEngineLevelEditor.LevelEditor;
 using VulkanGameEngineLevelEditor.Model;
+using VulkanGameEngineLevelEditor.Registries;
+
 namespace VulkanGameEngineLevelEditor.EditorEnhancements
 {
     public unsafe class PropertiesPanel : UserControl
     {
-        private bool _renderPassEditorMode = false;
         private GameObjecLevelEditor* _selectedGameObject;
-        private object _selectedObject;
         private readonly FlowLayoutPanel _flowComponents;
         private readonly ToolTip _toolTip = new ToolTip();
-        private System.Windows.Forms.Timer _refreshTimer;
+      //  private Timer _refreshTimer;
 
         public PropertiesPanel()
         {
@@ -33,27 +33,19 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             };
             Controls.Add(_flowComponents);
 
-            _refreshTimer = new System.Windows.Forms.Timer();
-            _refreshTimer.Interval = 120;
-            _refreshTimer.Tick += RefreshTimer_Tick;
-            _refreshTimer.Start();
+            //_refreshTimer = new Timer();
+            //_refreshTimer.Interval = 120;
+            //_refreshTimer.Tick += RefreshTimer_Tick;
+            //_refreshTimer.Start();
         }
 
         public void SetSelectedEntity(uint gameObjectId)
         {
-            _selectedGameObject = GameObjectSystem.GetGameObjectPtr(gameObjectId);
-            _renderPassEditorMode = false;
-            RefreshGameObjectPanel();
+            _selectedGameObject = GameObjectSystem.GetGameObject(gameObjectId);
+            RefreshPanel();
         }
 
-        public void SetSelectedObject(object selectedObject)
-        {
-            _selectedObject = selectedObject;
-            _renderPassEditorMode = true;
-            RefreshRenderPassPanel();
-        }
-
-        private void RefreshGameObjectPanel()
+        private void RefreshPanel()
         {
             _flowComponents.Controls.Clear();
 
@@ -70,9 +62,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             }
 
             _flowComponents.Controls.Add(CreateEntityHeader());
-            _flowComponents.Controls.Add(CreateAddComponentButton());
             var componentTypes = GameObjectSystem.GetGameObjectComponentList(_selectedGameObject->GameObjectId);
-
             if (_selectedGameObject != null)
             {
                 foreach (var componentType in componentTypes)
@@ -94,30 +84,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                     _flowComponents.Controls.Add(panel);
                 }
             }
-        }
-
-        private void RefreshRenderPassPanel()
-        {
-            _flowComponents.Controls.Clear();
-
-            if (_selectedObject == null)
-            {
-                _flowComponents.Controls.Add(new Label
-                {
-                    Text = "No RenderPass selected",
-                    ForeColor = Color.Silver,
-                    AutoSize = true,
-                    Padding = new Padding(20)
-                });
-                return;
-            }
-
-            _flowComponents.Controls.Add(CreateEntityHeader());
-            if (_selectedObject != null)
-            {
-                var panel = new ObjectPanelView(this, _selectedObject, _toolTip);
-                _flowComponents.Controls.Add(panel);
-            }
+            _flowComponents.Controls.Add(CreateAddComponentButton());
         }
 
         private Control CreateEntityHeader()
@@ -129,25 +96,25 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                 Padding = new Padding(12)
             };
 
-            //var lblName = new Label
-            //{
-            //    Text = _renderPassEditorMode ? : $"Entity: Entity_{_selectedGameObject->GameObjectId}",
-            //    Font = new Font("Segoe UI", 10.5f, FontStyle.Bold),
-            //    ForeColor = Color.White,
-            //    AutoSize = true,
-            //    Location = new Point(8, 12)
-            //};
+            var lblName = new Label
+            {
+                Text = $"Entity: Entity_{_selectedGameObject->GameObjectId}",
+                Font = new Font("Segoe UI", 10.5f, FontStyle.Bold),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(8, 12)
+            };
 
-            //var lblId = new Label
-            //{
-            //    Text = $"ID: {_selectedGameObject->GameObjectId}",
-            //    ForeColor = Color.Silver,
-            //    AutoSize = true,
-            //    Location = new Point(8, 38)
-            //};
+            var lblId = new Label
+            {
+                Text = $"ID: {_selectedGameObject->GameObjectId}",
+                ForeColor = Color.Silver,
+                AutoSize = true,
+                Location = new Point(8, 38)
+            };
 
-            //panel.Controls.Add(lblName);
-            //panel.Controls.Add(lblId);
+            panel.Controls.Add(lblName);
+            panel.Controls.Add(lblId);
             return panel;
         }
 
@@ -182,7 +149,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                 // GameObjectSystem.RemoveComponent(_selectedGameObject->GameObjectId, wrapper.ComponentType);
             }
 
-            RefreshGameObjectPanel();
+            RefreshPanel();
         }
 
         private void RefreshTimer_Tick(object? sender, EventArgs e)
@@ -207,8 +174,8 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
         {
             if (disposing)
             {
-                _refreshTimer?.Stop();
-                _refreshTimer?.Dispose();
+                //_refreshTimer?.Stop();
+                //_refreshTimer?.Dispose();
             }
             base.Dispose(disposing);
         }
