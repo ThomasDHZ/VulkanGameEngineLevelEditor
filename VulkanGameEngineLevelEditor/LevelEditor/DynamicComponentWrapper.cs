@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.Component;
 
 namespace VulkanGameEngineLevelEditor.LevelEditor
 {
@@ -10,76 +11,57 @@ namespace VulkanGameEngineLevelEditor.LevelEditor
     {
         public uint GameObjectId { get; }
         public ComponentTypeEnum ComponentType { get; }
-        public LightTypeEnum LightType { get; }
-        public IntPtr ComponentPtr { get; }
-        public Type ComponentStructType { get; }
+        public ComponentView? View { get; }
+        public Type? ComponentStructType { get; }
 
-        public string DisplayName => ComponentType.ToString().Replace("k", "").Replace("Component", "");
+        public string DisplayName =>
+            ComponentType.ToString().Replace("k", "").Replace("Component", "");
 
-        public DynamicComponentWrapper(uint gameObjectId, ComponentTypeEnum componentType, IntPtr componentPtr, Type structType)
+        public DynamicComponentWrapper(uint gameObjectId, ComponentTypeEnum componentType, ComponentView? view = null)
         {
             GameObjectId = gameObjectId;
             ComponentType = componentType;
-            ComponentPtr = componentPtr;
-            ComponentStructType = structType ?? throw new ArgumentNullException(nameof(structType));
-        }
-
-        public DynamicComponentWrapper(uint gameObjectId, LightTypeEnum lightType, IntPtr componentPtr, Type structType)
-        {
-            GameObjectId = gameObjectId;
-            LightType = lightType;
-            ComponentPtr = componentPtr;
-            ComponentStructType = structType ?? throw new ArgumentNullException(nameof(structType));
+            View = view;
+            ComponentStructType = view?.GetType();
         }
 
         public object? GetMemberValue(MemberInfo member)
         {
-            if (ComponentPtr == IntPtr.Zero) return null;
-
             try
             {
-                if (member is FieldInfo field)
-                {
-                    object boxed = Marshal.PtrToStructure(ComponentPtr, ComponentStructType);
-                    return field.GetValue(boxed);
-                }
-                else if (member is PropertyInfo prop && prop.CanRead)
-                {
-                    object boxed = Marshal.PtrToStructure(ComponentPtr, ComponentStructType);
-                    return prop.GetValue(boxed);
-                }
-                return null;
+                if (View == null) return null;
+
+                var vp = View.GetType().GetProperty(member.Name, BindingFlags.Public | BindingFlags.Instance);
+                if (vp == null || !vp.CanRead) return null;
+                return vp.GetValue(View);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[GetMemberValue] Error on {ComponentType}.{member.Name}: {ex}");
+                Console.WriteLine($"[GetMemberValue] {ComponentType}.{member.Name}: {ex}");
                 return null;
             }
         }
 
         public void SetMemberValue(MemberInfo member, object? value)
         {
-            if (ComponentPtr == IntPtr.Zero || value == null) return;
+            if (View == null || value == null) return;
 
             try
             {
-                if (member is FieldInfo field)
-                {
-                    object boxed = Marshal.PtrToStructure(ComponentPtr, ComponentStructType);
-                    field.SetValue(boxed, value); 
-                    Marshal.StructureToPtr(boxed, ComponentPtr, false);
-                }
-                else if (member is PropertyInfo prop && prop.CanWrite)
-                {
-                    object boxed = Marshal.PtrToStructure(ComponentPtr, ComponentStructType);
-                    prop.SetValue(boxed, value);
-                    Marshal.StructureToPtr(boxed, ComponentPtr, false);
-                }
+                var vp = View.GetType().GetProperty(member.Name, BindingFlags.Public | BindingFlags.Instance);
+                if (vp == null || !vp.CanWrite) return;
+                vp.SetValue(View, ConvertValue(value, vp.PropertyType));
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[SetMemberValue] FAILED {ComponentType}.{member.Name}: {ex.Message}");
+                Console.WriteLine($"[SetMemberValue] {ComponentType}.{member.Name}: {ex.Message}");
             }
+        }
+
+        static object ConvertValue(object value, Type target)
+        {
+            if (target.IsInstanceOfType(value)) return value;
+            return Convert.ChangeType(value, target);
         }
     }
 }

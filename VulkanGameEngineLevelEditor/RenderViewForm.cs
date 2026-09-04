@@ -10,6 +10,7 @@ using VulkanEngineCoreCS;
 using VulkanEngineCoreCS.Models;
 using VulkanEngineCoreCS.Vulkan;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.Component;
 using VulkanGameEngineLevelEditor.EditorEnhancements;
 using VulkanGameEngineLevelEditor.LevelEditor;
 using VulkanGameEngineLevelEditor.Model;
@@ -150,6 +151,8 @@ namespace VulkanGameEngineLevelEditor
                 LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
             }));
             levelEditorTreeView.PopulateWithGameObjects();
+            DirectionalLightComponentView a = new DirectionalLightComponentView(1);
+            a.LightColor = new vec3(1.0f, 0.0f, 0.0f);
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -293,6 +296,12 @@ namespace VulkanGameEngineLevelEditor
         [DllImport("kernel32.dll", SetLastError = true)] private static extern bool AllocConsole();
         [DllImport("kernel32.dll", SetLastError = true)] private static extern IntPtr GetStdHandle(int nStdHandle);
         [DllImport("kernel32.dll", SetLastError = true)] private static extern bool SetStdHandle(int nStdHandle, IntPtr hHandle);
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            List<GameObjecLevelEditor> gameObjectList = GameObjectSystem.GetGameObjectList();
+            string jsonString = JsonConvert.SerializeObject(gameObjectList);
+        }
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GlmSharp;
+using System;
 using System.Drawing;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -122,10 +123,11 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             {
                 try
                 {
-                    int offset = Marshal.OffsetOf(_wrapper.ComponentStructType, fi.Name).ToInt32();
-                    ref float target = ref Unsafe.AsRef<float>((byte*)_wrapper.ComponentPtr.ToPointer() + offset);
+                    _wrapper.SetMemberValue(_member, fi.GetValue(_targetObject));
+                    //int offset = Marshal.OffsetOf(_wrapper.ComponentStructType, fi.Name).ToInt32();
+                    //ref float target = ref Unsafe.AsRef<float>((byte*)_wrapper.ComponentPtr.ToPointer() + offset);
 
-                    target = newValue;
+                    //target = newValue;
                     return;
                 }
                 catch { }

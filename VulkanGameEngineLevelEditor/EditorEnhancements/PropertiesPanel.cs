@@ -3,8 +3,10 @@ using GameScriptLibraryDLL.GameObjects;
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.Component;
 using VulkanGameEngineLevelEditor.LevelEditor;
 using VulkanGameEngineLevelEditor.Model;
 using VulkanGameEngineLevelEditor.Registries;
@@ -70,18 +72,10 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                     IntPtr ptr = GameObjectSystem.GetGameObjectComponentPtr(_selectedGameObject->GameObjectId, componentType);
                     if (ptr == IntPtr.Zero) continue;
 
-                    Type? structType = ComponentRegistry.GetTypeFor(componentType);
-                    if (structType == null)
-                    {
-                        var unknown = new GroupBox { Text = $"{componentType} (Unknown Type)" };
-                        unknown.Controls.Add(new Label { Text = "No managed type registered in ComponentRegistry", Padding = new Padding(10) });
-                        _flowComponents.Controls.Add(unknown);
-                        continue;
-                    }
-
-                    var wrapper = new DynamicComponentWrapper(_selectedGameObject->GameObjectId, componentType, ptr, structType);
-                    var panel = new ObjectPanelView(this, wrapper, _toolTip);
-                    _flowComponents.Controls.Add(panel);
+                    var view = ComponentViewRegistry.TryCreate(_selectedGameObject->GameObjectId, componentType, ptr);
+                    var wrapper = new DynamicComponentWrapper(_selectedGameObject->GameObjectId, componentType, view);
+                    var members = wrapper.View.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.DeclaringType != typeof(ComponentView));
+                    _flowComponents.Controls.Add(new ObjectPanelView(this, wrapper, _toolTip));
                 }
             }
             _flowComponents.Controls.Add(CreateAddComponentButton());

@@ -96,59 +96,40 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             return table;
         }
 
-        private void SetAxis(int axis, float newValue)
-        {
-            if (_nativePtr.HasValue && _nativePtr.Value != IntPtr.Zero && _member is FieldInfo fieldInfo)
-            {
-                try
-                {
-                    int offset = Marshal.OffsetOf(_targetObject!.GetType(), fieldInfo.Name).ToInt32();
-                    ref vec2 vec = ref Unsafe.AsRef<vec2>((byte*)_nativePtr.Value + offset);
-
-                    switch (axis)
-                    {
-                        case 0: vec.x = newValue; break;
-                        case 1: vec.y = newValue; break;
-                    }
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[Vec3 Native Linked FAILED] {ex.Message}");
-                }
-            }
-
-            if (_wrapper != null && _member is FieldInfo fi)
-            {
-                try
-                {
-                    int offset = Marshal.OffsetOf(_wrapper.ComponentStructType, fi.Name).ToInt32();
-                    ref vec2 vec = ref Unsafe.AsRef<vec2>((byte*)_wrapper.ComponentPtr.ToPointer() + offset);
-                    switch (axis)
-                    {
-                        case 0: vec.x = newValue; break;
-                        case 1: vec.y = newValue; break;
-                    }
-                    return;
-                }
-                catch { }
-            }
-        }
-
         private vec2 GetCurrentVec2()
         {
             if (_wrapper != null)
             {
-                var value = _wrapper.GetMemberValue(_member);
-                return value is vec2 vec ? vec : vec2.Zero;
+                return _wrapper.GetMemberValue(_member) is vec2 v ? v : vec2.Zero;
             }
 
-            if (_targetObject != null)
+            return _member switch
             {
-                if (_member is FieldInfo fi) return (vec2?)fi.GetValue(_targetObject) ?? vec2.Zero;
-                if (_member is PropertyInfo pi && pi.CanRead) return (vec2?)pi.GetValue(_targetObject) ?? vec2.Zero;
+                FieldInfo fi when _targetObject != null => (vec2?)fi.GetValue(_targetObject) ?? vec2.Zero,
+                PropertyInfo pi when pi.CanRead && _targetObject != null => (vec2?)pi.GetValue(_targetObject) ?? vec2.Zero,
+                _ => vec2.Zero
+            };
+        }
+
+        private void SetAxis(int axis, float newValue)
+        {
+            if (_readOnly) return;
+
+            vec2 v = GetCurrentVec2();
+            switch (axis)
+            {
+                case 0: v.x = newValue; break;
+                case 1: v.y = newValue; break;
             }
-            return vec2.Zero;
+
+            if (_wrapper != null)
+            {
+                _wrapper.SetMemberValue(_member, v);
+                return;
+            }
+
+            if (_member is PropertyInfo pi && pi.CanWrite && _targetObject != null) pi.SetValue(_targetObject, v);
+            else if (_member is FieldInfo fi && _targetObject != null) fi.SetValue(_targetObject, v);
         }
     }
 }

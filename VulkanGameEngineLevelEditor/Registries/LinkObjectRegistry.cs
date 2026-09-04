@@ -81,7 +81,7 @@ namespace VulkanGameEngineLevelEditor.Registries
             // Register your resolvers here
         //    Register<DirectionalLightHandle, IntPtr>(handle => LightSystem.GetDirectionalLight((uint)handle.Value));
         //    Register<PointLightHandle, IntPtr>(handle => LightSystem.GetPointLight((uint)handle.Value));
-            // Register<TextureHandle, IntPtr>(handle => TextureSystem.GetTexture(handle));   // when ready
+            // Register<TextureHandle, IntPtr>(handle => TextureSystem.GetTexture(handle));   
             // Register<MaterialHandle, IntPtr>(handle => MaterialSystem.GetMaterial(handle));
 
             Console.WriteLine($"[ObjectLinkerRegistry] Initialized with {_resolvers.Count} resolvers.");

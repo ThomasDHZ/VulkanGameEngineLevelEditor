@@ -18,7 +18,6 @@
     <ProjectReference Include="..\..\VulkanCS\VulkanCS\VulkanCS.csproj" />
     <ProjectReference Include="..\..\VulkanEngineCore\VulkanEngineCoreCS\VulkanEngineCoreCS.csproj" />
     <ProjectReference Include="..\..\VulkanEngineCore\VulkanEngineCore\VulkanEngineCore.vcxproj" />
-    <ProjectReference Include="..\..\VulkanGameEngine\GameScriptLibraryDLL\GameScriptLibraryDLL.csproj" />
     <ProjectReference Include="..\..\VulkanGameEngine\VulkanEngineCS\VulkanEngineCS.csproj" />
     <ProjectReference Include="..\..\VulkanGameEngine\VulkanEngineDLL\VulkanEngineDLL.vcxproj" />
     <ProjectReference Include="..\..\VulkanGameEngine\VulkanEngineInterop\VulkanEngineInterop.vcxproj" />
@@ -32,6 +31,21 @@
     <PackageReference Include="DockPanelSuite" Version="3.1.1" />
     <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

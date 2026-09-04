@@ -65,11 +65,11 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             {
                 if (_readOnly || combo.SelectedItem is not LinkItem item) return;
 
-                SetLinkIdDirect(item.Id);
+                //SetLinkIdDirect(item.Id);
 
                 // Important: Refresh the entire parent panel so the nested linked object updates
-                if (_rootPanel != null)
-                    _rootPanel.RefreshValues();        // you'll need to make RefreshValues public or add a RefreshLinked() method
+                //if (_rootPanel != null)
+                    //_rootPanel.RefreshValues();        // you'll need to make RefreshValues public or add a RefreshLinked() method
             };
 
             table.Controls.Add(lbl, 0, 0);
@@ -84,22 +84,22 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             return val is uint id ? id : uint.MaxValue;
         }
 
-        private void SetLinkIdDirect(uint newId)
-        {
-            if (_wrapper == null || _wrapper.ComponentPtr == IntPtr.Zero || _member is not FieldInfo fi)
-                return;
+        //private void SetLinkIdDirect(uint newId)
+        //{
+        //    if (_wrapper == null || _wrapper.ComponentPtr == IntPtr.Zero || _member is not FieldInfo fi)
+        //        return;
 
-            try
-            {
-                int offset = Marshal.OffsetOf(_wrapper.ComponentStructType, fi.Name).ToInt32();
-                ref uint target = ref Unsafe.AsRef<uint>((byte*)_wrapper.ComponentPtr + offset);
-                target = newId;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Link Set] Failed for {_member.Name}: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        int offset = Marshal.OffsetOf(_wrapper.ComponentStructType, fi.Name).ToInt32();
+        //        ref uint target = ref Unsafe.AsRef<uint>((byte*)_wrapper.ComponentPtr + offset);
+        //        target = newId;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"[Link Set] Failed for {_member.Name}: {ex.Message}");
+        //    }
+        //}
 
         private void PopulateAvailableLinks(ComboBox combo, uint currentId)
         {

@@ -17,9 +17,7 @@ namespace VulkanGameEngineLevelEditor.Registries
 
         public static void Register(LightTypeEnum enumValue, Type structType)
         {
-            if (!structType.IsValueType && !structType.IsClass) // usually structs for ECS
-                throw new ArgumentException("Component must be struct or class with proper layout");
-
+            if (!structType.IsValueType && !structType.IsClass) throw new ArgumentException("Component must be struct or class with proper layout");
             _typeMap[enumValue] = structType;
         }
 

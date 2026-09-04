@@ -36,6 +36,7 @@ namespace VulkanGameEngineLevelEditor
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RenderViewForm));
             menuStrip1 = new MenuStrip();
             dockPanel1 = new DockPanel();
             VulkanLoggerBox = new RichTextBox();
@@ -48,7 +49,10 @@ namespace VulkanGameEngineLevelEditor
             renderPassTreeView = new RenderPassTreeView();
             levelEditorTreeView = new LevelEditorTreeView();
             propertiesPanel = new PropertiesPanel();
-
+            toolStrip1 = new ToolStrip();
+            toolStripButton1 = new ToolStripButton();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -70,7 +74,16 @@ namespace VulkanGameEngineLevelEditor
             dockPanel1.ShowAutoHideContentOnHover = false;
             dockPanel1.Size = new Size(1898, 1000);
             dockPanel1.TabIndex = 4;
-            dockPanel1.Theme = new VS2015DarkTheme();
+            // 
+            // VulkanLoggerBox
+            // 
+            VulkanLoggerBox.BackColor = Color.FromArgb(40, 40, 40);
+            VulkanLoggerBox.Dock = DockStyle.Fill;
+            VulkanLoggerBox.Location = new Point(3, 3);
+            VulkanLoggerBox.Name = "VulkanLoggerBox";
+            VulkanLoggerBox.Size = new Size(1880, 238);
+            VulkanLoggerBox.TabIndex = 0;
+            VulkanLoggerBox.Text = "";
             // 
             // GameObjectListView
             // 
@@ -126,16 +139,6 @@ namespace VulkanGameEngineLevelEditor
             LightListView.TabIndex = 1;
             LightListView.UseCompatibleStateImageBehavior = false;
             // 
-            // VulkanLoggerBox
-            // 
-            VulkanLoggerBox.BackColor = Color.FromArgb(40, 40, 40);
-            VulkanLoggerBox.Dock = DockStyle.Fill;
-            VulkanLoggerBox.Location = new Point(3, 3);
-            VulkanLoggerBox.Name = "VulkanLoggerBox";
-            VulkanLoggerBox.Size = new Size(1880, 238);
-            VulkanLoggerBox.TabIndex = 0;
-            VulkanLoggerBox.Text = "";
-            // 
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -150,19 +153,21 @@ namespace VulkanGameEngineLevelEditor
             // 
             renderPassTreeView.BackColor = Color.FromArgb(40, 40, 40);
             renderPassTreeView.Dock = DockStyle.Fill;
-            renderPassTreeView.Location = new Point(0, 0);
             renderPassTreeView.ForeColor = Color.FromArgb(255, 255, 255);
-            renderPassTreeView.Name = "renderPassTreeView1";
+            renderPassTreeView.LineColor = Color.Empty;
+            renderPassTreeView.Location = new Point(0, 0);
+            renderPassTreeView.Name = "renderPassTreeView";
             renderPassTreeView.PropertiesPanel = null;
             renderPassTreeView.Size = new Size(300, 714);
             renderPassTreeView.TabIndex = 0;
             // 
-            // renderPassTreeView
+            // levelEditorTreeView
             // 
             levelEditorTreeView.BackColor = Color.FromArgb(40, 40, 40);
             levelEditorTreeView.Dock = DockStyle.Fill;
-            levelEditorTreeView.Location = new Point(0, 0);
             levelEditorTreeView.ForeColor = Color.FromArgb(255, 255, 255);
+            levelEditorTreeView.LineColor = Color.Empty;
+            levelEditorTreeView.Location = new Point(0, 0);
             levelEditorTreeView.Name = "levelEditorTreeView";
             levelEditorTreeView.PropertiesPanel = null;
             levelEditorTreeView.Size = new Size(300, 714);
@@ -172,21 +177,45 @@ namespace VulkanGameEngineLevelEditor
             // 
             propertiesPanel.Dock = DockStyle.Fill;
             propertiesPanel.Location = new Point(0, 0);
-            propertiesPanel.Name = "propertiesPanel1";
+            propertiesPanel.Name = "propertiesPanel";
             propertiesPanel.Size = new Size(300, 714);
             propertiesPanel.TabIndex = 0;
+            // 
+            // toolStrip1
+            // 
+            toolStrip1.ImageScalingSize = new Size(24, 24);
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
+            toolStrip1.Location = new Point(0, 24);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new Size(1898, 33);
+            toolStrip1.TabIndex = 5;
+            toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton1
+            // 
+            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
+            toolStripButton1.ImageTransparentColor = Color.Magenta;
+            toolStripButton1.Name = "toolStripButton1";
+            toolStripButton1.Size = new Size(34, 28);
+            toolStripButton1.Text = "toolStripButton1";
+            toolStripButton1.Click += toolStripButton1_Click;
             // 
             // RenderViewForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1898, 1024);
+            Controls.Add(toolStrip1);
             Controls.Add(dockPanel1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
             Name = "RenderViewForm";
             Text = "Form1";
             Load += RenderViewForm_Load;
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -205,5 +234,7 @@ namespace VulkanGameEngineLevelEditor
         private PropertiesPanel propertiesPanel;
         private DataGridView dataGridView1;
         private RichTextBox VulkanLoggerBox;
+        private ToolStrip toolStrip1;
+        private ToolStripButton toolStripButton1;
     }
 }
