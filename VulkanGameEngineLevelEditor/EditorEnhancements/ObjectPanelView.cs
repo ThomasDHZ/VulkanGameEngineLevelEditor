@@ -49,25 +49,25 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             PopulateProperties();
         }
 
-        private (object? ResolvedObject, IntPtr NativePtr) ResolveLinkedObjectWithPtr(DynamicComponentWrapper wrapper, MemberInfo member, LinkObjectAttribute attr, uint currentId)
-        {
-            if (currentId == uint.MaxValue)
-                return (null, IntPtr.Zero);
+        //private (object? ResolvedObject, IntPtr NativePtr) ResolveLinkedObjectWithPtr(DynamicComponentWrapper wrapper, MemberInfo member, LinkObjectAttribute attr, uint currentId)
+        //{
+        //    if (currentId == uint.MaxValue)
+        //        return (null, IntPtr.Zero);
 
-            object handle = currentId;
-            if (attr.HandleType == typeof(PointLightHandle)) handle = new PointLightHandle(new IntPtr(currentId));
-            else if (attr.HandleType == typeof(DirectionalLightHandle)) handle = new DirectionalLightHandle(new IntPtr(currentId));
+        //    object handle = currentId;
+        //    if (attr.HandleType == typeof(PointLightHandle)) handle = new PointLightHandle(new IntPtr(currentId));
+        //    else if (attr.HandleType == typeof(DirectionalLightHandle)) handle = new DirectionalLightHandle(new IntPtr(currentId));
 
-            object result = LinkObjectRegistry.Resolve(attr.HandleType, handle);
-            if (result is IntPtr ptr && ptr != IntPtr.Zero)
-            {
-                Type resolvedType = GetResolvedTypeFromHandle(attr.HandleType);
-                object resolvedObj = Marshal.PtrToStructure(ptr, resolvedType);
-                return (resolvedObj, ptr);
-            }
+        //    object result = LinkObjectRegistry.Resolve(attr.HandleType, handle);
+        //    if (result is IntPtr ptr && ptr != IntPtr.Zero)
+        //    {
+        //        Type resolvedType = GetResolvedTypeFromHandle(attr.HandleType);
+        //        object resolvedObj = Marshal.PtrToStructure(ptr, resolvedType);
+        //        return (resolvedObj, ptr);
+        //    }
 
-            return (null, IntPtr.Zero);
-        }
+        //    return (null, IntPtr.Zero);
+        //}
 
         public void RefreshValues()
         {
@@ -238,22 +238,22 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                     _propTable.Controls.Add(linkControl, 0, linkRow);
                     _propTable.SetColumnSpan(linkControl, 2);
 
-                    var resolvedInfo = ResolveLinkedObjectWithPtr(wrapper, member, linkerAttr, currentId);
-                    if (resolvedInfo.ResolvedObject != null && resolvedInfo.NativePtr != IntPtr.Zero)
-                    {
-                        AddLinkedObjectHeader(resolvedInfo.ResolvedObject.GetType().Name);
+                    //var resolvedInfo = ResolveLinkedObjectWithPtr(wrapper, member, linkerAttr, currentId);
+                    //if (resolvedInfo.ResolvedObject != null && resolvedInfo.NativePtr != IntPtr.Zero)
+                    //{
+                    //    AddLinkedObjectHeader(resolvedInfo.ResolvedObject.GetType().Name);
 
-                        var linkedPanel = new ObjectPanelView(_propertiesPanel, resolvedInfo.ResolvedObject, resolvedInfo.NativePtr, _toolTip);
-                        if (linkedPanel._headerPanel != null) linkedPanel._headerPanel.Visible = false;
+                    //    var linkedPanel = new ObjectPanelView(_propertiesPanel, resolvedInfo.ResolvedObject, resolvedInfo.NativePtr, _toolTip);
+                    //    if (linkedPanel._headerPanel != null) linkedPanel._headerPanel.Visible = false;
 
-                        int linkedRow = _propTable.RowCount++;
-                        _propTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+                    //    int linkedRow = _propTable.RowCount++;
+                    //    _propTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-                        linkedPanel.Dock = DockStyle.Fill;
-                        linkedPanel.Margin = new Padding(0, 6, 0, 12);
-                        _propTable.Controls.Add(linkedPanel, 0, linkedRow);
-                        _propTable.SetColumnSpan(linkedPanel, 2);
-                    }
+                    //    linkedPanel.Dock = DockStyle.Fill;
+                    //    linkedPanel.Margin = new Padding(0, 6, 0, 12);
+                    //    _propTable.Controls.Add(linkedPanel, 0, linkedRow);
+                    //    _propTable.SetColumnSpan(linkedPanel, 2);
+                    //}
 
                     continue;
                 }
@@ -387,8 +387,8 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
         private Type GetResolvedTypeFromHandle(Type handleType)
         {
-            if (handleType == typeof(PointLightHandle)) return typeof(PointLight);
-            if (handleType == typeof(DirectionalLightHandle)) return typeof(DirectionalLight);
+            //if (handleType == typeof(PointLightHandle)) return typeof(PointLight);
+            //if (handleType == typeof(DirectionalLightHandle)) return typeof(DirectionalLight);
             return typeof(object);
         }
 

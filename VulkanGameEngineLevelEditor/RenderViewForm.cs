@@ -150,9 +150,6 @@ namespace VulkanGameEngineLevelEditor
                 LevelSystem.LoadLevel("Levels/TestLevel.json");
                 LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
             }));
-            levelEditorTreeView.PopulateWithGameObjects();
-            DirectionalLightComponentView a = new DirectionalLightComponentView(1);
-            a.LightColor = new vec3(1.0f, 0.0f, 0.0f);
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();

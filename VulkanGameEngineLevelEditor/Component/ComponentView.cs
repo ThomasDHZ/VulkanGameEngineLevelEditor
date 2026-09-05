@@ -35,13 +35,13 @@ namespace VulkanGameEngineLevelEditor.Component
             return _componentPtr;
         }
 
-        protected T GetComponent<T>() where T : unmanaged
+        protected virtual T GetComponent<T>() where T : unmanaged
         {
             IntPtr p = Ptr();
             return p == IntPtr.Zero ? default : Marshal.PtrToStructure<T>(p);
         }
 
-        protected void SetComponent<T>(T value) where T : unmanaged
+        protected virtual void SetComponent<T>(T value) where T : unmanaged
         {
             IntPtr p = Ptr();
             if (p == IntPtr.Zero) return;

@@ -3,13 +3,16 @@ using GlmSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using VulkanEngineCS;
 
 namespace VulkanGameEngineLevelEditor.Component
 {
-    public class DirectionalLightComponentView : ComponentView
+    public unsafe class DirectionalLightComponentView : ComponentView
     {
+        private uint directionalLightMemoryPoolIndex = UInt32.MaxValue;
         public DirectionalLightComponentView(uint id) : base(id, ComponentTypeEnum.kDirectionalLightComponent)
         {
         }
@@ -82,6 +85,23 @@ namespace VulkanGameEngineLevelEditor.Component
                 c.ShadowSoftness = value;
                 SetComponent(c);
             }
+        }
+
+        protected override T GetComponent<T>()
+        {
+            if (directionalLightMemoryPoolIndex == uint.MaxValue) directionalLightMemoryPoolIndex = LightSystem.FindDirectionalLightIndex(Ptr().ToPointer());
+            LightSystem.GetDirectionalLight(directionalLightMemoryPoolIndex);
+            IntPtr p = Ptr(); 
+            return p == IntPtr.Zero ? default : Marshal.PtrToStructure<T>(p);
+        }
+
+        protected override void SetComponent<T>(T value)
+        {
+            if (directionalLightMemoryPoolIndex == uint.MaxValue) directionalLightMemoryPoolIndex = LightSystem.FindDirectionalLightIndex(Ptr().ToPointer());
+            LightSystem.GetDirectionalLight(directionalLightMemoryPoolIndex);
+            IntPtr p = Ptr();
+            if (p == IntPtr.Zero) return;
+            Marshal.StructureToPtr(value, p, false);
         }
     }
 }
