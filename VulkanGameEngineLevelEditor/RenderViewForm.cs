@@ -1,10 +1,12 @@
 
+using GameScriptLibraryDLL.Components;
 using GameScriptLibraryDLL.GameObjects;
 using GlmSharp;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using VulkanCS;
 using VulkanCS;
 using VulkanEngineCoreCS;
 using VulkanEngineCoreCS.Models;
@@ -17,7 +19,6 @@ using VulkanGameEngineLevelEditor.Model;
 using WeifenLuo.WinFormsUI.Docking;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static VulkanEngineCoreCS.VulkanSystem;
-using VulkanCS;
 
 namespace VulkanGameEngineLevelEditor
 {
@@ -63,6 +64,7 @@ namespace VulkanGameEngineLevelEditor
         private ListViewWindow _materialsListView;
         private ListViewWindow _texturesListView;
         private Guid _displayAttachment = new Guid("de6ca646-874f-4986-9daf-912dbc3aa7d0");
+        private IntPtr _renderHwnd;
 
         public RenderViewForm()
         {
@@ -83,8 +85,15 @@ namespace VulkanGameEngineLevelEditor
 
             this.Text = "Vulkan Level Editor - RenderPassEditorView";
 
+            var renderBox = _viewportWindow.RenderBox;
+            _renderHwnd = renderBox.Handle;
+ 
             _viewportWindow.PropertiesPanel = propertiesPanel;
             _viewportWindow.TreeView = levelEditorTreeView;
+            _viewportWindow.PendingWidth = renderBox.ClientSize.Width;
+            _viewportWindow.PendingHeight = renderBox.ClientSize.Height;
+            _viewportWindow.SizeDirty = false;
+            
             levelEditorTreeView.PropertiesPanel = propertiesPanel;
             renderPassTreeView.PropertiesPanel = propertiesPanel;
             renderPassTreeView.Populate(awer);
@@ -153,14 +162,36 @@ namespace VulkanGameEngineLevelEditor
         {
             _shuttingDown = true;
             Running = false;
+            if (!_renderStopped.Wait(TimeSpan.FromSeconds(5))) Debug.WriteLine("Render thread did not stop in time");
             base.OnFormClosing(e);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            if (!_renderStopped.Wait(TimeSpan.FromSeconds(2)))
-                Debug.WriteLine("Render thread did not stop in time");
             base.OnFormClosed(e);
+        }
+
+        protected override void OnResizeBegin(EventArgs e)
+        {
+            BeginResize();
+            base.OnResizeBegin(e);
+        }
+
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            EndResize();
+            base.OnResizeEnd(e);
+        }
+
+        public void BeginResize()
+        {
+            IsResizing = true;
+            lock (LockObject) { } 
+        }
+
+        public void EndResize()
+        {
+            IsResizing = false;
         }
 
         private bool SetupRenderer()
@@ -171,7 +202,8 @@ namespace VulkanGameEngineLevelEditor
             if (renderBox.Width <= 0 || renderBox.Height <= 0) return false;
 
             var windowSize = new ivec2(renderBox.Width, renderBox.Height);
-            VulkanSystem.RendererSetUp(renderBox.Handle.ToPointer(), windowSize, RenderResolutionSize);
+            _renderHwnd = renderBox.Handle;
+            VulkanSystem.RendererSetUp(_renderHwnd.ToPointer(), windowSize, RenderResolutionSize);
             BufferSystem.SetUpVmaAllocator();
             MemoryPoolSystem.StartUp();
             CSharpScriptSystem.Initialize();
@@ -200,52 +232,119 @@ namespace VulkanGameEngineLevelEditor
                         continue;
                     }
 
+                    var vp = _viewportWindow;
+                    int width = vp.PendingWidth;
+                    int height = vp.PendingHeight;
+                    bool sizeDirty = vp.SizeDirty;
+
+                    if (_renderHwnd == IntPtr.Zero || width <= 0 || height <= 0)
+                    {
+                        Thread.Sleep(16);
+                        continue;
+                    }
+
                     double currentTime = stopwatch.Elapsed.TotalSeconds;
-                    double deltaTime = currentTime - lastTime;
+                    float deltaTime = (float)(currentTime - lastTime);
                     lastTime = currentTime;
 
                     lock (LockObject)
                     {
                         if (_shuttingDown) break;
+                        if (IsResizing) continue;
 
-                        GameObjectSystem.Update((float)deltaTime);
-                        LevelSystem.Update((float)deltaTime);
-                        CollisionSystem.Update();
-                        SpriteSystem.Update((float)deltaTime);
-                        MeshSystem.Update((float)deltaTime);
-                        MemoryPoolSystem.Update();
+                        width = vp.PendingWidth;
+                        height = vp.PendingHeight;
+                        sizeDirty = vp.SizeDirty;
 
-                        if (CanMarshalToUi())
+                        if (width <= 0 || height <= 0) continue;
+                        if (sizeDirty)
                         {
-                            try
+                            VulkanSystem.SetCustomFrameBufferSize(new ivec2(width, height));
+                            vp.SizeDirty = false;
+                        }
+
+                        bool pick = false;
+                        int pickX = 0, pickY = 0;
+                        float moveX, moveY, camX, camY, zoom;
+                        lock (vp.InputLock)
+                        {
+                            pick = vp.HasPickRequest;
+                            pickX = vp.PickX;
+                            pickY = vp.PickY;
+                            vp.HasPickRequest = false;
+
+                            moveX = vp.PendingMoveX;
+                            moveY = vp.PendingMoveY;
+                            camX = vp.PendingCamX;
+                            camY = vp.PendingCamY;
+                            zoom = vp.PendingZoom;
+                            vp.PendingMoveX = vp.PendingMoveY = 0;
+                            vp.PendingCamX = vp.PendingCamY = 0;
+                            vp.PendingZoom = 0;
+                        }
+
+                        if (pick)
+                        {
+                            ivec2 texSize = RenderSystem.GetAttachmentSize(vp.ObjectSamplerTexture);
+                            int x = (int)((long)pickX * texSize.x / Math.Max(1, width));
+                            int y = (int)((long)pickY * texSize.y / Math.Max(1, height));
+                            uint id = RenderSystem.SampleRenderPassPixel(vp.ObjectSamplerTexture, new ivec2(x, y));
+                            vp.SelectedSpriteIndex = id;
+
+                            if (CanMarshalToUi())
                             {
-                                BeginInvoke(new Action(() =>
+                                BeginInvoke(() =>
                                 {
-                                    if (_shuttingDown || IsDisposed || !IsHandleCreated) return;
-                                    RenderSystem.Update(_viewportWindow.RenderBox.Handle.ToPointer(), (float)deltaTime);
-                                }));
+                                    if (_shuttingDown || IsDisposed) return;
+                                    if (id != uint.MaxValue)
+                                    {
+                                        propertiesPanel.SetSelectedEntity(id);
+                                        levelEditorTreeView.SelectGameObject(id);
+                                    }
+                                });
                             }
-                            catch (ObjectDisposedException) { break; }
-                            catch (InvalidOperationException) { break; }
                         }
-                        else
+
+                        ref var camera = ref CameraSystem.UpdateActiveCamera();
+                        if (zoom != 0) camera.Zoom += zoom;
+                        if (camX != 0 || camY != 0) camera.Position = new vec3(camera.Position.x + camX, camera.Position.y + camY, 0);
+
+                        uint selected = vp.SelectedSpriteIndex;
+                        if (selected != uint.MaxValue && (moveX != 0 || moveY != 0))
                         {
-                            break;
+                            float worldW = camera.Width;
+                            float worldH = camera.Height;
+                            float z = camera.Zoom != 0 ? camera.Zoom : 1f;
+                            float worldDx = moveX * (worldW / Math.Max(1, width)) / z;
+                            float worldDy = moveY * (worldH / Math.Max(1, height)) / z;
+
+                            var components = GameObjectSystem.GetGameObjectComponentList(selected);
+                            if (components.Contains(ComponentTypeEnum.kTransform2DComponent))
+                            {
+                                var transform = new Transform2DComponentView(selected);
+                                transform.Position = new vec2(transform.Position.x + worldDx, transform.Position.y - worldDy);
+                            }
                         }
+
+                        GameObjectSystem.Update(deltaTime);
+                        LevelSystem.Update(deltaTime);
+                        CollisionSystem.Update();
+                        SpriteSystem.Update(deltaTime);
+                        MeshSystem.Update(deltaTime);
+                        MemoryPoolSystem.Update();
+                        RenderSystem.Update(_renderHwnd.ToPointer(), deltaTime);
 
                         var commandBuffer = VulkanSystem.StartFrame();
-                        if (commandBuffer != VulkanCSConst.VK_NULL_HANDLE)
+                        if (commandBuffer == VulkanCSConst.VK_NULL_HANDLE) continue;
+                        try
                         {
-                            try
-                            {
-                                var renderNodes = LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime);
-                                RenderSystem.Draw(commandBuffer, renderNodes);
-                                RenderSystem.PresentToSwapChain(commandBuffer, _displayAttachment);
-                            }
-                            finally
-                            {
-                                VulkanSystem.EndFrame(commandBuffer);
-                            }
+                            var renderNodes = LevelSystem.CreateDrawCommands(commandBuffer, deltaTime);
+                            RenderSystem.Draw(commandBuffer, renderNodes);
+                            RenderSystem.PresentToSwapChain(commandBuffer, _displayAttachment);
+                        }
+                        finally
+                        {
+                            VulkanSystem.EndFrame(commandBuffer);
                         }
                     }
                 }
@@ -262,14 +361,11 @@ namespace VulkanGameEngineLevelEditor
                     MemorySystem.ReportLeaks();
                     VulkanSystem.Destroy();
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                }
+                catch (Exception ex) { Debug.WriteLine(ex); }
                 _renderStopped.Set();
             }
         }
-     
+
         private void LoadExports(string dllPath)
         {
             var list = DLLSystem.ListDllExport(dllPath);

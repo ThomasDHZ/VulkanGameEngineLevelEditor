@@ -22,16 +22,28 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 {
     public class ViewPortWindow : DockContent
     {
+        public volatile bool HasPickRequest;
+        public volatile int PickX;
+        public volatile int PickY;
+        public volatile uint SelectedSpriteIndex = uint.MaxValue;
+        public float PendingMoveX;
+        public float PendingMoveY;
+        public float PendingCamX;
+        public float PendingCamY;
+        public float PendingZoom;
+        public readonly object InputLock = new();
         public PictureBox RenderBox { get; private set; }
         public LevelEditorTreeView TreeView { get; set; } = null;
         public PropertiesPanel PropertiesPanel { get; set; } = null;
         private float KeyBoardCameraSpeed = 25.0f;
         private bool IsDragging { get; set; } = false;
-        private uint SelectedSpriteIndex { get; set; } = uint.MaxValue;
         private bool LeftMouseButtonDown { get; set; } = false;
-        private Guid ObjectSamplerTexture { get; set; } = new Guid("7047804f-d32e-4cb5-ba95-90783b28d1df");
+        public Guid ObjectSamplerTexture { get; set; } = new Guid("7047804f-d32e-4cb5-ba95-90783b28d1df");
         private ivec2 RenderResolutionSize = new ivec2(3840, 2160);
         private System.Drawing.Point LastMousePosition { get; set; }
+        public volatile int PendingWidth;
+        public volatile int PendingHeight;
+        public volatile bool SizeDirty;
 
         public ViewPortWindow()
         {
@@ -87,26 +99,31 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                 return;
             }
 
-            ivec2 texSize = RenderSystem.GetAttachmentSize(ObjectSamplerTexture);
-            int x = (int)((long)e.X * texSize.x / Math.Max(1, RenderBox.ClientSize.Width));
-            int y = (int)((long)e.Y * texSize.y / Math.Max(1, RenderBox.ClientSize.Height));
-
-            uint pickedId = RenderSystem.SampleRenderPassPixel(ObjectSamplerTexture, new ivec2(x, y));
-            if (pickedId != uint.MaxValue)
+            lock (InputLock)
             {
-                SelectedSpriteIndex = pickedId;
-                PropertiesPanel.SetSelectedEntity(pickedId);
-                TreeView.SelectGameObject(pickedId);
-
-                IsDragging = true;
-                LastMousePosition = e.Location;
+                PickX = e.X;
+                PickY = e.Y;
+                HasPickRequest = true;
             }
+            IsDragging = true;
+            LastMousePosition = e.Location;
         }
 
         private void RenderBox_ClientSizeChanged(object sender, EventArgs e)
         {
-            if (RenderBox.Width <= 0 || RenderBox.Height <= 0) return;
-            VulkanSystem.SetCustomFrameBufferSize(new ivec2(RenderBox.Width, RenderBox.Height));
+            int width = RenderBox.ClientSize.Width;
+            int height = RenderBox.ClientSize.Height;
+            if (width <= 0 || height <= 0)
+            {
+                SizeDirty = true;
+                PendingWidth = 0;
+                PendingHeight = 0;
+                return;
+            }
+
+            PendingWidth = width;
+            PendingHeight = height;
+            SizeDirty = true;
         }
 
         private void RenderBox_DragEnter(object sender, DragEventArgs e)
@@ -137,65 +154,38 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
         private void RendererBox_MouseMove(object sender, MouseEventArgs e)
         {
-            if (SelectedSpriteIndex == uint.MaxValue) return;
+            if (!IsDragging) return;
 
-            Point currentPos = e.Location;
+            int dx = e.X - LastMousePosition.X;
+            int dy = e.Y - LastMousePosition.Y;
+            LastMousePosition = e.Location;
 
-            if (e.Button == MouseButtons.Left)
+            lock (InputLock)
             {
-                int deltaX = currentPos.X - LastMousePosition.X;
-                int deltaY = currentPos.Y - LastMousePosition.Y;
-
-                int cw = Math.Max(1, RenderBox.ClientSize.Width);
-                int ch = Math.Max(1, RenderBox.ClientSize.Height);
-
-                ref var camera = ref CameraSystem.UpdateActiveCamera();
-
-                float worldW = camera.Width;  
-                float worldH = camera.Height;
-                float zoom = camera.Zoom != 0 ? camera.Zoom : 1f;
-
-                float worldDx = deltaX * (worldW / cw) / zoom;
-                float worldDy = deltaY * (worldH / ch) / zoom;
-
-                List<ComponentTypeEnum> gameObjectComponents = GameObjectSystem.GetGameObjectComponentList(SelectedSpriteIndex);
-                if (gameObjectComponents.Contains(ComponentTypeEnum.kTransform2DComponent))
+                if (e.Button == MouseButtons.Left)
                 {
-                    var transformView = new Transform2DComponentView(SelectedSpriteIndex);
-                    transformView.Position = new vec2(transformView.Position.x + worldDx, transformView.Position.y - worldDy);
+                    PendingMoveX += dx;
+                    PendingMoveY += dy;
+                }
+                else if (e.Button == MouseButtons.Right)
+                {
+                    PendingCamX -= dx;
+                    PendingCamY += dy;
                 }
             }
-            else if (e.Button == MouseButtons.Right)
-            {
-                int deltaX = currentPos.X - LastMousePosition.X;
-                int deltaY = currentPos.Y - LastMousePosition.Y;
-
-                ref var cameraTransform = ref CameraSystem.UpdateActiveCamera();
-                cameraTransform.Position = new vec3(cameraTransform.Position.x - deltaX, cameraTransform.Position.y + deltaY, 0.0f);
-            }
-
-            LastMousePosition = currentPos;
         }
 
         private void RendererBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
-            {
-                IsDragging = false;
-                SelectedSpriteIndex = 0;
-            }
-            else if (e.Button == MouseButtons.Right)
-            {
-                IsDragging = false;
-            }
+            IsDragging = false;
         }
 
         private void RendererBox_MouseWheel(object sender, MouseEventArgs e)
         {
-            System.Drawing.Point mousePos = e.Location;
-            float scrollDelta = e.Delta / 1200.0f;
-            ref var cameraTransform = ref CameraSystem.UpdateActiveCamera();
-            cameraTransform.Zoom += scrollDelta;
+            lock (InputLock)
+            {
+                PendingZoom += e.Delta / 1200.0f;
+            }
         }
 
         private void RenderBox_KeyDown(object sender, KeyEventArgs e)

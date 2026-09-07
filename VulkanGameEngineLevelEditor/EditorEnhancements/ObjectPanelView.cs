@@ -22,15 +22,16 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
         private readonly PropertiesPanel _propertiesPanel;
         private readonly ToolTip _toolTip;
-
-        public object PanelObject { get; private set; }
-
         protected Panel _headerPanel;
         private Panel _contentPanel;
         private TableLayoutPanel _propTable;
-        private readonly IntPtr? _nativePtr;
-
+        public object PanelObject { get; private set; }
         private bool _isExpanded = true;
+
+        private Label _headerName;
+        private Label _headerId;
+        private Button _addButton;
+        private Label _emptyLabel;
 
         public ObjectPanelView(PropertiesPanel propertiesPanel, object component, ToolTip toolTip) : this(propertiesPanel, component, IntPtr.Zero, toolTip)
         {
@@ -40,7 +41,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
         {
             _propertiesPanel = propertiesPanel ?? throw new ArgumentNullException(nameof(propertiesPanel));
             PanelObject = component ?? throw new ArgumentNullException(nameof(component));
-            _nativePtr = nativePtr != IntPtr.Zero ? nativePtr : null;
+          //  _nativePtr = nativePtr != IntPtr.Zero ? nativePtr : null;
             _toolTip = toolTip ?? new ToolTip();
 
             InitializeLayout();
@@ -48,26 +49,6 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             CreateContent();
             PopulateProperties();
         }
-
-        //private (object? ResolvedObject, IntPtr NativePtr) ResolveLinkedObjectWithPtr(DynamicComponentWrapper wrapper, MemberInfo member, LinkObjectAttribute attr, uint currentId)
-        //{
-        //    if (currentId == uint.MaxValue)
-        //        return (null, IntPtr.Zero);
-
-        //    object handle = currentId;
-        //    if (attr.HandleType == typeof(PointLightHandle)) handle = new PointLightHandle(new IntPtr(currentId));
-        //    else if (attr.HandleType == typeof(DirectionalLightHandle)) handle = new DirectionalLightHandle(new IntPtr(currentId));
-
-        //    object result = LinkObjectRegistry.Resolve(attr.HandleType, handle);
-        //    if (result is IntPtr ptr && ptr != IntPtr.Zero)
-        //    {
-        //        Type resolvedType = GetResolvedTypeFromHandle(attr.HandleType);
-        //        object resolvedObj = Marshal.PtrToStructure(ptr, resolvedType);
-        //        return (resolvedObj, ptr);
-        //    }
-
-        //    return (null, IntPtr.Zero);
-        //}
 
         public void RefreshValues()
         {
@@ -202,11 +183,8 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             _propTable.RowCount = 0;
             _propTable.RowStyles.Clear();
 
-            if (PanelObject is DynamicComponentWrapper wrapper)
-                AddPropertyControlsForWrapper(wrapper);
-            else
-                AddPropertyControlsForPlainObject(PanelObject);
-
+            if (PanelObject is DynamicComponentWrapper wrapper) AddPropertyControlsForWrapper(wrapper);
+            else AddPropertyControlsForPlainObject(PanelObject);
             _propTable.ResumeLayout(true);
         }
 
@@ -234,32 +212,14 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
                     var linkEditor = new TypeOfLinkObject(this, wrapper, member, RowHeight, false);
                     var linkControl = linkEditor.CreateControl();
+
                     linkControl.Tag = member;
                     _propTable.Controls.Add(linkControl, 0, linkRow);
                     _propTable.SetColumnSpan(linkControl, 2);
-
-                    //var resolvedInfo = ResolveLinkedObjectWithPtr(wrapper, member, linkerAttr, currentId);
-                    //if (resolvedInfo.ResolvedObject != null && resolvedInfo.NativePtr != IntPtr.Zero)
-                    //{
-                    //    AddLinkedObjectHeader(resolvedInfo.ResolvedObject.GetType().Name);
-
-                    //    var linkedPanel = new ObjectPanelView(_propertiesPanel, resolvedInfo.ResolvedObject, resolvedInfo.NativePtr, _toolTip);
-                    //    if (linkedPanel._headerPanel != null) linkedPanel._headerPanel.Visible = false;
-
-                    //    int linkedRow = _propTable.RowCount++;
-                    //    _propTable.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-                    //    linkedPanel.Dock = DockStyle.Fill;
-                    //    linkedPanel.Margin = new Padding(0, 6, 0, 12);
-                    //    _propTable.Controls.Add(linkedPanel, 0, linkedRow);
-                    //    _propTable.SetColumnSpan(linkedPanel, 2);
-                    //}
-
                     continue;
                 }
 
-                Type memberType = member is FieldInfo f ? f.FieldType : ((PropertyInfo)member).PropertyType;
-
+                Type memberType = member is FieldInfo f ? f.FieldType : ((PropertyInfo)member).PropertyType; 
                 if (memberType == null || memberType == typeof(ulong) ||
                     memberType.IsPointer || memberType == typeof(IntPtr))
                 {
@@ -304,30 +264,9 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             }
         }
 
-        private void AddLinkedObjectHeader(string resolvedTypeName)
-        {
-            int headerRow = _propTable.RowCount++;
-            _propTable.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
-
-            var header = new Label
-            {
-                Text = $"→ {resolvedTypeName}",
-                ForeColor = Color.Cyan,
-                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
-                Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Margin = new Padding(12, 6, 4, 4),
-                BackColor = Color.FromArgb(45, 45, 65)
-            };
-
-            _propTable.Controls.Add(header, 0, headerRow);
-            _propTable.SetColumnSpan(header, 2);
-        }
-
         private bool IsDuplicateProperty(string name)
         {
-            return _propTable.Controls.OfType<Label>()
-                .Any(l => string.Equals(l.Text, name, StringComparison.OrdinalIgnoreCase));
+            return _propTable.Controls.OfType<Label>().Any(l => string.Equals(l.Text, name, StringComparison.OrdinalIgnoreCase));
         }
 
         private string FormatPropertyName(string name)
@@ -385,13 +324,6 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                    member.Name == "DisplayName";
         }
 
-        private Type GetResolvedTypeFromHandle(Type handleType)
-        {
-            //if (handleType == typeof(PointLightHandle)) return typeof(PointLight);
-            //if (handleType == typeof(DirectionalLightHandle)) return typeof(DirectionalLight);
-            return typeof(object);
-        }
-
         private object? GetCurrentValue(MemberInfo member)
         {
             try
@@ -443,8 +375,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
             if (control is CheckBox chk)
             {
-                if (value is bool b)
-                    chk.Checked = b;
+                if (value is bool b) chk.Checked = b;
                 return;
             }
 
@@ -470,9 +401,6 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
         private Control? CreateEditorControl(Type memberType, object targetObject, MemberInfo member, int height, bool readOnly)
         {
-            if (memberType == typeof(vec3))  return new TypeOfVec3(this, targetObject, member, height, readOnly, _nativePtr).CreateControl();
-            if (memberType == typeof(vec2))  return ControlRegistry.CreateControl(this, memberType, targetObject, member, height, readOnly);
-            if (memberType == typeof(float)) return new TypeOfFloat(this, targetObject, member, height, readOnly, _nativePtr).CreateControl();
             return ControlRegistry.CreateControl(this, memberType, targetObject, member, height, readOnly);
         }
 
@@ -493,10 +421,8 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
         {
             if (target is DynamicComponentWrapper wrapper)
             {
-                var m = wrapper.ComponentStructType
-                    .GetMember(name, BindingFlags.Public | BindingFlags.Instance)
-                    .FirstOrDefault();
-                return m != null ? wrapper.GetMemberValue(m) : null;
+                var member = wrapper.ComponentStructType.GetMember(name, BindingFlags.Public | BindingFlags.Instance).FirstOrDefault();
+                return member != null ? wrapper.GetMemberValue(member) : null;
             }
 
             var prop = target.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance);

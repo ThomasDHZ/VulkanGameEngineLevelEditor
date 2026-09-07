@@ -16,9 +16,11 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
     public unsafe class PropertiesPanel : UserControl
     {
         private GameObjecLevelEditor* _selectedGameObject;
+        private readonly Dictionary<ComponentTypeEnum, ObjectPanelView> _panelPool = new Dictionary<ComponentTypeEnum, ObjectPanelView>();
         private readonly FlowLayoutPanel _flowComponents;
         private readonly ToolTip _toolTip = new ToolTip();
-      //  private Timer _refreshTimer;
+        private uint _selectedId = uint.MaxValue;
+        private List<ComponentTypeEnum> _currentComponentTypes = new();
 
         public PropertiesPanel()
         {
@@ -43,7 +45,31 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
         public void SetSelectedEntity(uint gameObjectId)
         {
-            _selectedGameObject = GameObjectSystem.GetGameObject(gameObjectId);
+            if (gameObjectId == uint.MaxValue)
+            {
+                _selectedId = uint.MaxValue;
+                _selectedGameObject = null;
+                _currentComponentTypes.Clear();
+                RefreshPanel();
+                return;
+            }
+
+            var go = GameObjectSystem.GetGameObject(gameObjectId);
+            var types = GameObjectSystem.GetGameObjectComponentList(gameObjectId) ?? new List<ComponentTypeEnum>();
+
+            bool sameEntity = _selectedId == gameObjectId;
+            bool sameLayout = sameEntity && types.SequenceEqual(_currentComponentTypes);
+
+            _selectedGameObject = go;
+            _selectedId = gameObjectId;
+            _currentComponentTypes = types.ToList();
+
+            if (sameLayout)
+            {
+                RefreshAllPanels();
+                return;
+            }
+
             RefreshPanel();
         }
 
@@ -72,10 +98,17 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                     IntPtr ptr = GameObjectSystem.GetGameObjectComponentPtr(_selectedGameObject->GameObjectId, componentType);
                     if (ptr == IntPtr.Zero) continue;
 
-                    var view = ComponentViewRegistry.TryCreate(_selectedGameObject->GameObjectId, componentType, ptr);
-                    var wrapper = new DynamicComponentWrapper(_selectedGameObject->GameObjectId, componentType, view);
-                    var members = wrapper.View.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.DeclaringType != typeof(ComponentView));
-                    _flowComponents.Controls.Add(new ObjectPanelView(this, wrapper, _toolTip));
+                    if (_panelPool.ContainsKey(componentType))
+                    {
+                        _flowComponents.Controls.Add(_panelPool[componentType]);
+                    }
+                    else
+                    {
+                        var view = ComponentViewRegistry.TryCreate(_selectedGameObject->GameObjectId, componentType, ptr);
+                        var wrapper = new DynamicComponentWrapper(_selectedGameObject->GameObjectId, componentType, view);
+                        _panelPool.Add(componentType, new ObjectPanelView(this, wrapper, _toolTip));
+                        _flowComponents.Controls.Add(_panelPool[componentType]);
+                    }
                 }
             }
             _flowComponents.Controls.Add(CreateAddComponentButton());

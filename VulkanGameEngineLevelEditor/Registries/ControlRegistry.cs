@@ -23,6 +23,8 @@ namespace VulkanGameEngineLevelEditor.Registries
             { typeof(Guid),   (obj, member, height, readOnly, parentPanel) => new TypeOfGuidForm(parentPanel, obj, member, height, readOnly).CreateControl() },
             { typeof(vec2),   (obj, member, height, readOnly, parentPanel) => new TypeOfVec2(parentPanel, obj, member, height, readOnly).CreateControl() },
             { typeof(vec3),   (obj, member, height, readOnly, parentPanel) => new TypeOfVec3(parentPanel, obj, member, height, readOnly).CreateControl() },
+            { typeof(ivec2),   (obj, member, height, readOnly, parentPanel) => new TypeOfIVec2(parentPanel, obj, member, height, readOnly).CreateControl() },
+            { typeof(ivec3),   (obj, member, height, readOnly, parentPanel) => new TypeOfIVec3(parentPanel, obj, member, height, readOnly).CreateControl() },
 };
 
         public static Control CreateControl(ObjectPanelView parentPanel, Type type, object obj, MemberInfo member, int height, bool readOnly)

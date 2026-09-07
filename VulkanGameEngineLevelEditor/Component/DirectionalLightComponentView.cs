@@ -2,6 +2,7 @@
 using GlmSharp;
 using System.Runtime.InteropServices;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.Attributes;
 using VulkanGameEngineLevelEditor.Component;
 
 public unsafe class DirectionalLightComponentView : ComponentView
@@ -26,6 +27,7 @@ public unsafe class DirectionalLightComponentView : ComponentView
         }
     }
 
+    [NumericUpDownLimitsAttribute(0.01f, 0.0f, 1.0f)]
     public vec3 LightColor
     {
         get => ReadLight().LightColor;
@@ -38,6 +40,7 @@ public unsafe class DirectionalLightComponentView : ComponentView
         set { var l = ReadLight(); l.LightDirection = value; WriteLight(l); }
     }
 
+    [NumericUpDownLimitsAttribute(0.01f, 0.0f, 50.0f)]
     public float LightIntensity
     {
         get => ReadLight().LightIntensity;
