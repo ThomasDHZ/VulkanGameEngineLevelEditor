@@ -1,118 +1,84 @@
 ﻿using GameScriptLibraryDLL.Components;
 using GlmSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Cryptography.Xml;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.Component;
 
-namespace VulkanGameEngineLevelEditor.Component
+public unsafe class PointLightComponentView : ComponentView
 {
-    public unsafe class PointLightComponentView : ComponentView
+    public PointLightComponentView(uint id) : base(id, ComponentTypeEnum.kPointLightComponent) { }
+
+    public PointLightComponentView(uint id, IntPtr componentPtr) : base(id, ComponentTypeEnum.kPointLightComponent, componentPtr) { }
+
+    uint PoolIndex()
     {
-        private uint pointLightMemoryPoolIndex = UInt32.MaxValue;
-        public PointLightComponentView(uint id ) : base(id, ComponentTypeEnum.kPointLightComponent)
+        return base.GetComponent<PointLightComponent>().PointLightMemoryPoolIndex;
+    }
+
+    public uint PointLightMemoryPoolIndex
+    {
+        get => PoolIndex();
+        set
         {
-
+            var c = base.GetComponent<PointLightComponent>();
+            c.PointLightMemoryPoolIndex = value;
+            base.SetComponent(c);
         }
+    }
 
-        public PointLightComponentView(uint id, IntPtr componentPtr) : base(id, ComponentTypeEnum.kPointLightComponent) 
-        {
+    public vec3 LightPosition
+    {
+        get => ReadLight().LightPosition;
+        set => SetPointLightWorldXY(GameObjectId, value.x, value.y);
+    }
 
-        }
+    public vec3 LightColor
+    {
+        get => ReadLight().LightColor;
+        set { var l = ReadLight(); l.LightColor = value; WriteLight(l); }
+    }
 
-        public vec3 LightPosition
-        {
-            get => GetComponent<PointLightComponent>().LightPosition;
-            set
-            {
-                var c = GetComponent<PointLightComponent>();
-                c.LightPosition = value;
-                SetComponent(c);
-            }
-        }
+    public float LightRadius
+    {
+        get => ReadLight().LightRadius;
+        set { var l = ReadLight(); l.LightRadius = value; WriteLight(l); }
+    }
 
-        public vec3 LightColor
-        {
-            get => GetComponent<PointLightComponent>().LightColor;
-            set
-            {
-                var c = GetComponent<PointLightComponent>();
-                c.LightColor = value;
-                SetComponent(c);
-            }
-        }
+    public float LightIntensity
+    {
+        get => ReadLight().LightIntensity;
+        set { var l = ReadLight(); l.LightIntensity = value; WriteLight(l); }
+    }
 
-        public float LightRadius
-        {
-            get => GetComponent<PointLightComponent>().LightRadius;
-            set
-            {
-                var c = GetComponent<PointLightComponent>();
-                c.LightRadius = value;
-                SetComponent(c);
-            }
-        }
+    public float ShadowStrength
+    {
+        get => ReadLight().ShadowStrength;
+        set { var l = ReadLight(); l.ShadowStrength = value; WriteLight(l); }
+    }
 
-        public float LightIntensity
-        {
-            get => GetComponent<PointLightComponent>().LightIntensity;
-            set
-            {
-                var c = GetComponent<PointLightComponent>();
-                c.LightIntensity = value;
-                SetComponent(c);
-            }
-        }
+    public float ShadowBias
+    {
+        get => ReadLight().ShadowBias;
+        set { var l = ReadLight(); l.ShadowBias = value; WriteLight(l); }
+    }
 
-        public float ShadowStrength
-        {
-            get => GetComponent<PointLightComponent>().ShadowStrength;
-            set
-            {
-                var c = GetComponent<PointLightComponent>();
-                c.ShadowStrength = value;
-                SetComponent(c);
-            }
-        }
+    public float ShadowSoftness
+    {
+        get => ReadLight().ShadowSoftness;
+        set { var l = ReadLight(); l.ShadowSoftness = value; WriteLight(l); }
+    }
 
-        public float ShadowBias
-        {
-            get => GetComponent<PointLightComponent>().ShadowBias;
-            set
-            {
-                var c = GetComponent<PointLightComponent>();
-                c.ShadowBias = value;
-                SetComponent(c);
-            }
-        }
+    GameScriptLibraryDLL.Components.PointLight ReadLight()
+    {
+        IntPtr p = LightSystem.GetPointLight(PoolIndex());
+        return p == IntPtr.Zero ? default : Marshal.PtrToStructure<GameScriptLibraryDLL.Components.PointLight>(p);
+    }
 
-        public float ShadowSoftness
-        {
-            get => GetComponent<PointLightComponent>().ShadowSoftness;
-            set
-            {
-                var c = GetComponent<PointLightComponent>();
-                c.ShadowSoftness = value;
-                SetComponent(c);
-            }
-        }
-
-        protected override T GetComponent<T>()
-        {
-            if(pointLightMemoryPoolIndex == uint.MaxValue) pointLightMemoryPoolIndex = LightSystem.FindPointLightIndex(Ptr().ToPointer());
-            IntPtr p = LightSystem.GetPointLight(pointLightMemoryPoolIndex);
-            return p == IntPtr.Zero ? default : Marshal.PtrToStructure<T>(p);
-        }
-
-        protected override void SetComponent<T>(T value)
-        {
-            if (pointLightMemoryPoolIndex == uint.MaxValue) pointLightMemoryPoolIndex = LightSystem.FindPointLightIndex(Ptr().ToPointer());
-            IntPtr p = LightSystem.GetPointLight(pointLightMemoryPoolIndex);
-            if (p == IntPtr.Zero) return;
-            Marshal.StructureToPtr(value, p, false);
-        }
+    void WriteLight(GameScriptLibraryDLL.Components.PointLight value)
+    {
+        IntPtr p = LightSystem.GetPointLight(PoolIndex());
+        if (p == IntPtr.Zero) return;
+        Marshal.StructureToPtr(value, p, false);
     }
 }

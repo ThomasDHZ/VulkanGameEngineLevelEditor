@@ -70,7 +70,6 @@ namespace VulkanGameEngineLevelEditor
             dockPanel1.DockBackColor = Color.FromArgb(45, 45, 48);
             dockPanel1.Location = new Point(0, 24);
             dockPanel1.Name = "dockPanel1";
-            dockPanel1.Padding = new Padding(6);
             dockPanel1.ShowAutoHideContentOnHover = false;
             dockPanel1.Size = new Size(1898, 1000);
             dockPanel1.TabIndex = 4;

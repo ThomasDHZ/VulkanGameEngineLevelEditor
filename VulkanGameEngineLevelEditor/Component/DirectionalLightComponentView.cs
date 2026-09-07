@@ -1,107 +1,78 @@
 ﻿using GameScriptLibraryDLL.Components;
 using GlmSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.Component;
 
-namespace VulkanGameEngineLevelEditor.Component
+public unsafe class DirectionalLightComponentView : ComponentView
 {
-    public unsafe class DirectionalLightComponentView : ComponentView
+    public DirectionalLightComponentView(uint id) : base(id, ComponentTypeEnum.kDirectionalLightComponent) { }
+
+    public DirectionalLightComponentView(uint id, IntPtr componentPtr) : base(id, ComponentTypeEnum.kDirectionalLightComponent, componentPtr) { }
+
+    uint PoolIndex()
     {
-        private uint directionalLightMemoryPoolIndex = UInt32.MaxValue;
-        public DirectionalLightComponentView(uint id) : base(id, ComponentTypeEnum.kDirectionalLightComponent)
-        {
-        }
+        return base.GetComponent<DirectionalLightComponent>().DirectionalLightMemoryPoolIndex;
+    }
 
-        public DirectionalLightComponentView(uint id, IntPtr componentPtr) : base(id, ComponentTypeEnum.kDirectionalLightComponent)
+    public uint DirectionalLightMemoryPoolIndex
+    {
+        get => PoolIndex();
+        set
         {
+            var c = base.GetComponent<DirectionalLightComponent>();
+            c.DirectionalLightMemoryPoolIndex = value;
+            base.SetComponent(c);
         }
+    }
 
-        public vec3 LightColor
-        {
-            get => GetComponent<DirectionalLightComponent>().LightColor;
-            set
-            {
-                var c = GetComponent<DirectionalLightComponent>();
-                c.LightColor = value;
-                SetComponent(c);
-            }
-        }
+    public vec3 LightColor
+    {
+        get => ReadLight().LightColor;
+        set { var l = ReadLight(); l.LightColor = value; WriteLight(l); }
+    }
 
-        public vec3 LightDirection
-        {
-            get => GetComponent<DirectionalLightComponent>().LightDirection;
-            set
-            {
-                var c = GetComponent<DirectionalLightComponent>();
-                c.LightDirection = value;
-                SetComponent(c);
-            }
-        }
+    public vec3 LightDirection
+    {
+        get => ReadLight().LightDirection;
+        set { var l = ReadLight(); l.LightDirection = value; WriteLight(l); }
+    }
 
-        public float LightIntensity
-        {
-            get => GetComponent<DirectionalLightComponent>().LightIntensity;
-            set
-            {
-                var c = GetComponent<DirectionalLightComponent>();
-                c.LightIntensity = value;
-                SetComponent(c);
-            }
-        }
+    public float LightIntensity
+    {
+        get => ReadLight().LightIntensity;
+        set { var l = ReadLight(); l.LightIntensity = value; WriteLight(l); }
+    }
 
-        public float ShadowStrength
-        {
-            get => GetComponent<DirectionalLightComponent>().ShadowStrength;
-            set
-            {
-                var c = GetComponent<DirectionalLightComponent>();
-                c.ShadowStrength = value;
-                SetComponent(c);
-            }
-        }
+    public float ShadowStrength
+    {
+        get => ReadLight().ShadowStrength;
+        set { var l = ReadLight(); l.ShadowStrength = value; WriteLight(l); }
+    }
 
-        public float ShadowBias
-        {
-            get => GetComponent<DirectionalLightComponent>().ShadowBias;
-            set
-            {
-                var c = GetComponent<DirectionalLightComponent>();
-                c.ShadowBias = value;
-                SetComponent(c);
-            }
-        }
+    public float ShadowBias
+    {
+        get => ReadLight().ShadowBias;
+        set { var l = ReadLight(); l.ShadowBias = value; WriteLight(l); }
+    }
 
-        public float ShadowSoftness
-        {
-            get => GetComponent<DirectionalLightComponent>().ShadowSoftness;
-            set
-            {
-                var c = GetComponent<DirectionalLightComponent>();
-                c.ShadowSoftness = value;
-                SetComponent(c);
-            }
-        }
+    public float ShadowSoftness
+    {
+        get => ReadLight().ShadowSoftness;
+        set { var l = ReadLight(); l.ShadowSoftness = value; WriteLight(l); }
+    }
 
-        protected override T GetComponent<T>()
-        {
-            if (directionalLightMemoryPoolIndex == uint.MaxValue) directionalLightMemoryPoolIndex = LightSystem.FindDirectionalLightIndex(Ptr().ToPointer());
-            LightSystem.GetDirectionalLight(directionalLightMemoryPoolIndex);
-            IntPtr p = Ptr(); 
-            return p == IntPtr.Zero ? default : Marshal.PtrToStructure<T>(p);
-        }
+    GameScriptLibraryDLL.Components.DirectionalLight ReadLight()
+    {
+        IntPtr p = LightSystem.GetDirectionalLight(PoolIndex());
+        return p == IntPtr.Zero ? default : Marshal.PtrToStructure<GameScriptLibraryDLL.Components.DirectionalLight>(p);
+    }
 
-        protected override void SetComponent<T>(T value)
-        {
-            if (directionalLightMemoryPoolIndex == uint.MaxValue) directionalLightMemoryPoolIndex = LightSystem.FindDirectionalLightIndex(Ptr().ToPointer());
-            LightSystem.GetDirectionalLight(directionalLightMemoryPoolIndex);
-            IntPtr p = Ptr();
-            if (p == IntPtr.Zero) return;
-            Marshal.StructureToPtr(value, p, false);
-        }
+    void WriteLight(GameScriptLibraryDLL.Components.DirectionalLight value)
+    {
+        IntPtr p = LightSystem.GetDirectionalLight(PoolIndex());
+        if (p == IntPtr.Zero) return;
+        Marshal.StructureToPtr(value, p, false);
+        LightSystem.GetDirectionalLight(PoolIndex());
     }
 }

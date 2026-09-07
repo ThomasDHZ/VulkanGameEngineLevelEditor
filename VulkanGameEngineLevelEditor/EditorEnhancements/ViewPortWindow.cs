@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using VulkanCS;
 using VulkanEngineCoreCS;
 using VulkanEngineCS;
+using VulkanGameEngineLevelEditor.Component;
 using VulkanGameEngineLevelEditor.LevelEditor;
 using WeifenLuo.WinFormsUI.Docking;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -160,8 +161,8 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                 List<ComponentTypeEnum> gameObjectComponents = GameObjectSystem.GetGameObjectComponentList(SelectedSpriteIndex);
                 if (gameObjectComponents.Contains(ComponentTypeEnum.kTransform2DComponent))
                 {
-                    ref var transform = ref GameObjectSystem.UpdateGameObjectComponent<Transform2DComponent>(SelectedSpriteIndex, ComponentTypeEnum.kTransform2DComponent);
-                    transform.Position = new vec2(transform.Position.x + worldDx, transform.Position.y - worldDy);
+                    var transformView = new Transform2DComponentView(SelectedSpriteIndex);
+                    transformView.Position = new vec2(transformView.Position.x + worldDx, transformView.Position.y - worldDy);
                 }
             }
             else if (e.Button == MouseButtons.Right)

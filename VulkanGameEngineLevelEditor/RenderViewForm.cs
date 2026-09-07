@@ -17,6 +17,7 @@ using VulkanGameEngineLevelEditor.Model;
 using WeifenLuo.WinFormsUI.Docking;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static VulkanEngineCoreCS.VulkanSystem;
+using VulkanCS;
 
 namespace VulkanGameEngineLevelEditor
 {
@@ -40,12 +41,15 @@ namespace VulkanGameEngineLevelEditor
 
         private volatile bool Running;
         private volatile bool IsResizing;
+        private volatile bool _shuttingDown;
+        private readonly ManualResetEventSlim _renderStopped = new(false);
+
         private object LockObject = new object();
         private Thread RenderThread { get; set; }
-        private GCHandle _callbackHandle;
         private ivec2 RenderResolutionSize = new ivec2(3840, 2160);
-        private const int STD_OUTPUT_HANDLE = -11;
+        private GCHandle _callbackHandle;
         private const int STD_ERROR_HANDLE = -12;
+        private const int STD_OUTPUT_HANDLE = -11;
 
         private DockPanel _dockPanel;
         private ToolsWindow _renderPassTreeWindow;
@@ -58,6 +62,8 @@ namespace VulkanGameEngineLevelEditor
         private ListViewWindow _sceneListView;
         private ListViewWindow _materialsListView;
         private ListViewWindow _texturesListView;
+        private Guid _displayAttachment = new Guid("de6ca646-874f-4986-9daf-912dbc3aa7d0");
+
         public RenderViewForm()
         {
 #if DEBUG
@@ -123,8 +129,14 @@ namespace VulkanGameEngineLevelEditor
 
         public void StartRenderer()
         {
+            if (!SetupRenderer())
+                return;
+
             Running = true;
-            RenderThread = new System.Threading.Thread(RenderLoop)
+            _shuttingDown = false;
+            _renderStopped.Reset();
+
+            RenderThread = new Thread(RenderLoop)
             {
                 IsBackground = true,
                 Name = "VulkanLevelEditor"
@@ -132,69 +144,132 @@ namespace VulkanGameEngineLevelEditor
             RenderThread.Start();
         }
 
-        private void RenderLoop()
+        private bool CanMarshalToUi()
         {
-            this.Invoke(new Action(() =>
-            {
-                ivec2 windowSize = new ivec2(_viewportWindow.RenderBox.Width, _viewportWindow.RenderBox.Height);
-                VulkanSystem.RendererSetUp(_viewportWindow.RenderBox.Handle.ToPointer(), windowSize, RenderResolutionSize);
-                BufferSystem.SetUpVmaAllocator();
-                MemoryPoolSystem.StartUp();
-                CSharpScriptSystem.Initialize();
-
-                CSharpScriptSystem.RegisterBehavior<Player>();
-                CSharpScriptSystem.RegisterBehavior<PlayerShot>();
-                CSharpScriptSystem.RegisterBehavior<GameEnemy>();
-                CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
-                CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
-                LevelSystem.LoadLevel("Levels/TestLevel.json");
-                LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
-            }));
-
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            double lastTime = 0.0;
-
-            while (Running)
-            {
-                if (IsResizing)
-                {
-                    System.Threading.Thread.Sleep(10);
-                    continue;
-                }
-
-                double currentTime = stopwatch.Elapsed.TotalSeconds;
-                double deltaTime = currentTime - lastTime;
-                lastTime = currentTime;
-                lock (LockObject)
-                {
-                    GameObjectSystem.Update((float)deltaTime);
-                    LevelSystem.Update((float)deltaTime);
-                    CollisionSystem.Update();
-                    SpriteSystem.Update((float)deltaTime);
-                    MeshSystem.Update((float)deltaTime);
-                    MemoryPoolSystem.Update();
-                    this.Invoke(new Action(() =>
-                    {
-                        RenderSystem.Update(_viewportWindow.RenderBox.Handle.ToPointer(), (float)deltaTime);
-                    }));
-                    //InputSystem.Update((float)deltaTime);
-                    //        //networkSystem.Update(deltaTime);
-
-                    VkCommandBuffer commandBuffer = VulkanSystem.StartFrame();
-                    if (commandBuffer != VulkanCSConst.VK_NULL_HANDLE)
-                    {
-                        List<RenderPassNode> renderNodes = new List<RenderPassNode>(LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime));
-                        RenderSystem.Draw(commandBuffer, renderNodes);
-                        RenderSystem.PresentToSwapChain(commandBuffer, new Guid("de6ca646-874f-4986-9daf-912dbc3aa7d0"));
-                    }
-                    VulkanSystem.EndFrame(commandBuffer);
-                }
-            }
-
-            // GameSystem.Destroy();
+            return !_shuttingDown && !IsDisposed && IsHandleCreated && !IsResizing;
         }
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            _shuttingDown = true;
+            Running = false;
+            base.OnFormClosing(e);
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            if (!_renderStopped.Wait(TimeSpan.FromSeconds(2)))
+                Debug.WriteLine("Render thread did not stop in time");
+            base.OnFormClosed(e);
+        }
+
+        private bool SetupRenderer()
+        {
+            if (_shuttingDown || IsDisposed || !IsHandleCreated) return false;
+
+            var renderBox = _viewportWindow.RenderBox;
+            if (renderBox.Width <= 0 || renderBox.Height <= 0) return false;
+
+            var windowSize = new ivec2(renderBox.Width, renderBox.Height);
+            VulkanSystem.RendererSetUp(renderBox.Handle.ToPointer(), windowSize, RenderResolutionSize);
+            BufferSystem.SetUpVmaAllocator();
+            MemoryPoolSystem.StartUp();
+            CSharpScriptSystem.Initialize();
+            CSharpScriptSystem.RegisterBehavior<Player>();
+            CSharpScriptSystem.RegisterBehavior<PlayerShot>();
+            CSharpScriptSystem.RegisterBehavior<GameEnemy>();
+            CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
+            CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
+            LevelSystem.LoadLevel("Levels/TestLevel.json");
+            LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
+            return true;
+        }
+
+        private void RenderLoop()
+        {
+            try
+            {
+                var stopwatch = Stopwatch.StartNew();
+                double lastTime = 0.0;
+
+                while (Running && !_shuttingDown)
+                {
+                    if (IsResizing)
+                    {
+                        Thread.Sleep(10);
+                        continue;
+                    }
+
+                    double currentTime = stopwatch.Elapsed.TotalSeconds;
+                    double deltaTime = currentTime - lastTime;
+                    lastTime = currentTime;
+
+                    lock (LockObject)
+                    {
+                        if (_shuttingDown) break;
+
+                        GameObjectSystem.Update((float)deltaTime);
+                        LevelSystem.Update((float)deltaTime);
+                        CollisionSystem.Update();
+                        SpriteSystem.Update((float)deltaTime);
+                        MeshSystem.Update((float)deltaTime);
+                        MemoryPoolSystem.Update();
+
+                        if (CanMarshalToUi())
+                        {
+                            try
+                            {
+                                BeginInvoke(new Action(() =>
+                                {
+                                    if (_shuttingDown || IsDisposed || !IsHandleCreated) return;
+                                    RenderSystem.Update(_viewportWindow.RenderBox.Handle.ToPointer(), (float)deltaTime);
+                                }));
+                            }
+                            catch (ObjectDisposedException) { break; }
+                            catch (InvalidOperationException) { break; }
+                        }
+                        else
+                        {
+                            break;
+                        }
+
+                        var commandBuffer = VulkanSystem.StartFrame();
+                        if (commandBuffer != VulkanCSConst.VK_NULL_HANDLE)
+                        {
+                            try
+                            {
+                                var renderNodes = LevelSystem.CreateDrawCommands(commandBuffer, (float)deltaTime);
+                                RenderSystem.Draw(commandBuffer, renderNodes);
+                                RenderSystem.PresentToSwapChain(commandBuffer, _displayAttachment);
+                            }
+                            finally
+                            {
+                                VulkanSystem.EndFrame(commandBuffer);
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                try
+                {
+                    VulkanSystem.DeviceWaitIdle();
+                    RenderSystem.Destroy();
+                    TextureSystem.Destroy();
+                    MeshSystem.Destroy();
+                    MaterialSystem.Destroy();
+                    MemorySystem.ReportLeaks();
+                    VulkanSystem.Destroy();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+                _renderStopped.Set();
+            }
+        }
+     
         private void LoadExports(string dllPath)
         {
             var list = DLLSystem.ListDllExport(dllPath);

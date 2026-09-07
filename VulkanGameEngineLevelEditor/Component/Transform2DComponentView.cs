@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VulkanEngineCoreCS.Vulkan;
 using VulkanEngineCS;
 
 namespace VulkanGameEngineLevelEditor.Component
@@ -23,12 +24,7 @@ namespace VulkanGameEngineLevelEditor.Component
         public vec2 Position
         {
             get => GetComponent<Transform2DComponent>().Position;
-            set
-            {
-                var c = GetComponent<Transform2DComponent>();
-                c.Position = value;
-                SetComponent(c);
-            }
+            set => SetPointLightWorldXY(GameObjectId, value.x, value.y);
         }
 
         public vec2 Rotation

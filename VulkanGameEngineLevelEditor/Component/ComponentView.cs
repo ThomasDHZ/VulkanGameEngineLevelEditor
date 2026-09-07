@@ -1,4 +1,5 @@
 ﻿using GameScriptLibraryDLL.Components;
+using GlmSharp;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,35 @@ namespace VulkanGameEngineLevelEditor.Component
             IntPtr p = Ptr();
             if (p == IntPtr.Zero) return;
             write(p, value);
+        }
+
+        public static T GetComponent<T>(uint gameObjectId, IntPtr ptr, ComponentTypeEnum ComponentType) where T : unmanaged
+        {
+            IntPtr p = GameObjectSystem.GetGameObjectComponentPtr(gameObjectId, ComponentType);
+            return p == IntPtr.Zero ? default : Marshal.PtrToStructure<T>(p);
+        }
+
+        public static void SetPointLightWorldXY(uint gameObjectId, float x, float y, float? z = null)
+        {
+            IntPtr transformPtr = GameObjectSystem.GetGameObjectComponentPtr(gameObjectId, ComponentTypeEnum.kTransform2DComponent);
+            if (transformPtr != IntPtr.Zero)
+            {
+                var transform = Marshal.PtrToStructure<Transform2DComponent>(transformPtr);
+                transform.Position = new vec2(x, y);
+                Marshal.StructureToPtr(transform, transformPtr, false);
+            }
+
+            IntPtr indexPtr = GameObjectSystem.GetGameObjectComponentPtr(gameObjectId, ComponentTypeEnum.kPointLightComponent);
+            if (indexPtr == IntPtr.Zero) return;
+
+            var indexComp = Marshal.PtrToStructure<PointLightComponent>(indexPtr);
+            IntPtr lightPtr = LightSystem.GetPointLight(indexComp.PointLightMemoryPoolIndex);
+            if (lightPtr == IntPtr.Zero) return;
+
+            var light = Marshal.PtrToStructure<GameScriptLibraryDLL.Components.PointLight>(lightPtr);
+            light.LightPosition = new vec3(x, y, z ?? light.LightPosition.z);
+            Marshal.StructureToPtr(light, lightPtr, false);
+            LightSystem.GetPointLight(indexComp.PointLightMemoryPoolIndex);
         }
     }
 }
