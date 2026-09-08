@@ -2,6 +2,13 @@
   "Name": "GameObjectPickerRenderPass",
   "RenderPassId": "40183518-063f-449b-8a0a-4cef7938958c",
   "RenderPassResolution": [ 0, 0 ],
+  "RenderFlags": {
+    "UseGlobalBindlessSet": true,
+    "UseVkMultiview": false,
+    "IsRenderedToSwapchain": false,
+    "RenderAsCubemap": false,
+    "UseDefaultRenderResolution": true
+  },
   "SubPasses": [
     [
       {
@@ -24,12 +31,13 @@
     ]
   ],
   "UseGlobalBindlessSet": true,
-  "UseCubeMapMultiView": false,
+  "UseVkMultiview": false,
   "IsRenderedToSwapchain": false,
-  "IsCubeMapRenderPass": false,
+  "RenderAsCubemap": false,
   "SampleCount": 1,
-  "RenderAttachmentList": [
+  "AttachmentList": [
     {
+      "Name" "",
       "RenderedTextureId": "7047804f-d32e-4cb5-ba95-90783b28d1df",
       "MipMapCount": 1,
       "TextureType": 4,

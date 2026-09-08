@@ -5,15 +5,17 @@
     "Pipelines/AssetCreatorPipeline.json"
   ],
   "RenderPassResolution": [ 0, 0 ],
+  "RenderFlags": {
+    "UseGlobalBindlessSet": true,
+    "UseVkMultiview": false,
+    "IsRenderedToSwapchain": false,
+    "RenderAsCubemap": false,
+    "UseDefaultRenderResolution": true
+  },
   "SubPassCount": 1,
-  "UseGlobalBindlessSet": false,
-  "UseDefaultRenderResolution": false,
-  "UseCubeMapMultiView": false,
-  "IsRenderedToSwapchain": false,
-  "IsCubeMapRenderPass": false,
   "InputTextureList": [],
   "SampleCount": 1,
-  "RenderAttachmentList": [
+  "AttachmentList": [
     {
       "TextureAttachment": "0, Needs to be in UNORM for SRGB to come out right in shading",
       "RenderedTextureId": "a1b9565e-2a3e-4605-91ae-c650b9a97c90",
