@@ -36,7 +36,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
         public LevelEditorTreeView TreeView { get; set; } = null;
         public PropertiesPanel PropertiesPanel { get; set; } = null;
         private float KeyBoardCameraSpeed = 25.0f;
-        private bool IsDragging { get; set; } = false;
+        public bool IsDragging { get; set; } = false;
         private bool LeftMouseButtonDown { get; set; } = false;
         public Guid ObjectSamplerTexture { get; set; } = new Guid("7047804f-d32e-4cb5-ba95-90783b28d1df");
         private ivec2 RenderResolutionSize = new ivec2(3840, 2160);

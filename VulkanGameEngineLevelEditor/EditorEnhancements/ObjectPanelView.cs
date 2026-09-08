@@ -32,6 +32,7 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
         private Label _headerId;
         private Button _addButton;
         private Label _emptyLabel;
+        private bool _suspendWrites;
 
         public ObjectPanelView(PropertiesPanel propertiesPanel, object component, ToolTip toolTip) : this(propertiesPanel, component, IntPtr.Zero, toolTip)
         {
@@ -53,16 +54,29 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
         public void RefreshValues()
         {
             if (PanelObject == null) return;
-            for (int row = 0; row < _propTable.RowCount; row++)
+
+            bool old = _suspendWrites;
+            _suspendWrites = true;
+            try
             {
-                Control? valueControl = _propTable.GetControlFromPosition(1, row);
-                if (valueControl == null) continue;
-                if (valueControl.Tag is not MemberInfo member) continue;
-                object? newValue = GetCurrentValue(member);
-                if (newValue == null) continue;
-                UpdateControlValue(valueControl, newValue);
+                for (int row = 0; row < _propTable.RowCount; row++)
+                {
+                    Control? valueControl = _propTable.GetControlFromPosition(1, row);
+                    if (valueControl == null) continue;
+                    if (valueControl.Tag is not MemberInfo member) continue;
+
+                    object? newValue = GetCurrentValue(member);
+                    if (newValue == null) continue;
+                    UpdateControlValue(valueControl, newValue);
+                }
+            }
+            finally
+            {
+                _suspendWrites = old;
             }
         }
+
+        public bool ShouldWriteBack => !_suspendWrites;
 
         private void InitializeLayout()
         {
@@ -430,6 +444,20 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 
             var field = target.GetType().GetField(name, BindingFlags.Public | BindingFlags.Instance);
             return field?.GetValue(target);
+        }
+
+        public void Rebind(DynamicComponentWrapper wrapper)
+        {
+            _suspendWrites = true;
+            try
+            {
+                PanelObject = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
+                RefreshValues();
+            }
+            finally
+            {
+                _suspendWrites = false;
+            }
         }
     }
 }

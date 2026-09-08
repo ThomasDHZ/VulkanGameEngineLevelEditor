@@ -44,16 +44,17 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                 };
                 numeric.ValueChanged += (s, e) =>
                 {
-                    try
-                    {
-                        SetValue((int)((NumericUpDown)s).Value);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error setting : {ex.Message}");
-                        // Console.WriteLine($"Error setting {_property.Name}: {ex.Message}");
-                    }
+                    if (_readOnly || !_rootPanel.ShouldWriteBack) return;
+                    try { SetValue((uint)((NumericUpDown)s).Value); }
+                    catch (Exception ex) { Console.WriteLine($"Error setting: {ex.Message}"); }
                 };
+
+                numeric.TextChanged += (s, e) =>
+                {
+                    if (_readOnly || !_rootPanel.ShouldWriteBack) return;
+                    if (uint.TryParse(numeric.Text, out uint parsed)) SetValue((uint)((NumericUpDown)s).Value);
+                };
+
                 CreateBaseControl(numeric);
                 return numeric;
             }

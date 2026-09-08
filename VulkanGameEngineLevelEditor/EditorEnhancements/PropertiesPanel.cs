@@ -1,9 +1,9 @@
 ﻿using GameScriptLibraryDLL.Components;
 using GameScriptLibraryDLL.GameObjects;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
 using VulkanEngineCS;
 using VulkanGameEngineLevelEditor.Component;
@@ -15,12 +15,18 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
 {
     public unsafe class PropertiesPanel : UserControl
     {
-        private GameObjecLevelEditor* _selectedGameObject;
-        private readonly Dictionary<ComponentTypeEnum, ObjectPanelView> _panelPool = new Dictionary<ComponentTypeEnum, ObjectPanelView>();
+        private readonly Dictionary<ComponentTypeEnum, ObjectPanelView> _panelPool = new();
+        private readonly List<ComponentTypeEnum> _currentComponentTypes = new();
         private readonly FlowLayoutPanel _flowComponents;
-        private readonly ToolTip _toolTip = new ToolTip();
+        private readonly ToolTip _toolTip = new();
+
+        private readonly Panel _headerPanel;
+        private readonly Label _headerName;
+        private readonly Label _headerId;
+        private readonly Label _emptyLabel;
+        private readonly Button _addButton;
+
         private uint _selectedId = uint.MaxValue;
-        private List<ComponentTypeEnum> _currentComponentTypes = new();
 
         public PropertiesPanel()
         {
@@ -37,117 +43,46 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
             };
             Controls.Add(_flowComponents);
 
-            //_refreshTimer = new Timer();
-            //_refreshTimer.Interval = 120;
-            //_refreshTimer.Tick += RefreshTimer_Tick;
-            //_refreshTimer.Start();
-        }
+            typeof(Control)
+                .GetProperty("DoubleBuffered",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(_flowComponents, true);
 
-        public void SetSelectedEntity(uint gameObjectId)
-        {
-            if (gameObjectId == uint.MaxValue)
+            _headerPanel = new Panel
             {
-                _selectedId = uint.MaxValue;
-                _selectedGameObject = null;
-                _currentComponentTypes.Clear();
-                RefreshPanel();
-                return;
-            }
-
-            var go = GameObjectSystem.GetGameObject(gameObjectId);
-            var types = GameObjectSystem.GetGameObjectComponentList(gameObjectId) ?? new List<ComponentTypeEnum>();
-
-            bool sameEntity = _selectedId == gameObjectId;
-            bool sameLayout = sameEntity && types.SequenceEqual(_currentComponentTypes);
-
-            _selectedGameObject = go;
-            _selectedId = gameObjectId;
-            _currentComponentTypes = types.ToList();
-
-            if (sameLayout)
-            {
-                RefreshAllPanels();
-                return;
-            }
-
-            RefreshPanel();
-        }
-
-        private void RefreshPanel()
-        {
-            _flowComponents.Controls.Clear();
-
-            if (_selectedGameObject == null || _selectedGameObject->GameObjectId == uint.MaxValue)
-            {
-                _flowComponents.Controls.Add(new Label
-                {
-                    Text = "No entity selected",
-                    ForeColor = Color.Silver,
-                    AutoSize = true,
-                    Padding = new Padding(20)
-                });
-                return;
-            }
-
-            _flowComponents.Controls.Add(CreateEntityHeader());
-            var componentTypes = GameObjectSystem.GetGameObjectComponentList(_selectedGameObject->GameObjectId);
-            if (_selectedGameObject != null)
-            {
-                foreach (var componentType in componentTypes)
-                {
-                    IntPtr ptr = GameObjectSystem.GetGameObjectComponentPtr(_selectedGameObject->GameObjectId, componentType);
-                    if (ptr == IntPtr.Zero) continue;
-
-                    if (_panelPool.ContainsKey(componentType))
-                    {
-                        _flowComponents.Controls.Add(_panelPool[componentType]);
-                    }
-                    else
-                    {
-                        var view = ComponentViewRegistry.TryCreate(_selectedGameObject->GameObjectId, componentType, ptr);
-                        var wrapper = new DynamicComponentWrapper(_selectedGameObject->GameObjectId, componentType, view);
-                        _panelPool.Add(componentType, new ObjectPanelView(this, wrapper, _toolTip));
-                        _flowComponents.Controls.Add(_panelPool[componentType]);
-                    }
-                }
-            }
-            _flowComponents.Controls.Add(CreateAddComponentButton());
-        }
-
-        private Control CreateEntityHeader()
-        {
-            var panel = new Panel
-            {
+                Width = 280,
                 Height = 88,
                 BackColor = Color.FromArgb(48, 48, 53),
-                Padding = new Padding(12)
+                Padding = new Padding(12),
+                Margin = new Padding(6, 5, 6, 8)
             };
-
-            var lblName = new Label
+            _headerName = new Label
             {
-                Text = $"Entity: Entity_{_selectedGameObject->GameObjectId}",
+                Text = "Entity: —",
                 Font = new Font("Segoe UI", 10.5f, FontStyle.Bold),
                 ForeColor = Color.White,
                 AutoSize = true,
                 Location = new Point(8, 12)
             };
-
-            var lblId = new Label
+            _headerId = new Label
             {
-                Text = $"ID: {_selectedGameObject->GameObjectId}",
+                Text = "ID: —",
                 ForeColor = Color.Silver,
                 AutoSize = true,
                 Location = new Point(8, 38)
             };
+            _headerPanel.Controls.Add(_headerName);
+            _headerPanel.Controls.Add(_headerId);
 
-            panel.Controls.Add(lblName);
-            panel.Controls.Add(lblId);
-            return panel;
-        }
+            _emptyLabel = new Label
+            {
+                Text = "No entity selected",
+                ForeColor = Color.Silver,
+                AutoSize = true,
+                Padding = new Padding(20)
+            };
 
-        private Button CreateAddComponentButton()
-        {
-            var btn = new Button
+            _addButton = new Button
             {
                 Text = "＋ Add Component",
                 AutoSize = true,
@@ -157,58 +92,160 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                 FlatStyle = FlatStyle.Flat,
                 Height = 38
             };
+            _addButton.Click += (_, _) => ShowAddComponentDialog();
 
-            btn.Click += (s, e) => ShowAddComponentDialog();
-            return btn;
+            _flowComponents.Controls.Add(_emptyLabel);
+            _flowComponents.Controls.Add(_headerPanel);
+            _flowComponents.Controls.Add(_addButton);
+
+            ShowEmpty(true);
+        }
+
+        public void SetSelectedEntity(uint gameObjectId)
+        {
+            if (gameObjectId == uint.MaxValue)
+            {
+                _selectedId = uint.MaxValue;
+                _currentComponentTypes.Clear();
+                HideAllComponentPanels();
+                ShowEmpty(true);
+                return;
+            }
+
+            var types = GameObjectSystem.GetGameObjectComponentList(gameObjectId)
+                        ?? new List<ComponentTypeEnum>();
+
+            bool sameEntity = _selectedId == gameObjectId;
+            bool sameTypes = types.SequenceEqual(_currentComponentTypes);
+
+            _selectedId = gameObjectId;
+            _currentComponentTypes.Clear();
+            _currentComponentTypes.AddRange(types);
+
+            ShowEmpty(false);
+            UpdateHeader(gameObjectId);
+
+            if (sameEntity && sameTypes)
+            {
+                RefreshVisiblePanels();
+                return;
+            }
+
+            _flowComponents.SuspendLayout();
+            _flowComponents.Visible = false;
+            try
+            {
+                foreach (var kv in _panelPool)
+                    kv.Value.Visible = false;
+
+                foreach (var type in types)
+                {
+                    IntPtr ptr = GameObjectSystem.GetGameObjectComponentPtr(gameObjectId, type);
+                    if (ptr == IntPtr.Zero) continue;
+
+                    var view = ComponentViewRegistry.TryCreate(gameObjectId, type, ptr);
+                    var wrapper = new DynamicComponentWrapper(gameObjectId, type, view);
+
+                    if (!_panelPool.TryGetValue(type, out var panel))
+                    {
+                        panel = new ObjectPanelView(this, wrapper, _toolTip);
+                        _panelPool[type] = panel;
+                        InsertBeforeAddButton(panel);
+                    }
+                    else
+                    {
+                        panel.Rebind(wrapper);
+                    }
+
+                    panel.Visible = true;
+                    panel.RefreshValues();
+                }
+
+                EnsureAddButtonLast();
+            }
+            finally
+            {
+                _flowComponents.Visible = true;
+                _flowComponents.ResumeLayout(true);
+            }
+        }
+
+        public void RefreshAllPanels() => RefreshVisiblePanels();
+
+        public void RefreshLayout() => _flowComponents.PerformLayout();
+
+        public void RemoveComponent(object component)
+        {
+            if (component is DynamicComponentWrapper wrapper && _selectedId != uint.MaxValue)
+            {
+                // GameObjectSystem.RemoveComponent(_selectedId, wrapper.ComponentType);
+            }
+
+            if (_selectedId != uint.MaxValue)
+                SetSelectedEntity(_selectedId);
+        }
+
+        private void RefreshVisiblePanels()
+        {
+            foreach (var type in _currentComponentTypes)
+            {
+                if (_panelPool.TryGetValue(type, out var panel) && panel.Visible)
+                    panel.RefreshValues();
+            }
+        }
+
+        private void HideAllComponentPanels()
+        {
+            foreach (var kv in _panelPool)
+                kv.Value.Visible = false;
+        }
+
+        private void ShowEmpty(bool empty)
+        {
+            _emptyLabel.Visible = empty;
+            _headerPanel.Visible = !empty;
+            _addButton.Visible = !empty;
+            if (empty)
+                HideAllComponentPanels();
+        }
+
+        private void UpdateHeader(uint id)
+        {
+            _headerName.Text = $"Entity: Entity_{id}";
+            _headerId.Text = $"ID: {id}";
+        }
+
+        private void InsertBeforeAddButton(Control panel)
+        {
+            _flowComponents.Controls.Add(panel);
+            EnsureAddButtonLast();
+        }
+
+        private void EnsureAddButtonLast()
+        {
+            int last = _flowComponents.Controls.Count - 1;
+            if (last >= 0)
+                _flowComponents.Controls.SetChildIndex(_addButton, last);
         }
 
         private void ShowAddComponentDialog()
         {
-            MessageBox.Show("Add Component dialog - implement me using ComponentRegistry.GetAllComponentTypes()",
-                            "Add Component", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(
+                "Add Component dialog - implement me using ComponentRegistry.GetAllComponentTypes()",
+                "Add Component",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
 
-        public void RemoveComponent(object component)
+        private void InitializeComponent()
         {
-            if (component is DynamicComponentWrapper wrapper)
-            {
-                // TODO: Call your removal logic here
-                // GameObjectSystem.RemoveComponent(_selectedGameObject->GameObjectId, wrapper.ComponentType);
-            }
-
-            RefreshPanel();
+            SuspendLayout();
+            // 
+            // PropertiesPanel
+            // 
+            BackColor = Color.FromArgb(40, 40, 40);
+            Name = "PropertiesPanel";
+            ResumeLayout(false);
         }
-
-        private void RefreshTimer_Tick(object? sender, EventArgs e)
-        {
-            RefreshAllPanels();
-        }
-
-        public void RefreshAllPanels()
-        {
-            if (_selectedGameObject == null) return;
-
-            foreach (Control ctrl in _flowComponents.Controls)
-            {
-                if (ctrl is ObjectPanelView panelView)
-                {
-                    panelView.RefreshValues();
-                }
-            }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                //_refreshTimer?.Stop();
-                //_refreshTimer?.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        public void RefreshLayout() => _flowComponents.PerformLayout();
-
-        private void InitializeComponent() { }
     }
 }

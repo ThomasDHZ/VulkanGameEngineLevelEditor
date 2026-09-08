@@ -2,8 +2,6 @@
 using System;
 using System.Drawing;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using VulkanGameEngineLevelEditor.Attributes;
 using VulkanGameEngineLevelEditor.EditorEnhancements;
@@ -15,17 +13,15 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
     {
         private const int RowHeight = 32;
 
-        private readonly DynamicComponentWrapper? _wrapper;
-        private readonly object? _targetObject;
+        private readonly ObjectPanelView _rootPanel;
         private readonly MemberInfo _member;
-        private readonly IntPtr? _nativePtr;
 
-        public TypeOfIVec2(ObjectPanelView rootPanel, object obj, MemberInfo member, int minimumPanelSize, bool readOnly, IntPtr? nativePtr = null) : base(rootPanel, obj, member, minimumPanelSize, readOnly)
+        public TypeOfIVec2(ObjectPanelView rootPanel, object obj, MemberInfo member,
+                           int minimumPanelSize, bool readOnly, IntPtr? nativePtr = null)
+            : base(rootPanel, obj, member, minimumPanelSize, readOnly)
         {
+            _rootPanel = rootPanel;
             _member = member;
-            _wrapper = obj as DynamicComponentWrapper;
-            _targetObject = obj;
-            _nativePtr = nativePtr;
         }
 
         public override Control CreateControl()
@@ -43,7 +39,8 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75F));
 
             ivec2 currentVec = GetCurrentVec2();
-            void AddAxis(string label, Func<vec2, float> getter, int axis)
+
+            void AddAxis(string label, Func<ivec2, int> getter, int axis)
             {
                 int row = table.RowCount++;
                 table.RowStyles.Add(new RowStyle(SizeType.Absolute, RowHeight));
@@ -58,15 +55,17 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                 };
                 table.Controls.Add(lbl, 0, row);
 
-                float currentValue = getter(currentVec);
+                int currentValue = getter(currentVec);
                 var memberLimits = _member.GetCustomAttribute<NumericUpDownLimitsAttribute>();
                 var num = new NumericUpDown
                 {
-                    DecimalPlaces = memberLimits != null ? memberLimits.DecimalPlaces : 4,
-                    Increment = memberLimits != null ? Convert.ToDecimal(memberLimits.Increment) : 0.1m,
+                    DecimalPlaces = 0,
+                    Increment = memberLimits != null ? Convert.ToDecimal(memberLimits.Increment) : 1m,
                     Minimum = memberLimits != null ? Convert.ToDecimal(memberLimits.Minimum) : -10000000m,
                     Maximum = memberLimits != null ? Convert.ToDecimal(memberLimits.Maximum) : 10000000m,
-                    Value = (decimal)Math.Clamp(currentValue, memberLimits?.Minimum ?? -10000000f, memberLimits?.Maximum ?? 10000000f),
+                    Value = Math.Clamp(currentValue,
+                        (int)(memberLimits?.Minimum ?? -10000000),
+                        (int)(memberLimits?.Maximum ?? 10000000)),
                     Dock = DockStyle.Fill,
                     BackColor = Color.FromArgb(60, 60, 60),
                     ForeColor = Color.White,
@@ -74,19 +73,17 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                     Enabled = !_readOnly
                 };
 
-                num.ValueChanged += (s, e) =>
+                num.ValueChanged += (_, _) =>
                 {
-                    if (_readOnly) return;
+                    if (_readOnly || !_rootPanel.ShouldWriteBack) return;
                     SetAxis(axis, (int)num.Value);
                 };
 
-                num.TextChanged += (s, e) =>
+                num.TextChanged += (_, _) =>
                 {
-                    if (_readOnly) return;
-                    if (float.TryParse(num.Text, out float parsed))
-                    {
-                        SetAxis(axis, (int)parsed);
-                    }
+                    if (_readOnly || !_rootPanel.ShouldWriteBack) return;
+                    if (int.TryParse(num.Text, out int parsed))
+                        SetAxis(axis, parsed);
                 };
 
                 table.Controls.Add(num, 1, row);
@@ -98,24 +95,20 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             return table;
         }
 
+        private DynamicComponentWrapper? CurrentWrapper =>
+            _rootPanel.PanelObject as DynamicComponentWrapper;
+
         private ivec2 GetCurrentVec2()
         {
-            if (_wrapper != null)
-            {
-                return _wrapper.GetMemberValue(_member) is ivec2 v ? v : ivec2.Zero;
-            }
-
-            return _member switch
-            {
-                FieldInfo fi when _targetObject != null => (ivec2?)fi.GetValue(_targetObject) ?? ivec2.Zero,
-                PropertyInfo pi when pi.CanRead && _targetObject != null => (ivec2?)pi.GetValue(_targetObject) ?? ivec2.Zero,
-                _ => ivec2.Zero
-            };
+            var wrapper = CurrentWrapper;
+            if (wrapper != null)
+                return wrapper.GetMemberValue(_member) is ivec2 v ? v : ivec2.Zero;
+            return ivec2.Zero;
         }
 
         private void SetAxis(int axis, int newValue)
         {
-            if (_readOnly) return;
+            if (_readOnly || !_rootPanel.ShouldWriteBack) return;
 
             ivec2 v = GetCurrentVec2();
             switch (axis)
@@ -124,14 +117,7 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                 case 1: v.y = newValue; break;
             }
 
-            if (_wrapper != null)
-            {
-                _wrapper.SetMemberValue(_member, v);
-                return;
-            }
-
-            if (_member is PropertyInfo pi && pi.CanWrite && _targetObject != null) pi.SetValue(_targetObject, v);
-            else if (_member is FieldInfo fi && _targetObject != null) fi.SetValue(_targetObject, v);
+            CurrentWrapper?.SetMemberValue(_member, v);
         }
     }
 }

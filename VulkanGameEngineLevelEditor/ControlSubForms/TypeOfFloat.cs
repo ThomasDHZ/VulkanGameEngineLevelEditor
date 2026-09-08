@@ -1,9 +1,6 @@
-﻿using GlmSharp;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using VulkanGameEngineLevelEditor.Attributes;
 using VulkanGameEngineLevelEditor.EditorEnhancements;
@@ -13,17 +10,15 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
 {
     public unsafe class TypeOfFloat : PropertyEditorForm
     {
-        private readonly DynamicComponentWrapper? _wrapper;
-        private readonly object? _targetObject;
+        private readonly ObjectPanelView _rootPanel;
         private readonly MemberInfo _member;
-        private readonly IntPtr? _nativePtr;
 
-        public TypeOfFloat(ObjectPanelView rootPanel, object obj, MemberInfo member, int minimumPanelSize, bool readOnly, IntPtr? nativePtr = null) : base(rootPanel, obj, member, minimumPanelSize, readOnly)
+        public TypeOfFloat(ObjectPanelView rootPanel, object obj, MemberInfo member,
+                           int minimumPanelSize, bool readOnly, IntPtr? nativePtr = null)
+            : base(rootPanel, obj, member, minimumPanelSize, readOnly)
         {
+            _rootPanel = rootPanel;
             _member = member;
-            _wrapper = obj as DynamicComponentWrapper;
-            _targetObject = obj;
-            _nativePtr = nativePtr;
         }
 
         public override Control CreateControl()
@@ -41,16 +36,17 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75F));
 
             float currentValue = GetCurrentFloat();
-
             var memberLimits = _member.GetCustomAttribute<NumericUpDownLimitsAttribute>();
 
             var num = new NumericUpDown
             {
-                DecimalPlaces = memberLimits != null ? memberLimits.DecimalPlaces : 4,
+                DecimalPlaces = memberLimits?.DecimalPlaces ?? 4,
                 Increment = memberLimits != null ? Convert.ToDecimal(memberLimits.Increment) : 0.1m,
                 Minimum = memberLimits != null ? Convert.ToDecimal(memberLimits.Minimum) : -10000000m,
                 Maximum = memberLimits != null ? Convert.ToDecimal(memberLimits.Maximum) : 10000000m,
-                Value = (decimal)Math.Clamp(currentValue, memberLimits?.Minimum ?? -10000000f, memberLimits?.Maximum ?? 10000000f),
+                Value = (decimal)Math.Clamp(currentValue,
+                    memberLimits?.Minimum ?? -10000000f,
+                    memberLimits?.Maximum ?? 10000000f),
                 Dock = DockStyle.Fill,
                 BackColor = Color.FromArgb(60, 60, 60),
                 ForeColor = Color.White,
@@ -58,15 +54,15 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                 Enabled = !_readOnly
             };
 
-            num.ValueChanged += (s, e) =>
+            num.ValueChanged += (_, _) =>
             {
-                if (_readOnly) return;
+                if (_readOnly || !_rootPanel.ShouldWriteBack) return;
                 SetFloat((float)num.Value);
             };
 
-            num.TextChanged += (s, e) =>
+            num.TextChanged += (_, _) =>
             {
-                if (_readOnly) return;
+                if (_readOnly || !_rootPanel.ShouldWriteBack) return;
                 if (float.TryParse(num.Text, out float parsed))
                     SetFloat(parsed);
             };
@@ -86,36 +82,21 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             return table;
         }
 
+        private DynamicComponentWrapper? CurrentWrapper =>
+            _rootPanel.PanelObject as DynamicComponentWrapper;
+
         private float GetCurrentFloat()
         {
-            if (_wrapper != null)
-            {
-                return _wrapper.GetMemberValue(_member) is float v ? v : 0.0f;
-            }
-
-            return _member switch
-            {
-                FieldInfo fi when _targetObject != null => (float?)fi.GetValue(_targetObject) ?? 0.0f,
-                PropertyInfo pi when pi.CanRead && _targetObject != null => (float?)pi.GetValue(_targetObject) ?? 0.0f,
-                _ => 0.0f
-            };
+            var wrapper = CurrentWrapper;
+            if (wrapper != null)
+                return wrapper.GetMemberValue(_member) is float v ? v : 0f;
+            return 0f;
         }
 
         private void SetFloat(float newValue)
         {
-            if (_readOnly) return;
-
-            float v = GetCurrentFloat();
-            v = newValue;
-
-            if (_wrapper != null)
-            {
-                _wrapper.SetMemberValue(_member, v);
-                return;
-            }
-
-            if (_member is PropertyInfo pi && pi.CanWrite && _targetObject != null) pi.SetValue(_targetObject, v);
-            else if (_member is FieldInfo fi && _targetObject != null) fi.SetValue(_targetObject, v);
+            if (_readOnly || !_rootPanel.ShouldWriteBack) return;
+            CurrentWrapper?.SetMemberValue(_member, newValue);
         }
     }
 }

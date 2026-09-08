@@ -26,16 +26,11 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                 };
                 checkBox.CheckedChanged += (s, e) =>
                 {
-                    try
-                    {
-                        SetValue(((CheckBox)s).Checked);
-                       // _rootPanel?.NotifyPropertyChanged();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error setting value: {ex.Message}");
-                    }
+                    if (_readOnly || !_rootPanel.ShouldWriteBack) return;
+                    try { SetValue(((CheckBox)s).Checked); }
+                    catch (Exception ex) { Console.WriteLine($"Error setting value: {ex.Message}"); }
                 };
+
                 CreateBaseControl(checkBox);
                 return checkBox;
             }

@@ -63,6 +63,8 @@ namespace VulkanGameEngineLevelEditor
         private ListViewWindow _sceneListView;
         private ListViewWindow _materialsListView;
         private ListViewWindow _texturesListView;
+        private long _lastPropsRefreshTicks;
+        private long PropsRefreshIntervalTicks = TimeSpan.FromMilliseconds(66).Ticks;
         private Guid _displayAttachment = new Guid("de6ca646-874f-4986-9daf-912dbc3aa7d0");
         private IntPtr _renderHwnd;
 
@@ -323,6 +325,28 @@ namespace VulkanGameEngineLevelEditor
                             {
                                 var transform = new Transform2DComponentView(selected);
                                 transform.Position = new vec2(transform.Position.x + worldDx, transform.Position.y - worldDy);
+                            }
+                        }
+
+                        if (selected != uint.MaxValue && vp.IsDragging)
+                        {
+                            long now = Stopwatch.GetTimestamp(); // or DateTime.UtcNow.Ticks
+                            if (now - _lastPropsRefreshTicks >= PropsRefreshIntervalTicks)
+                            {
+                                _lastPropsRefreshTicks = now;
+                                if (CanMarshalToUi())
+                                {
+                                    try
+                                    {
+                                        BeginInvoke(new Action(() =>
+                                        {
+                                            if (_shuttingDown || IsDisposed) return;
+                                            propertiesPanel.RefreshAllPanels(); // or RefreshVisiblePanels()
+                                        }));
+                                    }
+                                    catch (ObjectDisposedException) { }
+                                    catch (InvalidOperationException) { }
+                                }
                             }
                         }
 

@@ -15,17 +15,15 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
     {
         private const int RowHeight = 32;
 
-        private readonly DynamicComponentWrapper? _wrapper;
-        private readonly object? _targetObject;
         private readonly MemberInfo _member;
-        private readonly IntPtr? _nativePtr;
+        private readonly ObjectPanelView _rootPanel;   // keep the panel, not the wrapper
 
-        public TypeOfVec2(ObjectPanelView rootPanel, object obj, MemberInfo member, int minimumPanelSize, bool readOnly, IntPtr? nativePtr = null) : base(rootPanel, obj, member, minimumPanelSize, readOnly)
+        public TypeOfVec2(ObjectPanelView rootPanel, object obj, MemberInfo member,
+                          int minimumPanelSize, bool readOnly, IntPtr? nativePtr = null)
+            : base(rootPanel, obj, member, minimumPanelSize, readOnly)
         {
+            _rootPanel = rootPanel;
             _member = member;
-            _wrapper = obj as DynamicComponentWrapper;
-            _targetObject = obj;
-            _nativePtr = nativePtr;
         }
 
         public override Control CreateControl()
@@ -43,6 +41,7 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75F));
 
             vec2 currentVec = GetCurrentVec2();
+
             void AddAxis(string label, Func<vec2, float> getter, int axis)
             {
                 int row = table.RowCount++;
@@ -62,7 +61,7 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                 var memberLimits = _member.GetCustomAttribute<NumericUpDownLimitsAttribute>();
                 var num = new NumericUpDown
                 {
-                    DecimalPlaces = memberLimits != null ? memberLimits.DecimalPlaces : 4,
+                    DecimalPlaces = memberLimits?.DecimalPlaces ?? 4,
                     Increment = memberLimits != null ? Convert.ToDecimal(memberLimits.Increment) : 0.1m,
                     Minimum = memberLimits != null ? Convert.ToDecimal(memberLimits.Minimum) : -10000000m,
                     Maximum = memberLimits != null ? Convert.ToDecimal(memberLimits.Maximum) : 10000000m,
@@ -74,17 +73,16 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                     Enabled = !_readOnly
                 };
 
-                num.ValueChanged += (s, e) =>
+                num.ValueChanged += (_, _) =>
                 {
-                    if (_readOnly) return;
+                    if (_readOnly || !_rootPanel.ShouldWriteBack) return;
                     SetAxis(axis, (float)num.Value);
                 };
 
                 num.TextChanged += (s, e) =>
                 {
                     if (_readOnly) return;
-                    if (float.TryParse(num.Text, out float parsed))
-                        SetAxis(axis, parsed);
+                    if (float.TryParse(num.Text, out float parsed)) SetAxis(axis, parsed);
                 };
 
                 table.Controls.Add(num, 1, row);
@@ -96,24 +94,19 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
             return table;
         }
 
+        private DynamicComponentWrapper? CurrentWrapper =>
+            _rootPanel.PanelObject as DynamicComponentWrapper;
+
         private vec2 GetCurrentVec2()
         {
-            if (_wrapper != null)
-            {
-                return _wrapper.GetMemberValue(_member) is vec2 v ? v : vec2.Zero;
-            }
-
-            return _member switch
-            {
-                FieldInfo fi when _targetObject != null => (vec2?)fi.GetValue(_targetObject) ?? vec2.Zero,
-                PropertyInfo pi when pi.CanRead && _targetObject != null => (vec2?)pi.GetValue(_targetObject) ?? vec2.Zero,
-                _ => vec2.Zero
-            };
+            var wrapper = CurrentWrapper;
+            if (wrapper != null) return wrapper.GetMemberValue(_member) is vec2 v ? v : vec2.Zero;
+            return vec2.Zero;
         }
 
         private void SetAxis(int axis, float newValue)
         {
-            if (_readOnly) return;
+            if (_readOnly || !_rootPanel.ShouldWriteBack) return;
 
             vec2 v = GetCurrentVec2();
             switch (axis)
@@ -122,14 +115,8 @@ namespace VulkanGameEngineLevelEditor.ControlSubForms
                 case 1: v.y = newValue; break;
             }
 
-            if (_wrapper != null)
-            {
-                _wrapper.SetMemberValue(_member, v);
-                return;
-            }
-
-            if (_member is PropertyInfo pi && pi.CanWrite && _targetObject != null) pi.SetValue(_targetObject, v);
-            else if (_member is FieldInfo fi && _targetObject != null) fi.SetValue(_targetObject, v);
+            var wrapper = CurrentWrapper;
+            if (wrapper != null) wrapper.SetMemberValue(_member, v);
         }
     }
 }
