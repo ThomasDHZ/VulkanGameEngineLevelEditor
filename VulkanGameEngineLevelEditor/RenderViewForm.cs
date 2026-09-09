@@ -209,7 +209,6 @@ namespace VulkanGameEngineLevelEditor
             _renderHwnd = renderBox.Handle;
             VulkanSystem.RendererSetUp(_renderHwnd.ToPointer(), windowSize, RenderResolutionSize);
             BufferSystem.SetUpVmaAllocator();
-            MemoryPoolSystem.StartUp();
             MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\AnimeGirlImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets");
             //CSharpScriptSystem.Initialize();
             //CSharpScriptSystem.RegisterBehavior<Player>();

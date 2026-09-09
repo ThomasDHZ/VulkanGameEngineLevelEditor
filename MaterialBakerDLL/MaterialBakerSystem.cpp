@@ -15,6 +15,7 @@ void MaterialBakerSystem::BakeMaterial(const String& importMaterialPath, const S
 {
     vulkan.VulkanSetUp(configSystem.WindowResolution, configSystem.RenderResolution);
     bufferSystem.SetUpVmaAllocation();
+    memoryPoolSystem.StartUp();
     materialMemoryPoolSystem.StartUp();
     AssetBakerId = renderSystem.LoadRenderPass("RenderPass/AssetCreatorRenderPass.json");
     LoadMaterial(importMaterialPath);
@@ -171,6 +172,14 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
     materialMemoryPoolSystem.IsHeaderDirty = true;
     materialMemoryPoolSystem.IsDescriptorSetDirty = true;
 }
+
+//uint32 MaterialBakerSystem::AddToMaterialMemoryPool(VulkanTexture& texture)
+//{
+//    uint32 gpuTextureIndex = materialMemoryPoolSystem.AllocateObject(MaterialBakerMemoryPoolTypes::BakerTexture2DMetadataBuffer);
+//
+//    memoryPoolSystem.UpdateTextureDescriptorSet(gpuTextureIndex, texture, memoryPoolSystem.Texture2DBinding);
+//    return gpuTextureIndex;
+//}
 
 void MaterialBakerSystem_BakeMaterial(const char* importMaterialPath, const char* exportMaterialPath)
 {

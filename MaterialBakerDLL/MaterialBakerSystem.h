@@ -25,6 +25,7 @@ private:
     VkGuid                                  AssetBakerId;
 
     void                                    LoadMaterial(const String& materialPath);
+   // uint32									AddToMaterialMemoryPool(VulkanTexture& texture);
     void                                    CleanRenderPass();
 
 public:
