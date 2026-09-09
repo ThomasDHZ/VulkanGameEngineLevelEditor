@@ -2,6 +2,7 @@
 using GameScriptLibraryDLL.Components;
 using GameScriptLibraryDLL.GameObjects;
 using GlmSharp;
+using Microsoft.VisualBasic.ApplicationServices;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Numerics;
@@ -16,6 +17,7 @@ using VulkanGameEngineLevelEditor.Component;
 using VulkanGameEngineLevelEditor.EditorEnhancements;
 using VulkanGameEngineLevelEditor.LevelEditor;
 using VulkanGameEngineLevelEditor.Model;
+using VulkanGameEngineLevelEditor.Systems;
 using WeifenLuo.WinFormsUI.Docking;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static VulkanEngineCoreCS.VulkanSystem;
@@ -208,14 +210,15 @@ namespace VulkanGameEngineLevelEditor
             VulkanSystem.RendererSetUp(_renderHwnd.ToPointer(), windowSize, RenderResolutionSize);
             BufferSystem.SetUpVmaAllocator();
             MemoryPoolSystem.StartUp();
-            CSharpScriptSystem.Initialize();
-            CSharpScriptSystem.RegisterBehavior<Player>();
-            CSharpScriptSystem.RegisterBehavior<PlayerShot>();
-            CSharpScriptSystem.RegisterBehavior<GameEnemy>();
-            CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
-            CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
-            LevelSystem.LoadLevel("Levels/TestLevel.json");
-            LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
+            MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\AnimeGirlImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets");
+            //CSharpScriptSystem.Initialize();
+            //CSharpScriptSystem.RegisterBehavior<Player>();
+            //CSharpScriptSystem.RegisterBehavior<PlayerShot>();
+            //CSharpScriptSystem.RegisterBehavior<GameEnemy>();
+            //CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
+            //CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
+            //LevelSystem.LoadLevel("Levels/TestLevel.json");
+            //LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
             return true;
         }
 

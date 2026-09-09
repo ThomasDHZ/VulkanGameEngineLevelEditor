@@ -15,6 +15,10 @@
     <BuildDependency Project="../VulkanEngineCore/VulkanEngineCore/VulkanEngineCore.vcxproj" />
     <BuildDependency Project="../VulkanGameEngine/VulkanEngineDLL/VulkanEngineDLL.vcxproj" />
   </Project>
+  <Project Path="MaterialBakerDLL/MaterialBakerDLL.vcxproj" Id="690c7396-c308-4b1d-85ab-1a82ee9774cb">
+    <BuildDependency Project="../VulkanEngineCore/VulkanEngineCore/VulkanEngineCore.vcxproj" />
+    <BuildDependency Project="../VulkanGameEngine/VulkanEngineDLL/VulkanEngineDLL.vcxproj" />
+  </Project>
   <Project Path="VulkanGameEngineLevelEditor/VulkanGameEngineLevelEditor.csproj">
     <BuildDependency Project="../VulkanGameEngine/VulkanEngineInterop/VulkanEngineInterop.vcxproj" />
   </Project>
