@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -147,14 +147,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DLL.h" />
+    <ClInclude Include="FrameTimer.h" />
+    <ClInclude Include="GameSystem.h" />
     <ClInclude Include="MaterialBakerSystem.h" />
     <ClInclude Include="MaterialMemoryPoolSystem.h" />
+    <ClInclude Include="SystemClock.h" />
     <ClInclude Include="TextureBakerSystem.h" />
     <ClInclude Include="TextureSamplers.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FrameTimer.cpp" />
+    <ClCompile Include="GameSystem.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="MaterialBakerSystem.cpp" />
     <ClCompile Include="MaterialMemoryPoolSystem.cpp" />
+    <ClCompile Include="SystemClock.cpp" />
     <ClCompile Include="TextureBakerSystem.cpp" />
     <ClCompile Include="TextureSamplers.cpp" />
   </ItemGroup>

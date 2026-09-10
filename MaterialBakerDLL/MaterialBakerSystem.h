@@ -7,6 +7,7 @@
 #include <VulkanRenderPass.h>
 #include <TextureSystem.h>
 #include <VulkanTexture.h>
+#include <RenderSystem.h>
 
 class MaterialBakerSystem
 {
@@ -22,14 +23,17 @@ private:
     MaterialBakerSystem& operator=(MaterialBakerSystem&&) = delete;
 
     Vector<Texture>                         TextureList;
-    VkGuid                                  AssetBakerId;
 
-    void                                    LoadMaterial(const String& materialPath);
-   // uint32									AddToMaterialMemoryPool(VulkanTexture& texture);
+    uint32									AddToMaterialMemoryPool(VulkanTexture& texture);
     void                                    CleanRenderPass();
 
 public:
+    VkGuid                                  AssetBakerRenderPassId;
+    Vector<VkGuid>                          RenderPassDrawList;
+    void                                    LoadMaterial(const String& materialPath);
+   // void                                    UpdateDescriptorSets();
     DLL_EXPORT void BakeMaterial(const String& importMaterialPath, const String& exportMaterialPath);
+    Vector<RenderPassNode> CreateDrawCommands(VkCommandBuffer& commandBuffer, const float& deltaTime);
 };
 extern DLL_EXPORT MaterialBakerSystem& materialBakerSystem;
 inline MaterialBakerSystem& MaterialBakerSystem::Get()

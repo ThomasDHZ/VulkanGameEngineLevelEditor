@@ -17,10 +17,10 @@ void MaterialBakerSystem::BakeMaterial(const String& importMaterialPath, const S
     bufferSystem.SetUpVmaAllocation();
     memoryPoolSystem.StartUp();
     materialMemoryPoolSystem.StartUp();
-    AssetBakerId = renderSystem.LoadRenderPass("RenderPass/AssetCreatorRenderPass.json");
+    AssetBakerRenderPassId = renderSystem.LoadRenderPass("RenderPass/AssetCreatorRenderPass.json", materialMemoryPoolSystem.GetMemoryPoolInfo());
     LoadMaterial(importMaterialPath);
-    textureSystem.GenerateTexture(AssetBakerId);
-    textureBakerSystem.BakeTexture(importMaterialPath, exportMaterialPath, AssetBakerId);
+    textureSystem.GenerateTexture(AssetBakerRenderPassId);
+    textureBakerSystem.BakeTexture(importMaterialPath, exportMaterialPath, AssetBakerRenderPassId);
     vkQueueWaitIdle(vulkan.GraphicsQueue());
     CleanRenderPass();
     materialMemoryPoolSystem.BakerResetMemoryPool();
@@ -31,7 +31,7 @@ void MaterialBakerSystem::CleanRenderPass()
 {
     vkQueueWaitIdle(vulkan.GraphicsQueue());
     
-    VulkanRenderPass renderPass = renderSystem.FindRenderPass(AssetBakerId);
+    VulkanRenderPass renderPass = renderSystem.FindRenderPass(AssetBakerRenderPassId);
     for (auto& renderPipelineIdList : renderPass.PipelineList())
     {
         VulkanPipeline pipeline = renderSystem.FindRenderPipeline(renderPipelineIdList);
@@ -54,8 +54,8 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
     nlohmann::json json = fileSystem.LoadJsonFile(materialPath.c_str());
     ivec2 materialSetResolution = ivec2(json["TextureSetResolution"][0], json["TextureSetResolution"][1]);
 
-    materialMemoryPoolSystem.AllocateObject(BakerMaterialBuffer);
-    ImportMaterialShader& material = materialMemoryPoolSystem.UpdateMaterial(0);
+    uint materialId = materialMemoryPoolSystem.AllocateObject(BakerMaterialBuffer);
+    ImportMaterial& material = materialMemoryPoolSystem.UpdateMaterial(materialId);
     material.Albedo = vec3(json["Albedo"][0], json["Albedo"][1], json["Albedo"][2]);
     material.SheenColor = vec3(json["SheenColor"][0], json["SheenColor"][1], json["SheenColor"][2]);
     material.SubSurfaceScatteringColor = vec3(json["SubSurfaceScatteringColor"][0], json["SubSurfaceScatteringColor"][1], json["SubSurfaceScatteringColor"][2]);
@@ -79,7 +79,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportAlbedoMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.AlbedoMap = TextureList.back().gpuTextureBufferIndex;
+        material.AlbedoMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["MetallicMap"].is_null())
     {
@@ -87,7 +87,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportPackedORMMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.MetallicMap = TextureList.back().gpuTextureBufferIndex;
+        material.MetallicMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["RoughnessMap"].is_null())
     {
@@ -95,7 +95,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportPackedORMMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.RoughnessMap = TextureList.back().gpuTextureBufferIndex;
+        material.RoughnessMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["ThicknessMap"].is_null())
     {
@@ -103,7 +103,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportThicknessMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.ThicknessMap = TextureList.back().gpuTextureBufferIndex;
+        material.ThicknessMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["SubSurfaceScatteringColorMap"].is_null())
     {
@@ -111,7 +111,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportSubSurfaceScatteringMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.SubSurfaceScatteringColorMap = TextureList.back().gpuTextureBufferIndex;
+        material.SubSurfaceScatteringColorMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["SheenMap"].is_null())
     {
@@ -119,7 +119,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportSheenMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.SheenMap = TextureList.back().gpuTextureBufferIndex;
+        material.SheenMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["ClearCoatMap"].is_null())
     {
@@ -127,7 +127,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportClearCoatMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.ClearCoatMap = TextureList.back().gpuTextureBufferIndex;
+        material.ClearCoatMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["AmbientOcclusionMap"].is_null())
     {
@@ -135,7 +135,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportPackedORMMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.AmbientOcclusionMap = TextureList.back().gpuTextureBufferIndex;
+        material.AmbientOcclusionMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["NormalMap"].is_null())
     {
@@ -143,7 +143,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportNormalMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.NormalMap = TextureList.back().gpuTextureBufferIndex;
+        material.NormalMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["AlphaMap"].is_null())
     {
@@ -151,7 +151,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportAlphaMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.AlphaMap = TextureList.back().gpuTextureBufferIndex;
+        material.AlphaMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["EmissionMap"].is_null())
     {
@@ -159,7 +159,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportEmissionMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.EmissionMap = TextureList.back().gpuTextureBufferIndex;
+        material.EmissionMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     if (!json["HeightMap"].is_null())
     {
@@ -167,21 +167,97 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
         loader.SamplerCreateInfo = TextureSamplers::GetImportParallaxMapSamplerSettings();
 
         TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.HeightMap = TextureList.back().gpuTextureBufferIndex;
+        material.HeightMap = AddToMaterialMemoryPool(TextureList.back().texture);
     }
     materialMemoryPoolSystem.IsHeaderDirty = true;
     materialMemoryPoolSystem.IsDescriptorSetDirty = true;
 }
 
-//uint32 MaterialBakerSystem::AddToMaterialMemoryPool(VulkanTexture& texture)
+//void MaterialBakerSystem::UpdateDescriptorSets()
 //{
-//    uint32 gpuTextureIndex = materialMemoryPoolSystem.AllocateObject(MaterialBakerMemoryPoolTypes::BakerTexture2DMetadataBuffer);
+//    auto GetDescriptorSet = [](const Texture& texture)
+//        {
+//            return VkDescriptorImageInfo
+//            {
+//                .sampler = texture.texture.TextureSampler(),
+//                .imageView = texture.texture.TextureViews()[0],
+//                .imageLayout = texture.texture.TextureImageLayout()
+//            };
+//        };
 //
-//    memoryPoolSystem.UpdateTextureDescriptorSet(gpuTextureIndex, texture, memoryPoolSystem.Texture2DBinding);
-//    return gpuTextureIndex;
+//    vkDeviceWaitIdle(vulkan.LogicalDevice());
+//    VulkanRenderPass renderPass = renderSystem.FindRenderPass(AssetBakerRenderPassId);
+//    auto a = renderPass.PipelineList();
+//    VkDescriptorSet targetSet = renderSystem.FindRenderPipeline(renderPass.PipelineList()[0]).DescriptorSetList().front();
+//
+//    Vector<VkWriteDescriptorSet> descriptorSetList;
+//    VkDescriptorBufferInfo materialInfo =
+//    {
+//        .buffer = bufferSystem.FindVulkanBuffer(materialMemoryPoolSystem.MaterialBakerBufferId).Buffer(),
+//        .offset = 0,
+//        .range = VK_WHOLE_SIZE
+//    };
+//    descriptorSetList.emplace_back(VkWriteDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, nullptr, targetSet, 0, 0, 1,  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, nullptr, &materialInfo,  nullptr });
+//
+//    for (uint x = 0; x < TextureList.size(); x++)
+//    {
+//        VkDescriptorImageInfo imageInfo = GetDescriptorSet(TextureList[x]);
+//        descriptorSetList.emplace_back(VkWriteDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, nullptr, targetSet, x + 1, 0, 1,  VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &imageInfo,  nullptr, nullptr });
+//    }
+//    vkUpdateDescriptorSets(vulkan.LogicalDevice(), static_cast<uint32_t>(descriptorSetList.size()), descriptorSetList.data(), 0, nullptr);
 //}
+
+uint32 MaterialBakerSystem::AddToMaterialMemoryPool(VulkanTexture& texture)
+{
+    uint32 gpuTextureIndex = materialMemoryPoolSystem.AllocateObject(MaterialBakerMemoryPoolTypes::BakerTexture2DMetadataBuffer);
+
+    memoryPoolSystem.UpdateTextureDescriptorSet(gpuTextureIndex, texture, memoryPoolSystem.Texture2DBinding);
+    return gpuTextureIndex;
+}
 
 void MaterialBakerSystem_BakeMaterial(const char* importMaterialPath, const char* exportMaterialPath)
 {
     materialBakerSystem.BakeMaterial(importMaterialPath, exportMaterialPath);
+}
+
+Vector<RenderPassNode> MaterialBakerSystem::CreateDrawCommands(VkCommandBuffer& commandBuffer, const float& deltaTime)
+{
+    Vector<RenderPassNode> renderPassNodeList;
+    for (auto& renderPassGuid : RenderPassDrawList)
+    {
+        const VulkanRenderPass& renderPass = renderSystem.FindRenderPass(renderPassGuid);
+
+        uint32 maxMipLevelCount = 1;
+        Vector<Vector<VulkanDrawMessage>> vulkanDrawMessageList;
+        for (auto& renderPassList : renderPass.SubPassList())
+        {
+            Vector<VulkanDrawMessage> vulkanSubPassMessageList;
+            for (auto& subPass : renderPassList)
+            {
+                for (auto& inputTexture : subPass.InputTextureList)
+                {
+                    const Texture& texture = renderSystem.FindRenderPassAttachment(inputTexture);
+                    if (maxMipLevelCount < texture.texture.MipMapLevels()) maxMipLevelCount = texture.texture.MipMapLevels() - 1;
+                }
+
+                vulkanSubPassMessageList.emplace_back(VulkanDrawMessage
+                    {
+                        .RenderPassGuid = renderPassGuid,
+                        .PipelinePackageGuid = subPass.PipelinePackageId,
+                        .PushConstant = subPass.ShaderPushConstant,
+                        .RenderPassInputs = subPass.InputTextureList,
+                        .RenderPassOutputs = subPass.OutputTextureList,
+                        .OffScreenRenderPass = subPass.OffScreenFrameBuffer
+                    });
+            }
+            vulkanDrawMessageList.emplace_back(vulkanSubPassMessageList);
+        }
+        renderPassNodeList.emplace_back(RenderPassNode
+            {
+               .RenderPassGuid = renderPassGuid,
+               .SubPassDrawMessage = vulkanDrawMessageList,
+               .MipCount = maxMipLevelCount
+            });
+    }
+    return renderPassNodeList;
 }
