@@ -24,14 +24,14 @@ private:
 
     Vector<Texture>                         TextureList;
 
-    uint32									AddToMaterialMemoryPool(VulkanTexture& texture);
+    uint32									AddToMaterialMemoryPool(Texture& texture);
     void                                    CleanRenderPass();
 
 public:
     VkGuid                                  AssetBakerRenderPassId;
     Vector<VkGuid>                          RenderPassDrawList;
     void                                    LoadMaterial(const String& materialPath);
-   // void                                    UpdateDescriptorSets();
+
     DLL_EXPORT void BakeMaterial(const String& importMaterialPath, const String& exportMaterialPath);
     Vector<RenderPassNode> CreateDrawCommands(VkCommandBuffer& commandBuffer, const float& deltaTime);
 };

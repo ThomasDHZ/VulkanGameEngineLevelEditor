@@ -119,101 +119,49 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
         if (requestedMips == UINT32_MAX) actualMips = maxMips;
         else actualMips = std::clamp(requestedMips, 1u, maxMips);
 
+        STARTUPINFOA si{};
+        si.cb = sizeof(si);
+        PROCESS_INFORMATION pi{};
         bool generateMips = (actualMips > 1);
-        std::string args = fmt::format("\"{}\" -o \"{}\" " "--format bc7 " "--quality production " "--zcmp 22 " "--export-transfer-function {}", previewPngPath.string(), ktxPath.string(), isSRGB ? "srgb" : "linear");
+        const char* nvttExe =
+            R"(C:\Program Files\NVIDIA Corporation\NVIDIA Texture Tools\nvtt_export.exe)";
 
-        if (isNormalMap)
-        {
-            args += " --normal-alpha unchanged";
-        }
+        std::string cmd = fmt::format(
+            "\"{}\" \"{}\" -o \"{}\" --format bc7 --quality production --zcmp 22 "
+            "--export-transfer-function {} --no-mips",
+            nvttExe,
+            previewPngPath.string(),  // INPUT
+            ktxPath.string(),         // OUTPUT
+            isSRGB ? "srgb" : "linear");
 
-        if (generateMips)
-        {
-            args += " --mips "
-                "--mip-filter kaiser "
-                "--mip-gamma-correct "
-                "--mip-pre-alpha "
-                "--max-mip-levels " + std::to_string(actualMips);
-        }
-        else
-        {
-            args += " --no-mips";
-        }
-        printf("Launching NVTT for %s with args:\n%s\n", textureAttachment.c_str(), args.c_str());
+        std::vector<char> cmdBuf(cmd.begin(), cmd.end());
+        cmdBuf.push_back('\0');
 
-        HINSTANCE hInst = ShellExecuteA(NULL, "open", configSystem.NvidiaTextureTool.c_str(), args.c_str(), NULL, SW_HIDE);
-        if ((intptr_t)hInst <= 32)
+        if (!CreateProcessA(nvttExe, cmdBuf.data(), nullptr, nullptr, FALSE,
+            CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi))
         {
-            fprintf(stderr, "ShellExecuteA failed with code %ld for %s\n", (intptr_t)hInst, textureAttachment.c_str());
+            fprintf(stderr, "CreateProcess failed (%lu): %s\n", GetLastError(), cmd.c_str());
             continue;
         }
 
-        bool fileCreated = false;
-        for (int x = 0; x < 60; ++x) {
-            if (std::filesystem::exists(ktxPath) && std::filesystem::file_size(ktxPath) > 1024)
-            {
-                fileCreated = true;
-                printf("NVTT succeeded for %s (size %llu bytes)\n", textureAttachment.c_str(), std::filesystem::file_size(ktxPath));
-                break;
-            }
-            Sleep(1000);
-        }
+        const DWORD chunkMs = 30 * 1000;
+        DWORD waitResult;
+        do {
+            waitResult = WaitForSingleObject(pi.hProcess, chunkMs);
+            if (waitResult == WAIT_TIMEOUT)
+                printf("Still baking %s...\n", textureAttachment.c_str());
+        } while (waitResult == WAIT_TIMEOUT);
 
-        if (!fileCreated) {
-            fprintf(stderr, "Timeout: KTX2 not created for %s\n", textureAttachment.c_str());
+        DWORD exitCode = 1;
+        GetExitCodeProcess(pi.hProcess, &exitCode);
+        CloseHandle(pi.hThread);
+        CloseHandle(pi.hProcess);
+
+        if (waitResult != WAIT_OBJECT_0 || exitCode != 0 ||
+            !std::filesystem::exists(ktxPath) || std::filesystem::file_size(ktxPath) == 0)
+        {
+            fprintf(stderr, "NVTT failed for %s (exit=%lu)\n", textureAttachment.c_str(), exitCode);
             continue;
-        }
-
-
-        nlohmann::json& exportEntry = exportJson[textureAttachment];
-        exportEntry["TextureFilePath"] = nlohmann::json::array({ ktxPath.string() });
-        exportEntry["TextureByteFormat"] = isSRGB ? static_cast<int>(VK_FORMAT_BC7_SRGB_BLOCK) : static_cast<int>(VK_FORMAT_BC7_UNORM_BLOCK);
-        exportEntry["MipMapCount"] = actualMips;
-        exportEntry["SampleCount"] = 1;
-        exportEntry["ImageType"] = 1;
-        exportEntry["TextureType"] = 1;
-        exportEntry["IsSkyBox"] = importJson["IsSkyBox"];
-
-        switch (x)
-        {
-        case AlbedoAttachment: exportEntry["TextureId"] = importJson["AlbedoAttachmentId"]; importJson["IsTiled"] ? TextureSamplers::GetTiledAlbedoMaterialSamplerSettings(exportEntry) : TextureSamplers::GetAlbedoMaterialSamplerSettings(exportEntry); break;
-        case NormalDataAttachment: exportEntry["TextureId"] = importJson["NormalDataAttachmentId"]; importJson["IsTiled"] ? TextureSamplers::GetTiledNormalMaterialSamplerSettings(exportEntry) : TextureSamplers::GetNormalMaterialSamplerSettings(exportEntry); break;
-        case PackedMROAttachment: exportEntry["TextureId"] = importJson["PackedMROAttachmentId"]; importJson["IsTiled"] ? TextureSamplers::GetTiledMROMaterialSamplerSettings(exportEntry) : TextureSamplers::GetMROMaterialSamplerSettings(exportEntry); break;
-        case PackedSheenSSSAttachment: exportEntry["TextureId"] = importJson["PackedSheenSSSAttachmentId"]; importJson["IsTiled"] ? TextureSamplers::GetTiledSheenSSSSamplerSettings(exportEntry) : TextureSamplers::GetSheenSSSSamplerSettings(exportEntry); break;
-        case UnusedAttachment: exportEntry["TextureId"] = importJson["UnusedAttachmentId"]; importJson["IsTiled"] ? TextureSamplers::GetTiledUnusedSamplerSettings(exportEntry) : TextureSamplers::GetUnusedSamplerSettings(exportEntry); break;
-        case EmissionAttachment: exportEntry["TextureId"] = importJson["EmissionAttachmentId"]; importJson["IsTiled"] ? TextureSamplers::GetTiledEmissionSamplerSettings(exportEntry) : TextureSamplers::GetEmissionSamplerSettings(exportEntry); break;
-        }
-    }
-
-    pos = textureName.find("Texture");
-    if (pos != String::npos) {
-        textureName.replace(pos, 7, "Material");
-    }
-
-    String materialName = textureName + ".json";
-    try
-    {
-        std::ofstream file(materialName.c_str());
-        if (!file.is_open())
-        {
-            fprintf(stderr, "Failed to open material JSON file: %s\n", materialName.c_str());
-            return;
-        }
-        file << std::setw(4) << exportJson << std::endl;
-        file.close();
-        printf("Material JSON saved to: %s\n", materialName.c_str());
-    }
-    catch (const std::exception& e)
-    {
-        fprintf(stderr, "JSON write error: %s\n", e.what());
-    }
-
-    for (const auto& png : tempFilesToClean)
-    {
-        if (std::filesystem::exists(png))
-        {
-            std::filesystem::remove(png);
-            printf("Cleaned temp preview: %s\n", png.string().c_str());
         }
     }
 }
@@ -466,13 +414,13 @@ RawMipReadback TextureBakerSystem::ConvertToRawTextureData(Texture& importTextur
     uint32 mipHeight = std::max(1u, static_cast<uint32>(importTexture.texture.TextureSize().y) >> mipLevel);
 
     size_t bytesPerPixel = 4;
-    if (importTexture.texture.TextureImageLayout() == VK_FORMAT_R32G32B32A32_SFLOAT ||
-        importTexture.texture.TextureImageLayout() == VK_FORMAT_R32G32B32A32_UINT ||
-        importTexture.texture.TextureImageLayout() == VK_FORMAT_R32G32B32A32_SINT) {
+    if (importTexture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_SFLOAT ||
+        importTexture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_UINT ||
+        importTexture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_SINT) {
         bytesPerPixel = 16;
     }
-    else if (importTexture.texture.TextureImageLayout() >= VK_FORMAT_R16G16B16A16_UNORM &&
-        importTexture.texture.TextureImageLayout() <= VK_FORMAT_R16G16B16A16_SFLOAT)
+    else if (importTexture.texture.TextureByteFormat() >= VK_FORMAT_R16G16B16A16_UNORM &&
+        importTexture.texture.TextureByteFormat() <= VK_FORMAT_R16G16B16A16_SFLOAT)
     {
         bytesPerPixel = 8;
     }

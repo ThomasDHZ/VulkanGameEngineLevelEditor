@@ -91,13 +91,13 @@ namespace VulkanGameEngineLevelEditor
 
             var renderBox = _viewportWindow.RenderBox;
             _renderHwnd = renderBox.Handle;
- 
+
             _viewportWindow.PropertiesPanel = propertiesPanel;
             _viewportWindow.TreeView = levelEditorTreeView;
             _viewportWindow.PendingWidth = renderBox.ClientSize.Width;
             _viewportWindow.PendingHeight = renderBox.ClientSize.Height;
             _viewportWindow.SizeDirty = false;
-            
+
             levelEditorTreeView.PropertiesPanel = propertiesPanel;
             renderPassTreeView.PropertiesPanel = propertiesPanel;
             renderPassTreeView.Populate(awer);
@@ -190,7 +190,7 @@ namespace VulkanGameEngineLevelEditor
         public void BeginResize()
         {
             IsResizing = true;
-            lock (LockObject) { } 
+            lock (LockObject) { }
         }
 
         public void EndResize()
@@ -209,15 +209,15 @@ namespace VulkanGameEngineLevelEditor
             _renderHwnd = renderBox.Handle;
             VulkanSystem.RendererSetUp(_renderHwnd.ToPointer(), windowSize, RenderResolutionSize);
             BufferSystem.SetUpVmaAllocator();
-            MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\AnimeGirlImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets");
-            //CSharpScriptSystem.Initialize();
-            //CSharpScriptSystem.RegisterBehavior<Player>();
-            //CSharpScriptSystem.RegisterBehavior<PlayerShot>();
-            //CSharpScriptSystem.RegisterBehavior<GameEnemy>();
-            //CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
-            //CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
-            //LevelSystem.LoadLevel("Levels/TestLevel.json");
-            //LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
+            MemoryPoolSystem.StartUp();
+            CSharpScriptSystem.Initialize();
+            CSharpScriptSystem.RegisterBehavior<Player>();
+            CSharpScriptSystem.RegisterBehavior<PlayerShot>();
+            CSharpScriptSystem.RegisterBehavior<GameEnemy>();
+            CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.DirectionalLight>();
+            CSharpScriptSystem.RegisterBehavior<GameScriptLibraryDLL.GameObjects.PointLight>();
+            LevelSystem.LoadLevel("Levels/TestLevel.json");
+            LevelSystem.LevelEditorRenderPass("Levels/TestLevel.json");
             return true;
         }
 
@@ -332,7 +332,7 @@ namespace VulkanGameEngineLevelEditor
 
                         if (selected != uint.MaxValue && vp.IsDragging)
                         {
-                            long now = Stopwatch.GetTimestamp(); // or DateTime.UtcNow.Ticks
+                            long now = Stopwatch.GetTimestamp(); 
                             if (now - _lastPropsRefreshTicks >= PropsRefreshIntervalTicks)
                             {
                                 _lastPropsRefreshTicks = now;
@@ -495,6 +495,11 @@ namespace VulkanGameEngineLevelEditor
         {
             List<GameObjecLevelEditor> gameObjectList = GameObjectSystem.GetGameObjectList();
             string jsonString = JsonConvert.SerializeObject(gameObjectList);
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\AnimeGirlImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\Textures\\AnimeGirlMaterial");
         }
     }
 }

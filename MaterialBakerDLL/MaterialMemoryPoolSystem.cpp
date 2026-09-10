@@ -15,7 +15,7 @@ void MaterialMemoryPoolSystem::StartUp()
             {
                 .ActiveCount = 0,
                 .Count = BakerMaterialCapacity,
-                .Size = sizeof(ImportMaterialShader),
+                .Size = sizeof(ImportMaterial),
                 .IsActive = Vector<byte>(BakerMaterialCapacity, 0x00),
                 .FreeIndices = Vector<uint32>(),
                 .IsDirty = true
@@ -182,7 +182,7 @@ uint32 MaterialMemoryPoolSystem::AllocateObject(MaterialBakerMemoryPoolTypes mem
     return index;
 }
 
-void MaterialMemoryPoolSystem::UpdateMemoryPool(Vector<VulkanPipeline>& pipelineList)
+void MaterialMemoryPoolSystem::UpdateMemoryPool()
 {
     if (!MaterialBufferPtr)
     {
@@ -218,15 +218,15 @@ void MaterialMemoryPoolSystem::UpdateMemoryPool(Vector<VulkanPipeline>& pipeline
     }
 }
 
-ImportMaterialShader& MaterialMemoryPoolSystem::UpdateMaterial(uint32 index)
+ImportMaterial& MaterialMemoryPoolSystem::UpdateMaterial(uint32 index)
 {
     MemoryPoolSubBufferHeader& materialSubPool = MemorySubPoolHeader[BakerMaterialBuffer];
     if (index >= materialSubPool.Count) throw std::out_of_range("Material index out of range: " + std::to_string(index) + " >= " + std::to_string(materialSubPool.Count));
     if (index >= materialSubPool.IsActive.size() || !materialSubPool.IsActive[index]) throw std::runtime_error("Material slot inactive at index " + std::to_string(index));
 
-    uint32 offset = materialSubPool.Offset + (index * sizeof(ImportMaterialShader));
+    uint32 offset = materialSubPool.Offset + (index * sizeof(ImportMaterial));
     materialSubPool.IsDirty = true;
-    return *reinterpret_cast<ImportMaterialShader*>(static_cast<byte*>(MaterialBufferPtr) + offset);
+    return *reinterpret_cast<ImportMaterial*>(static_cast<byte*>(MaterialBufferPtr) + offset);
 }
 
 void MaterialMemoryPoolSystem::UpdateTextureDescriptorSet(Texture& texture, uint binding)
@@ -307,6 +307,16 @@ void MaterialMemoryPoolSystem::BakerResetMemoryPool()
     MemorySubPoolHeader.clear();
     MaterialPoolHeader = MaterialBakerBufferHeader();
     MaterialBufferMemoryPool.clear();
+}
+
+const MemoryPoolLoader MaterialMemoryPoolSystem::GetMemoryPoolInfo()
+{
+    return MemoryPoolLoader
+    {
+        .GlobalBindlessPool = MaterialBakerBindlessPool,
+        .GlobalBindlessDescriptorSet = MaterialBakerBindlessDescriptorSet,
+        .GlobalBindlessDescriptorSetLayout = MaterialBakerBindlessDescriptorSetLayout
+    };
 }
 
 void MaterialMemoryPoolSystem::CreateMaterialBakerBindlessDescriptorSet()
@@ -406,7 +416,7 @@ void MaterialMemoryPoolSystem_UpdateMemoryPool(Vector<VulkanPipeline>& pipelineL
     return void();
 }
 
-ImportMaterialShader& MaterialMemoryPoolSystem_UpdateMaterial(uint32 index)
+ImportMaterial& MaterialMemoryPoolSystem_UpdateMaterial(uint32 index)
 {
     return materialMemoryPoolSystem.UpdateMaterial(index);
 }

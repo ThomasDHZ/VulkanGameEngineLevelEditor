@@ -51,6 +51,7 @@ namespace VulkanGameEngineLevelEditor
             propertiesPanel = new PropertiesPanel();
             toolStrip1 = new ToolStrip();
             toolStripButton1 = new ToolStripButton();
+            toolStripButton2 = new ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             toolStrip1.SuspendLayout();
             SuspendLayout();
@@ -174,6 +175,7 @@ namespace VulkanGameEngineLevelEditor
             // 
             // propertiesPanel
             // 
+            propertiesPanel.BackColor = Color.FromArgb(40, 40, 40);
             propertiesPanel.Dock = DockStyle.Fill;
             propertiesPanel.Location = new Point(0, 0);
             propertiesPanel.Name = "propertiesPanel";
@@ -183,7 +185,7 @@ namespace VulkanGameEngineLevelEditor
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new Size(24, 24);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1, toolStripButton2 });
             toolStrip1.Location = new Point(0, 24);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(1898, 33);
@@ -199,6 +201,16 @@ namespace VulkanGameEngineLevelEditor
             toolStripButton1.Size = new Size(34, 28);
             toolStripButton1.Text = "toolStripButton1";
             toolStripButton1.Click += toolStripButton1_Click;
+            // 
+            // toolStripButton2
+            // 
+            toolStripButton2.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton2.Image = (Image)resources.GetObject("toolStripButton2.Image");
+            toolStripButton2.ImageTransparentColor = Color.Magenta;
+            toolStripButton2.Name = "toolStripButton2";
+            toolStripButton2.Size = new Size(34, 28);
+            toolStripButton2.Text = "toolStripButton2";
+            toolStripButton2.Click += toolStripButton2_Click;
             // 
             // RenderViewForm
             // 
@@ -235,5 +247,6 @@ namespace VulkanGameEngineLevelEditor
         private RichTextBox VulkanLoggerBox;
         private ToolStrip toolStrip1;
         private ToolStripButton toolStripButton1;
+        private ToolStripButton toolStripButton2;
     }
 }

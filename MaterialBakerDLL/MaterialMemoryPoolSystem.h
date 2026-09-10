@@ -28,7 +28,7 @@ struct MaterialBakerBufferHeader
     //uint32 TextureCubeMapSize = UINT32_MAX;
 };
 
-struct ImportMaterialShader
+struct ImportMaterial
 {
     vec3  Albedo;
     vec3  SheenColor;
@@ -77,6 +77,10 @@ private:
     MaterialMemoryPoolSystem(MaterialMemoryPoolSystem&&) = delete;
     MaterialMemoryPoolSystem& operator=(MaterialMemoryPoolSystem&&) = delete;
 
+    VkDescriptorPool										              MaterialBakerBindlessPool = VK_NULL_HANDLE;
+    VkDescriptorSet											              MaterialBakerBindlessDescriptorSet = VK_NULL_HANDLE;
+    VkDescriptorSetLayout									              MaterialBakerBindlessDescriptorSetLayout = VK_NULL_HANDLE;
+
     void													              UpdateMemoryPoolHeader(MaterialBakerMemoryPoolTypes memoryPoolType, uint32 newPoolSize);
     void													              ResizeMemoryPool(MaterialBakerMemoryPoolTypes memoryPoolToUpdate, uint32 resizeCount);
     void													              CreateMaterialBakerBindlessDescriptorSet();
@@ -96,9 +100,6 @@ public:
     bool													              IsHeaderDirty = true;
     bool													              IsDescriptorSetDirty = true;
 
-    VkDescriptorPool										              MaterialBakerBindlessPool = VK_NULL_HANDLE;
-    VkDescriptorSet											              MaterialBakerBindlessDescriptorSet = VK_NULL_HANDLE;
-    VkDescriptorSetLayout									              MaterialBakerBindlessDescriptorSetLayout = VK_NULL_HANDLE;
 
     uint32                                                                MaterialBakerBufferId = UINT32_MAX;
     size_t													              MaterialMemoryPoolSize = UINT32_MAX;
@@ -108,13 +109,13 @@ public:
 
     DLL_EXPORT void											              StartUp();
     DLL_EXPORT uint32										              AllocateObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate);
-    DLL_EXPORT void											              UpdateMemoryPool(Vector<VulkanPipeline>& pipelineList);
-    DLL_EXPORT ImportMaterialShader&                                      UpdateMaterial(uint32 index);
+    DLL_EXPORT void											              UpdateMemoryPool();
+    DLL_EXPORT ImportMaterial&                                            UpdateMaterial(uint32 index);
     DLL_EXPORT void											              UpdateTextureDescriptorSet(Texture& texture, uint binding);
     DLL_EXPORT void											              UpdateDataBufferDescriptorSet(uint32 vulkanBufferIndex, uint binding);
     DLL_EXPORT void											              FreeObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate, uint32 index);
     DLL_EXPORT void                                                       BakerResetMemoryPool();
-
+    const MemoryPoolLoader									 GetMemoryPoolInfo();
 };
 extern DLL_EXPORT MaterialMemoryPoolSystem& materialMemoryPoolSystem;
 inline MaterialMemoryPoolSystem& MaterialMemoryPoolSystem::Get()
@@ -129,7 +130,7 @@ extern "C" {
     DLL_EXPORT void											              MaterialMemoryPoolSystem_StartUp();
     DLL_EXPORT uint32										              MaterialMemoryPoolSystem_AllocateObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate);
     DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateMemoryPool(Vector<VulkanPipeline>& pipelineList);
-    DLL_EXPORT ImportMaterialShader&                                      MaterialMemoryPoolSystem_UpdateMaterial(uint32 index);
+    DLL_EXPORT ImportMaterial&                                            MaterialMemoryPoolSystem_UpdateMaterial(uint32 index);
     DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateTextureDescriptorSet(Texture& texture, uint binding);
     DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateDataBufferDescriptorSet(uint32 vulkanBufferIndex, uint binding);
     DLL_EXPORT void											              MaterialMemoryPoolSystem_FreeObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate, uint32 index);
