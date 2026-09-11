@@ -31,6 +31,7 @@ void MaterialBakerSystem::BakeMaterial(const String& importMaterialPath, const S
     vkQueueWaitIdle(vulkan.GraphicsQueue());
     CleanRenderPass();
     materialMemoryPoolSystem.BakerResetMemoryPool();
+    std::cout << "Material Baking Finished" << std::endl;
 }
 
 

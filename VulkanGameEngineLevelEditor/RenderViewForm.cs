@@ -499,7 +499,7 @@ namespace VulkanGameEngineLevelEditor
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-            MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\AnimeGirlImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\Textures\\AnimeGirlMaterial");
+            MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\SparkManTileSetImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\Textures\\SparkManTileSetMaterial");
         }
     }
 }
