@@ -358,6 +358,7 @@ namespace VulkanGameEngineLevelEditor
                         SpriteSystem.Update(deltaTime);
                         MeshSystem.Update(deltaTime);
                         MemoryPoolSystem.Update();
+                        InputSystem.Update(deltaTime);
                         RenderSystem.Update(_renderHwnd.ToPointer(), deltaTime);
 
                         var commandBuffer = VulkanSystem.StartFrame();

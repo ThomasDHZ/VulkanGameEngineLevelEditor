@@ -15,7 +15,7 @@ namespace VulkanGameEngineLevelEditor.Registries
         {
             ComponentView? view = type switch
             {
-                ComponentTypeEnum.kInputComponent => new Transform2DComponentView(gameObjectId, componentPtr),
+                ComponentTypeEnum.kInputComponent => new InputComponentView(gameObjectId, componentPtr),
                 ComponentTypeEnum.kSpriteComponent => new SpriteComponentView(gameObjectId, componentPtr),
                 ComponentTypeEnum.kTransform2DComponent => new Transform2DComponentView(gameObjectId, componentPtr),
                // ComponentTypeEnum.kTransform3DComponent => new Transform3DComponentView(),
