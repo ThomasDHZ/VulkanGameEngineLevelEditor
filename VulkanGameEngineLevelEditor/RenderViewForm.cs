@@ -33,6 +33,7 @@ namespace VulkanGameEngineLevelEditor
             kAssetTypeMaterial,
             kAssetTypeTexture,
             kAssetTypeScene,
+            kAssetTypeEnvironmentMap
         };
 
         public class DragAssetData
@@ -473,7 +474,7 @@ namespace VulkanGameEngineLevelEditor
                 _sceneListView.AddListItem(fileName, AssetDataTypeEnum.kAssetTypeScene, sceneLevel);
             }
 
-            List<System.String> textureList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\Textures").ToList();
+            List<System.String> textureList = Directory.GetFiles(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\TextureLoader").ToList();
             foreach (var texture in textureList)
             {
                 string fileName = Path.GetFileName(texture);

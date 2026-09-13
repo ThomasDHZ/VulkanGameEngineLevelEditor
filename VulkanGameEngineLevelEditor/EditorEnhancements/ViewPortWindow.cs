@@ -150,6 +150,10 @@ namespace VulkanGameEngineLevelEditor.EditorEnhancements
                 uint id = GameObjectSystem.CreateGameObject(asset.JsonPath, dropPos);
                 TreeView?.AddGameObject(id);
             }
+            if (asset.AssetType == AssetDataTypeEnum.kAssetTypeTexture)
+            {
+                IblRenderSystem.SetEnvironmentMap(asset.JsonPath);
+            }
         }
 
         private void RendererBox_MouseMove(object sender, MouseEventArgs e)
