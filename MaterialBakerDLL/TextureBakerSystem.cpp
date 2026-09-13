@@ -146,17 +146,17 @@ void TextureBakerSystem::ExportToPng(const String& fileName, Texture& texture, u
     bool is16Bit = false;
     bool is32BitFloat = false;
     size_t bytesPerPixel = 4;
-    if (texture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_SFLOAT ||
-        texture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_UINT ||
-        texture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_SINT)
+    if (texture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_SFLOAT ||
+        texture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_UINT ||
+        texture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_SINT)
     {
         bytesPerPixel = 16;
         is32BitFloat = true;
         std::cerr << "32-bit float formats not supported for PNG export yet\n";
         return;
     }
-    else if (texture.texture.TextureByteFormat() >= VK_FORMAT_R16G16B16A16_UNORM &&
-        texture.texture.TextureByteFormat() <= VK_FORMAT_R16G16B16A16_SFLOAT) {
+    else if (texture.texture.m_textureByteFormat >= VK_FORMAT_R16G16B16A16_UNORM &&
+        texture.texture.m_textureByteFormat <= VK_FORMAT_R16G16B16A16_SFLOAT) {
         bytesPerPixel = 8;
         is16Bit = true;
     }
@@ -379,13 +379,13 @@ RawMipReadback TextureBakerSystem::ConvertToRawTextureData(Texture& importTextur
     uint32 mipHeight = std::max(1u, static_cast<uint32>(importTexture.texture.TextureSize().y) >> mipLevel);
 
     size_t bytesPerPixel = 4;
-    if (importTexture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_SFLOAT ||
-        importTexture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_UINT ||
-        importTexture.texture.TextureByteFormat() == VK_FORMAT_R32G32B32A32_SINT) {
+    if (importTexture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_SFLOAT ||
+        importTexture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_UINT ||
+        importTexture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_SINT) {
         bytesPerPixel = 16;
     }
-    else if (importTexture.texture.TextureByteFormat() >= VK_FORMAT_R16G16B16A16_UNORM &&
-        importTexture.texture.TextureByteFormat() <= VK_FORMAT_R16G16B16A16_SFLOAT)
+    else if (importTexture.texture.m_textureByteFormat >= VK_FORMAT_R16G16B16A16_UNORM &&
+        importTexture.texture.m_textureByteFormat <= VK_FORMAT_R16G16B16A16_SFLOAT)
     {
         bytesPerPixel = 8;
     }

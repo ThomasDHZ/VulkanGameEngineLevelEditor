@@ -156,6 +156,11 @@
     <ClInclude Include="TextureSamplers.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\External\imgui\imgui.cpp" />
+    <ClCompile Include="..\External\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\External\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\External\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\External\LodePNG\lodepng.cpp" />
     <ClCompile Include="FrameTimer.cpp" />
     <ClCompile Include="GameSystem.cpp" />
     <ClCompile Include="main.cpp" />
@@ -164,6 +169,7 @@
     <ClCompile Include="SystemClock.cpp" />
     <ClCompile Include="TextureBakerSystem.cpp" />
     <ClCompile Include="TextureSamplers.cpp" />
+    <ClCompile Include="VmaImplementation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
