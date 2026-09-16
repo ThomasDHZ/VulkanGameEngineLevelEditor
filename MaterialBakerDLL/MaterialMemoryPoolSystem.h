@@ -30,39 +30,61 @@ struct MaterialBakerBufferHeader
 
 struct ImportMaterial
 {
-    vec3  Albedo;
-    vec3  SheenColor;
-    vec3  SubSurfaceScatteringColor;
-    vec3  Emission;
-    float ClearcoatTint;
+    float Albedo[3];
+    float ClearcoatTint[3];
+    float SheenColor[3];
+    float SSSColor[3];
+    float AttenuationColor[3];
+    float Emission[3];
+
     float Metallic;
     float Roughness;
     float AmbientOcclusion;
-    float ClearcoatStrength;
-    float ClearcoatRoughness;
-    float SheenIntensity;
+    float IOR;
+    float NormalStrength;
+    float Height;
+
+    float CoatWeight;
+    float CoatRoughness;
+    float CoatDarkening;
+
+    float SheenWeight;
+    float SheenRoughness;
+
+    float SSSWeight;
+    float SSSProfile;
     float Thickness;
+
+    float TransmissionWeight;
+    float AttenuationDistance;
+
     float Anisotropy;
     float AnisotropyRotation;
-    float NormalStrength;
-    float HeightScale;
-    float Height;
-    float Alpha;
+    float ThinFilmWeight;
+    float ThinFilmThickness;
+    float EmissionIntensity;
 
-    uint AlbedoMap;
-    uint MetallicMap;
-    uint RoughnessMap;
-    uint ThicknessMap;
-    uint SubSurfaceScatteringColorMap;
-    uint SheenMap;
-    uint ClearCoatMap;
-    uint AnisotropyMap;
-    uint AmbientOcclusionMap;
-    uint NormalMap;
-    uint AlphaMap;
-    uint EmissionMap;
-    uint HeightMap;
+    uint32 AlbedoMap;
+    uint32 NormalMap;
+    uint32 HeightMap;
+    uint32 AlphaMap;
+    uint32 MetallicMap;
+    uint32 RoughnessMap;
+    uint32 AmbientOcclusionMap;
+    uint32 EmissionMap;
+    uint32 ClearCoatColorMap;
+    uint32 ClearCoatPropertiesMap;
+    uint32 SheenMap;
+    uint32 SheenPropertiesMap;
+    uint32 SSSColorMap;
+    uint32 SSSPropertiesMap;
+    uint32 AttenuationColorMap;
+    uint32 AnisotropyMap;
+
+    uint32 ShadingModel;
+    uint32 FeatureMask;
 };
+static_assert(sizeof(ImportMaterial) == 57 * 4);
 
 class MaterialMemoryPoolSystem
 {

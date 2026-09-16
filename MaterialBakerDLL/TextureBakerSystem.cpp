@@ -30,8 +30,7 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
     nlohmann::json importJson = fileSystem.LoadJsonFile(materialLoader.c_str());
 
     String textureName = baseFilePath;
-    if (const size_t pos = textureName.find("Import"); pos != String::npos)
-        textureName.erase(pos, 6);
+    if (const size_t pos = textureName.find("Import"); pos != String::npos) textureName.erase(pos, 6);
 
     uint32 requestedMips = 1;
     importJson.at("ExportMipMapCount").get_to(requestedMips);
@@ -42,21 +41,22 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
     {
         Texture& importTexture = attachmentTextureList[x];
 
-        const bool isAlbedo = (x == AlbedoAttachment);
-        const bool isEmission = (x == EmissionAttachment);
+        const bool isAlbedo = (x == kAlbedoAttachment);
+        const bool isEmission = (x == kEmissionAttachment);
 
         String textureAttachment;
         switch (x)
         {
-        case AlbedoAttachment:         textureAttachment = "AlbedoData";         break;
-        case NormalDataAttachment:     textureAttachment = "NormalData";         break;
-        case PackedMROAttachment:      textureAttachment = "PackedMROData";      break;
-        case PackedSheenSSSAttachment: textureAttachment = "PackedSheenSSSData"; break;
-        case UnusedAttachment:         textureAttachment = "UnusedData";         break;
-        case EmissionAttachment:       textureAttachment = "EmissionData";       break;
-        default:
-            fprintf(stderr, "Unknown attachment index %zu\n", x);
-            continue;
+            case  kAlbedoAttachment:     textureAttachment = "AlbedoData";       break;
+            case  kNormalDataAttachment: textureAttachment = "NormalHeightData"; break;
+            case  kMROAttachment:        textureAttachment = "MROData";          break;
+            case  kClearCoatAttachment:  textureAttachment = "ClearCoatData";    break;
+            case  kFeatureAAttachment:   textureAttachment = "FeatureAData";     break;
+            case  kFeatureBAttachment:   textureAttachment = "FeatureBData";     break;
+            case  kFeatureCAttachment:   textureAttachment = "FeatureCData";     break;
+            case  kGlassAttachment:      textureAttachment = "GlassData";        break;
+            case  kEmissionAttachment:   textureAttachment = "EmissionData";     break;
+            default: fprintf(stderr, "Unknown attachment index %zu\n", x);       continue;
         }
 
         const String suffix = GetAttachmentSuffix(x);
@@ -156,7 +156,8 @@ void TextureBakerSystem::ExportToPng(const String& fileName, Texture& texture, u
         return;
     }
     else if (texture.texture.m_textureByteFormat >= VK_FORMAT_R16G16B16A16_UNORM &&
-        texture.texture.m_textureByteFormat <= VK_FORMAT_R16G16B16A16_SFLOAT) {
+             texture.texture.m_textureByteFormat <= VK_FORMAT_R16G16B16A16_SFLOAT) 
+    {
         bytesPerPixel = 8;
         is16Bit = true;
     }
@@ -491,9 +492,12 @@ String TextureBakerSystem::GetAttachmentSuffix(uint x)
     if (x == 0)      suffix = "_Albedo";
     else if (x == 1) suffix = "_NormalHeight";
     else if (x == 2) suffix = "_MRO";
-    else if (x == 3) suffix = "_SheenSSS";
-    else if (x == 4) suffix = "_Unused";
-    else if (x == 5) suffix = "_Emission";
+    else if (x == 3) suffix = "_ClearCoat";
+    else if (x == 4) suffix = "_FeatureA";
+    else if (x == 5) suffix = "_FeatureB";
+    else if (x == 6) suffix = "_FeatureC";
+    else if (x == 7) suffix = "_Glass";
+    else if (x == 8) suffix = "_Emission";
     else             suffix = "_Attachment" + std::to_string(x);
     return suffix;
 }

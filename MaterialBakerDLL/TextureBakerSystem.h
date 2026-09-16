@@ -10,12 +10,15 @@
 
 enum RenderPassAttachmentEnum
 {
-    AlbedoAttachment,
-    NormalDataAttachment,
-    PackedMROAttachment,
-    PackedSheenSSSAttachment,
-    UnusedAttachment,
-    EmissionAttachment
+    kAlbedoAttachment,
+    kNormalDataAttachment,
+    kMROAttachment,
+    kClearCoatAttachment,
+    kFeatureAAttachment,
+    kFeatureBAttachment,
+    kFeatureCAttachment,
+    kGlassAttachment,
+    kEmissionAttachment
 };
 
 struct RawMipReadback

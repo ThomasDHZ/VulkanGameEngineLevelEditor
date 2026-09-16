@@ -24,9 +24,10 @@ private:
 
     Vector<Texture>                         TextureList;
 
+    uint                                    TextureExists(nlohmann::json& j, const char* key);
+    uint                                    LoadTexture(nlohmann::json& json);
     uint32									AddToMaterialMemoryPool(Texture& texture);
     void                                    CleanRenderPass();
-
 public:
     VkGuid                                  AssetBakerRenderPassId;
     Vector<VkGuid>                          RenderPassDrawList;
