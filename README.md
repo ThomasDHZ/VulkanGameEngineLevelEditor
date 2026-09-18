@@ -58,6 +58,7 @@ Active desktop tool used to drive the hybrid engine. Expect editor and baker pat
 - Sibling repos checked out next to this one (see `.slnx` project paths)
 - Native DLLs produced by the engine / baker projects on the loader path
 
-<img width="3840" height="2101" alt="image" src="https://github.com/user-attachments/assets/f01fb2c7-f7ed-456c-acf6-230501243db8" /><img width="3840" height="2096" alt="image" src="https://github.com/user-attachments/assets/1ba0f5f7-2cb2-4d22-8176-a20ae92b764e" /><img width="3838" height="2105" alt="image" src="https://github.com/user-attachments/assets/1b533940-0f0c-461e-a481-b1fc21c60a0d" />
+<img width="3840" height="2101" alt="image" src="https://github.com/user-attachments/assets/f01fb2c7-f7ed-456c-acf6-230501243db8" /><img width="3840" height="2096" alt="image" src="https://github.com/user-attachments/assets/1ba0f5f7-2cb2-4d22-8176-a20ae92b764e" /><img width="3838" height="2105" alt="image" src="https://github.com/user-attachments/assets/1b533940-0f0c-461e-a481-b1fc21c60a0d" /><img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/d0ac8817-7af1-4840-9de1-c32e84e2a28b" />
+
 
 
