@@ -224,7 +224,7 @@ void GameSystem::Draw(float deltaTime)
     Vector<RenderPassNode> renderNodes = materialBakerSystem.CreateDrawCommands(commandBuffer, deltaTime);
     renderSystem.Draw(commandBuffer, renderNodes);
    // renderSystem.PresentToSwapChain(commandBuffer, levelSystem.PresentingAttachmentTextureId);
-    imGuiSystem.Draw(commandBuffer);
+    //imGuiSystem.Draw(commandBuffer);
     vulkan.Swapchain().EndFrame(commandBuffer);
 }
 

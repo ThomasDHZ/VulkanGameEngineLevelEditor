@@ -194,7 +194,7 @@ void MaterialMemoryPoolSystem::UpdateMemoryPool()
     {
         if (sub.IsDirty)
         {
-            size_t start = sizeof(MaterialBakerBufferHeader) + sub.Offset;
+            size_t start = sub.Offset;
             size_t len = sub.ActiveCount * sub.Size;
             if (len > 0)
             {

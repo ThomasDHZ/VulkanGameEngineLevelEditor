@@ -124,7 +124,9 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
     m.SSSColorMap = json.contains("SSSColorMap") ? TextureExists(json, "SSSColorMap") : TextureExists(json, "SubSurfaceScatteringColorMap");
     m.SSSPropertiesMap = json.contains("SSSPropertiesMap") ? TextureExists(json, "SSSPropertiesMap") : TextureExists(json, "SubSurfaceScatteringPropertiesMap");
     m.AttenuationColorMap = json.contains("AttenuationColorMap") ? TextureExists(json, "AttenuationColorMap") : TextureExists(json, "AttenuationTexture");
-    m.AnisotropyMap = TextureExists(json, "AnisotropyPropertiesMap");
+    m.AttenuationPropertiesMap = json.contains("AttenuationPropertiesMap") ? TextureExists(json, "AttenuationPropertiesMap") : TextureExists(json, "AttenuationPropertiesMap");
+    m.AnisotropyPropertiesMap = TextureExists(json, "AnisotropyPropertiesMap");
+    m.IORMap = TextureExists(json, "IORMap");
 
     m.ShadingModel = json.value("ShadingModel", 0u);
     m.FeatureMask = json.value("FeatureMask", 0u);

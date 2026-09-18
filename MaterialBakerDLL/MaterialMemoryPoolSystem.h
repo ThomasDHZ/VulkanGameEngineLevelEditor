@@ -30,12 +30,12 @@ struct MaterialBakerBufferHeader
 
 struct ImportMaterial
 {
-    float Albedo[3];
-    float ClearcoatTint[3];
-    float SheenColor[3];
-    float SSSColor[3];
-    float AttenuationColor[3];
-    float Emission[3];
+    vec3  Albedo;
+    vec3  ClearcoatTint;
+    vec3  SheenColor;
+    vec3  SSSColor;
+    vec3  AttenuationColor;
+    vec3  Emission;
 
     float Metallic;
     float Roughness;
@@ -64,27 +64,29 @@ struct ImportMaterial
     float ThinFilmThickness;
     float EmissionIntensity;
 
-    uint32 AlbedoMap;
-    uint32 NormalMap;
-    uint32 HeightMap;
-    uint32 AlphaMap;
-    uint32 MetallicMap;
-    uint32 RoughnessMap;
-    uint32 AmbientOcclusionMap;
-    uint32 EmissionMap;
-    uint32 ClearCoatColorMap;
-    uint32 ClearCoatPropertiesMap;
-    uint32 SheenMap;
-    uint32 SheenPropertiesMap;
-    uint32 SSSColorMap;
-    uint32 SSSPropertiesMap;
-    uint32 AttenuationColorMap;
-    uint32 AnisotropyMap;
+    uint  AlbedoMap;
+    uint  NormalMap;
+    uint  HeightMap;
+    uint  AlphaMap;
+    uint  MetallicMap;
+    uint  RoughnessMap;
+    uint  AmbientOcclusionMap;
+    uint  EmissionMap;
+    uint  ClearCoatColorMap;
+    uint  ClearCoatPropertiesMap;
+    uint  SheenMap;
+    uint  SheenPropertiesMap;
+    uint  SSSColorMap;
+    uint  SSSPropertiesMap;
+    uint  AttenuationColorMap;
+    uint  AttenuationPropertiesMap;
+    uint  AnisotropyPropertiesMap;
+    uint  IORMap;
 
-    uint32 ShadingModel;
-    uint32 FeatureMask;
+    uint  ShadingModel;
+    uint  FeatureMask;
 };
-static_assert(sizeof(ImportMaterial) == 57 * 4);
+static_assert(sizeof(ImportMaterial) == 59 * 4);
 
 class MaterialMemoryPoolSystem
 {
