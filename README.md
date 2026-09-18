@@ -5,9 +5,21 @@ C# WinForms editor that hosts a native C++ engine over a .NET 8 interop layer.
 The editor is the tool layer: inspect objects, edit components, view the scene, and run config/asset paths. Rendering and native memory stay in the engine DLL. C# owns orchestration, UI, and data that should not leak across the managed/native boundary.
 
 Related repos:
+
 - [VulkanEngineCore](https://github.com/ThomasDHZ/VulkanEngineCore) — core hybrid .NET 8 + native architecture
 - [VulkanGameEngine](https://github.com/ThomasDHZ/VulkanGameEngine) — runtime / engine
 - [ListPtr](https://github.com/ThomasDHZ/ListPtr) — dense C# ↔ native transfer
+- [MemoryLeakReporterDemo](https://github.com/ThomasDHZ/MemoryLeakReporterDemo) — native leak reporting from managed code
+
+## Screenshots
+
+**Editor shell** — WinForms host: object list, embedded native viewport, component inspector (sprite, transform, collision).
+
+![Editor shell](https://github.com/user-attachments/assets/f01fb2c7-f7ed-456c-acf6-230501243db8)
+
+**Lighting / HDRI** — point lights and packed textures driven from the C# property panel.
+
+![Lighting and HDRI](https://github.com/user-attachments/assets/1b533940-0f0c-461e-a481-b1fc21c60a0d)
 
 ## What it does
 
@@ -18,9 +30,18 @@ Related repos:
 - Talks to a native material-baker path (packed textures + JSON) via `MaterialBakerDLL`
 - Loads engine config from `EngineConfig.json`
 
+## Call path
+
+```text
+WinForms editor (this repo)
+  → C# wrappers (VulkanEngineCoreCS / VulkanEngineCS)
+    → P/Invoke, explicit DLL exports, ListPtr<>
+      → native engine + MaterialBakerDLL
+```
+
 ## Layout
 
-```
+```text
 VulkanGameEngineLevelEditor/
   VulkanGameEngineLevelEditor/   # C# WinForms editor
     Component/                   # Component view UIs
@@ -57,8 +78,3 @@ Active desktop tool used to drive the hybrid engine. Expect editor and baker pat
 - Visual Studio with C# and C++ workloads
 - Sibling repos checked out next to this one (see `.slnx` project paths)
 - Native DLLs produced by the engine / baker projects on the loader path
-
-<img width="3840" height="2101" alt="image" src="https://github.com/user-attachments/assets/f01fb2c7-f7ed-456c-acf6-230501243db8" /><img width="3840" height="2096" alt="image" src="https://github.com/user-attachments/assets/1ba0f5f7-2cb2-4d22-8176-a20ae92b764e" /><img width="3838" height="2105" alt="image" src="https://github.com/user-attachments/assets/1b533940-0f0c-461e-a481-b1fc21c60a0d" /><img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/d0ac8817-7af1-4840-9de1-c32e84e2a28b" />
-
-
-
