@@ -56,7 +56,7 @@
     <ClCompile Include="SystemClock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\External\LodePNG\lodepng.cpp">
+    <ClCompile Include="..\..\VulkanGameEngine\External\LodePNG\lodepng.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
