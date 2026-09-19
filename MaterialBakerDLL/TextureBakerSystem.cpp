@@ -47,16 +47,17 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
         String textureAttachment;
         switch (x)
         {
-            case  kAlbedoAttachment:     textureAttachment = "AlbedoData";       break;
-            case  kNormalDataAttachment: textureAttachment = "NormalHeightData"; break;
-            case  kMROAttachment:        textureAttachment = "MROData";          break;
-            case  kClearCoatAttachment:  textureAttachment = "ClearCoatData";    break;
-            case  kFeatureAAttachment:   textureAttachment = "FeatureAData";     break;
-            case  kFeatureBAttachment:   textureAttachment = "FeatureBData";     break;
-            case  kFeatureCAttachment:   textureAttachment = "FeatureCData";     break;
-            case  kGlassAttachment:      textureAttachment = "GlassData";        break;
-            case  kEmissionAttachment:   textureAttachment = "EmissionData";     break;
-            default: fprintf(stderr, "Unknown attachment index %zu\n", x);       continue;
+            case  kAlbedoAttachment:                textureAttachment = "AlbedoData";                break;
+            case  kNormalDataAttachment:            textureAttachment = "NormalHeightData";          break;
+            case  kMROAttachment:                   textureAttachment = "MROData";                   break;
+            case  kFeatureAAttachment:              textureAttachment = "FeatureAData";              break;
+            case  kFeatureBAttachment:              textureAttachment = "FeatureBData";              break;
+            case  kFeatureCAttachment:              textureAttachment = "FeatureCData";              break;
+            case  kFeatureDAttachment:              textureAttachment = "FeatureDData";              break;
+            case  kTranslucentAttachment:           textureAttachment = "TranslucentData";           break;
+            case  kTranslucentPropertiesAttachment: textureAttachment = "TranslucentPropertiesData"; break;
+            case  kEmissionAttachment:              textureAttachment = "EmissionData";              break;
+            default: fprintf(stderr, "Unknown attachment index %zu\n", x);                           continue;
         }
 
         const String suffix = GetAttachmentSuffix(x);
@@ -489,15 +490,19 @@ void TextureBakerSystem::DestroyVMATextureBuffer(RawMipReadback& data)
 String TextureBakerSystem::GetAttachmentSuffix(uint x)
 {
     String suffix;
-    if (x == 0)      suffix = "_Albedo";
-    else if (x == 1) suffix = "_NormalHeight";
-    else if (x == 2) suffix = "_MRO";
-    else if (x == 3) suffix = "_ClearCoat";
-    else if (x == 4) suffix = "_FeatureA";
-    else if (x == 5) suffix = "_FeatureB";
-    else if (x == 6) suffix = "_FeatureC";
-    else if (x == 7) suffix = "_Glass";
-    else if (x == 8) suffix = "_Emission";
-    else             suffix = "_Attachment" + std::to_string(x);
+    switch (x)
+    {
+        case 0:  suffix = "_Albedo";                break;
+        case 1:  suffix = "_NormalHeight";          break;
+        case 2:  suffix = "_MRO";                   break;
+        case 3:  suffix = "_FeatureA";              break;
+        case 4:  suffix = "_FeatureB";              break;
+        case 5:  suffix = "_FeatureC";              break;
+        case 6:  suffix = "_FeatureD";              break;
+        case 7:  suffix = "_Translucent";           break;
+        case 8:  suffix = "_TranslucentProperties"; break;
+        case 9:  suffix = "_Emission";              break;
+        default: suffix = "_Attachment" + std::to_string(x);
+    }
     return suffix;
 }

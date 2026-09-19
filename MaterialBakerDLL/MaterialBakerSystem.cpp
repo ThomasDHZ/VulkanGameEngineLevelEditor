@@ -75,12 +75,12 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
     auto AttenuationColor = v3(json["AttenuationColor"], 1, 1, 1);
     auto Emission = v3(json["Emission"], 0, 0, 0);
 
-    memcpy(m.Albedo, Albedo.data(), 12);
+ /*   memcpy(m.Albedo, Albedo.data(), 12);
     memcpy(m.ClearcoatTint, ClearcoatTint.data(), 12);
     memcpy(m.SheenColor, SheenColor.data(), 12);
     memcpy(m.SSSColor, SSSColor.data(), 12);
     memcpy(m.AttenuationColor, AttenuationColor.data(), 12);
-    memcpy(m.Emission, Emission.data(), 12);
+    memcpy(m.Emission, Emission.data(), 12);*/
 
     m.Metallic = json.value("Metallic", 0.0f);
     m.Roughness = json.value("Roughness", 0.5f);
@@ -186,6 +186,7 @@ Vector<RenderPassNode> MaterialBakerSystem::CreateDrawCommands(VkCommandBuffer& 
                         .RenderPassGuid = renderPassGuid,
                         .PipelinePackageGuid = subPass.PipelinePackageId,
                         .PushConstant = subPass.ShaderPushConstant,
+                        .PushConstantUpdateRules = subPass.PushConstantUpdates,
                         .RenderPassInputs = subPass.InputTextureList,
                         .RenderPassOutputs = subPass.OutputTextureList,
                         .OffScreenRenderPass = subPass.OffScreenFrameBuffer,

@@ -13,11 +13,12 @@ enum RenderPassAttachmentEnum
     kAlbedoAttachment,
     kNormalDataAttachment,
     kMROAttachment,
-    kClearCoatAttachment,
     kFeatureAAttachment,
     kFeatureBAttachment,
     kFeatureCAttachment,
-    kGlassAttachment,
+    kFeatureDAttachment,
+    kTranslucentAttachment,
+    kTranslucentPropertiesAttachment,
     kEmissionAttachment
 };
 

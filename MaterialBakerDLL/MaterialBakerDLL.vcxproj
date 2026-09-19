@@ -27,7 +27,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)External\fmt\include;$(SolutionDir)..\VulkanGameEngine\VulkanEngineDLL;$(SolutionDir)..\VulkanEngineCore\VulkanEngineCore;C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\8.0.26\runtimes\win-x64\native;$(SolutionDir)External\lua\src;$(SolutionDir)External\sol2/include;$(SolutionDir)External\xxHash;$(SolutionDir)packages\freetype.2.8.0.1\build\native\include;$(SolutionDir)\External\imgui\backends;$(SolutionDir)\External\imgui;$(SolutionDir)External\entt\src\;$(SolutionDir)External\ktx\include;$(SolutionDir)External\LodePNG;$(SolutionDir)External\VulkanMemoryAllocator\include;C:\Program Files\RenderDoc\;$(SolutionDir)External\SPIRV-Reflect;$(SolutionDir)External\json\include;$(SolutionDir)\External\glfw\include;$(SolutionDir)\External\stb;$(SolutionDir)External\glfw\;$(SolutionDir)External\glfw\include;$(SolutionDir)External\glfw\include\GLFW;$(SolutionDir)External;C:\VulkanSDK\1.4.328.1\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\VulkanGameEngine\x64\Debug;$(SolutionDir)packages\freetype.2.8.0.1\build\native\lib\x64\v141\static\Release;C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\8.0.26\runtimes\win-x64\native;$(SolutionDir)External\lua\src;$(SolutionDir)External\ktx\Release;$(SolutionDir)x64\Debug;$(SolutionDir)\External\glfw\src\Release;C:\VulkanSDK\1.4.328.1\Lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\VulkanEngineCore\External\VulkanMemoryAllocator\include;$(SolutionDir)..\VulkanEngineCore\External\SPIRV-Reflect;$(SolutionDir)External\fmt\include;$(SolutionDir)..\VulkanEngineCore\VulkanEngineCore;$(SolutionDir)..\VulkanGameEngine\VulkanEngineDLL;C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\8.0.26\runtimes\win-x64\native;$(SolutionDir)External\lua\src;$(SolutionDir)External\sol2/include;$(SolutionDir)External\xxHash;$(SolutionDir)packages\freetype.2.8.0.1\build\native\include;$(SolutionDir)\External\imgui\backends;$(SolutionDir)\External\imgui;$(SolutionDir)External\entt\src\;$(SolutionDir)External\ktx\include;$(SolutionDir)External\LodePNG;C:\Program Files\RenderDoc\;$(SolutionDir)External\SPIRV-Reflect;$(SolutionDir)External\json\include;$(SolutionDir)\External\glfw\include;$(SolutionDir)\External\stb;$(SolutionDir)External\glfw\;$(SolutionDir)External\glfw\include;$(SolutionDir)External\glfw\include\GLFW;$(SolutionDir)External;C:\VulkanSDK\1.4.328.1\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)VulkanGameEngineLevelEditor\x64\Debug;$(SolutionDir)packages\freetype.2.8.0.1\build\native\lib\x64\v141\static\Release;C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\8.0.26\runtimes\win-x64\native;$(SolutionDir)External\lua\src;$(SolutionDir)External\ktx\Release;$(SolutionDir)x64\Debug;$(SolutionDir)\External\glfw\src\Release;C:\VulkanSDK\1.4.328.1\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -148,7 +148,6 @@
   <ItemGroup>
     <ClInclude Include="DLL.h" />
     <ClInclude Include="FrameTimer.h" />
-    <ClInclude Include="GameSystem.h" />
     <ClInclude Include="MaterialBakerSystem.h" />
     <ClInclude Include="MaterialMemoryPoolSystem.h" />
     <ClInclude Include="SystemClock.h" />
@@ -156,20 +155,13 @@
     <ClInclude Include="TextureSamplers.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\External\imgui\imgui.cpp" />
-    <ClCompile Include="..\External\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\External\imgui\imgui_tables.cpp" />
-    <ClCompile Include="..\External\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\External\LodePNG\lodepng.cpp" />
     <ClCompile Include="FrameTimer.cpp" />
-    <ClCompile Include="GameSystem.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="MaterialBakerSystem.cpp" />
     <ClCompile Include="MaterialMemoryPoolSystem.cpp" />
     <ClCompile Include="SystemClock.cpp" />
     <ClCompile Include="TextureBakerSystem.cpp" />
     <ClCompile Include="TextureSamplers.cpp" />
-    <ClCompile Include="VmaImplementation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,22 +15,6 @@
   "PresentingAttachmentTextureId": "de6ca646-874f-4986-9daf-912dbc3aa7d0",
   "MainRenderPassList": [
     {
-      "RenderPass": "RenderPass/BRDFRenderPass.json",
-      "OneTimeDraw": true
-    },
-    {
-      "RenderPass": "RenderPass/EnvironmentToCubeMapRenderPass.json",
-      "OneTimeDraw": true
-    },
-    {
-      "RenderPass": "RenderPass/IrradianceRenderPass.json",
-      "OneTimeDraw": false
-    },
-    {
-      "RenderPass": "RenderPass/PrefilterRenderPass.json",
-      "OneTimeDraw": false
-    },
-    {
       "RenderPass": "RenderPass/GBufferRenderPass.json",
       "OneTimeDraw": false
     },
@@ -58,17 +42,17 @@
   ],
   "GameObjectList": [
     {
-      "GameObjectType": 1,
-      "GameObjectPositionOverride": [
-        527.6328,
-        217.1766
-      ]
-    },
-    {
       "GameObjectType": 3,
       "GameObjectPositionOverride": [
         0.0,
         0.0
+      ]
+    },
+    {
+      "GameObjectType": 1,
+      "GameObjectPositionOverride": [
+        527.6328,
+        217.1766
       ]
     },
     {
