@@ -121,7 +121,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;ktx.lib;ktx_read.lib;lua.lib;nethost.lib;VulkanEngineCore.lib;VulkanEngineDLL.lib;freetype28.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;ktx.lib;ktx_read.lib;lua.lib;nethost.lib;VulkanEngineCore.lib;VulkanEngineDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -155,6 +155,7 @@
     <ClInclude Include="TextureSamplers.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\VulkanGameEngine\External\LodePNG\lodepng.cpp" />
     <ClCompile Include="FrameTimer.cpp" />
     <ClCompile Include="MaterialBakerSystem.cpp" />
     <ClCompile Include="MaterialMemoryPoolSystem.cpp" />
