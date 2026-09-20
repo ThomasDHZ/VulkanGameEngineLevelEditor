@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\VulkanEngineCore\External\VulkanMemoryAllocator\include;$(SolutionDir)..\VulkanEngineCore\External\SPIRV-Reflect;$(SolutionDir)External\fmt\include;$(SolutionDir)..\VulkanEngineCore\VulkanEngineCore;$(SolutionDir)..\VulkanGameEngine\VulkanEngineDLL;C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\8.0.26\runtimes\win-x64\native;$(SolutionDir)External\lua\src;$(SolutionDir)External\sol2/include;$(SolutionDir)External\xxHash;$(SolutionDir)packages\freetype.2.8.0.1\build\native\include;$(SolutionDir)\External\imgui\backends;$(SolutionDir)\External\imgui;$(SolutionDir)External\entt\src\;$(SolutionDir)External\ktx\include;$(SolutionDir)..\VulkanGameEngine\LodePNG;C:\Program Files\RenderDoc\;$(SolutionDir)External\SPIRV-Reflect;$(SolutionDir)External\json\include;$(SolutionDir)\External\glfw\include;$(SolutionDir)\External\stb;$(SolutionDir)External\glfw\;$(SolutionDir)External\glfw\include;$(SolutionDir)External\glfw\include\GLFW;$(SolutionDir)External;C:\VulkanSDK\1.4.328.1\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)VulkanGameEngineLevelEditor\x64\Debug;$(SolutionDir)packages\freetype.2.8.0.1\build\native\lib\x64\v141\static\Release;C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\8.0.26\runtimes\win-x64\native;$(SolutionDir)External\lua\src;$(SolutionDir)External\ktx\Release;$(SolutionDir)x64\Debug;$(SolutionDir)\External\glfw\src\Release;C:\VulkanSDK\1.4.328.1\Lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\VulkanGameEngine\\External\ktx\include;$(SolutionDir)..\VulkanGameEngine\External\ktx\other_include;$(SolutionDir)..\VulkanEngineCore\VulkanEngineCore;$(SolutionDir)..\VulkanEngineCore\External\imgui;$(SolutionDir)..\VulkanEngineCore\External\imgui\backends;$(SolutionDir)..\VulkanEngineCore\External\glfw\include;$(SolutionDir)..\VulkanEngineCore\External\VulkanMemoryAllocator\include;$(SolutionDir)..\VulkanEngineCore\External\SPIRV-Reflect;$(SolutionDir)..\VulkanEngineCore\External\json\include;$(SolutionDir)..\VulkanGameEngine\VulkanEngineDLL;$(SolutionDir)..\VulkanGameEngine\External;$(SolutionDir)..\VulkanGameEngine\External\LodePNG;$(SolutionDir)..\VulkanGameEngine\External\xxHash;$(SolutionDir)..\VulkanGameEngine\External\glm;$(SolutionDir)..\VulkanGameEngine\External\stb;$(SolutionDir)..\VulkanGameEngine\External\entt\src;$(SolutionDir)..\VulkanGameEngine\External\sol2\include;$(SolutionDir)..\VulkanGameEngine\External\lua\src;C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\8.0.26\runtimes\win-x64\native;C:\Program Files\RenderDoc;C:\VulkanSDK\1.4.328.1\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)x64\Debug;$(SolutionDir)..\VulkanEngineCore\x64\Debug;$(SolutionDir)..\VulkanGameEngine\x64\Debug;C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\8.0.26\runtimes\win-x64\native;$(SolutionDir)..\VulkanGameEngine\External\lua\src;$(SolutionDir)..\VulkanGameEngine\External\ktx\Release;$(SolutionDir)..\VulkanEngineCore\External\glfw\src\Release;C:\VulkanSDK\1.4.328.1\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -155,7 +155,6 @@
     <ClInclude Include="TextureSamplers.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\VulkanGameEngine\External\LodePNG\lodepng.cpp" />
     <ClCompile Include="FrameTimer.cpp" />
     <ClCompile Include="MaterialBakerSystem.cpp" />
     <ClCompile Include="MaterialMemoryPoolSystem.cpp" />
