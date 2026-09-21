@@ -130,7 +130,7 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
     m.AmbientOcclusionMap = TextureExists(json, "AmbientOcclusionMap");
     m.EmissionMap = TextureExists(json, "EmissionMap");
     m.ClearCoatColorMap = TextureExists(json, "ClearCoatColorMap");
-    m.ClearCoatPropertiesMap = TextureExists(json, "ClearCoatPropertyMap");
+    m.ClearCoatPropertiesMap = TextureExists(json, "ClearCoatPropertiesMap");
     m.SheenMap = TextureExists(json, "SheenMap");
     m.SheenPropertiesMap = TextureExists(json, "SheenPropertiesMap");
     m.SSSColorMap = TextureExists(json, "SubSurfaceScatteringColorMap");

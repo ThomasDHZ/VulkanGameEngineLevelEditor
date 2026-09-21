@@ -228,16 +228,17 @@ void TextureBakerSystem::ExportToPng(const String& fileName, Texture& texture, u
         .imageExtent = {width, height, 1}
     };
 
-    VkMemoryBarrier memBarrier
-    {
+    VkMemoryBarrier mem{
         .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
         .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
         .dstAccessMask = VK_ACCESS_HOST_READ_BIT
     };
 
     vkCmdCopyImageToBuffer(cmd, texture.texture.TextureImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer, 1, &region);
-    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &memBarrier, 0, nullptr, 0, nullptr);
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT,
+        0, 1, &mem, 0, nullptr, 0, nullptr);
     vulkan.CommandBuffer().EndSingleUseCommand(cmd);
+    vmaInvalidateAllocation(allocator, stagingAlloc, 0, VK_WHOLE_SIZE);
     texture.texture.TransitionImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     void* mapped = allocInfoOut.pMappedData;
