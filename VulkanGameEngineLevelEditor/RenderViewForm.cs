@@ -84,7 +84,7 @@ namespace VulkanGameEngineLevelEditor
             _callbackHandle = GCHandle.Alloc(callback);
             VulkanSystem.CreateLogMessageCallback(callback);
 
-            LoadExports("VulkanEngineInterop.dll");
+            LoadExports("../x64/Debug/VulkanEngineInterop.dll");
             string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\GBufferRenderPass.json");
             RenderPassLoader awer = JsonConvert.DeserializeObject<RenderPassLoader>(jsonContent);
 

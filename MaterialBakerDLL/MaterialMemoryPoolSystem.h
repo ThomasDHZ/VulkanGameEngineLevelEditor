@@ -30,12 +30,12 @@ struct MaterialBakerBufferHeader
 
 struct ImportMaterial
 {
-    vec3  Albedo;
-    vec3  ClearcoatTint;
-    vec3  SheenColor;
-    vec3  SSSColor;
-    vec3  AttenuationColor;
-    vec3  Emission;
+    float  Albedo[3];
+    float  ClearcoatTint[3];
+    float  SheenColor[3];
+    float  SSSColor[3];
+    float  AttenuationColor[3];
+    float  Emission[3];
 
     float Metallic;
     float Roughness;
@@ -147,18 +147,3 @@ inline MaterialMemoryPoolSystem& MaterialMemoryPoolSystem::Get()
     static MaterialMemoryPoolSystem instance;
     return instance;
 }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_StartUp();
-    DLL_EXPORT uint32										              MaterialMemoryPoolSystem_AllocateObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate);
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateMemoryPool(Vector<VulkanPipeline>& pipelineList);
-    DLL_EXPORT ImportMaterial&                                            MaterialMemoryPoolSystem_UpdateMaterial(uint32 index);
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateTextureDescriptorSet(Texture& texture, uint binding);
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateDataBufferDescriptorSet(uint32 vulkanBufferIndex, uint binding);
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_FreeObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate, uint32 index);
-    DLL_EXPORT void                                                       MaterialMemoryPoolSystem_BakerResetMemoryPool();
-#ifdef __cplusplus
-}
-#endif

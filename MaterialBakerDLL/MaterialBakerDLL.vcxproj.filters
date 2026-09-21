@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\External">
+      <UniqueIdentifier>{539ad63b-778d-4fb2-bd8c-65acb377e3c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interop">
+      <UniqueIdentifier>{ca735dc1-7739-464a-8df0-06668584854d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Interop">
+      <UniqueIdentifier>{73ecc0f0-5868-47a0-a9d3-3ecdab7bc509}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MaterialBakerSystem.h">
@@ -30,11 +39,8 @@
     <ClInclude Include="DLL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FrameTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemClock.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="MaterialBakerSystemDLL.h">
+      <Filter>Header Files\Interop</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -50,14 +56,11 @@
     <ClCompile Include="TextureSamplers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FrameTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SystemClock.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\VulkanGameEngine\External\LodePNG\lodepng.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\External</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialBakerSystemDLL.cpp">
+      <Filter>Source Files\Interop</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

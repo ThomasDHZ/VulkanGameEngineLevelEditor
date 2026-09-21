@@ -13,9 +13,6 @@ MaterialBakerSystem& materialBakerSystem = MaterialBakerSystem::Get();
 
 void MaterialBakerSystem::BakeMaterial(const String& importMaterialPath, const String& exportMaterialPath)
 {
-    vulkan.VulkanSetUp(configSystem.WindowResolution, configSystem.RenderResolution);
-    bufferSystem.SetUpVmaAllocation();
-    memoryPoolSystem.StartUp();
     materialMemoryPoolSystem.StartUp();
 
     nlohmann::json json = fileSystem.LoadJsonFile(importMaterialPath.c_str());
@@ -25,9 +22,24 @@ void MaterialBakerSystem::BakeMaterial(const String& importMaterialPath, const S
     renderPassLoader.RenderPassResolution = materialSetResolution;
     AssetBakerRenderPassId = renderSystem.LoadRenderPass(renderPassLoader, materialMemoryPoolSystem.GetMemoryPoolInfo());
     
+    VulkanRenderPass renderPass = renderSystem.FindRenderPass(AssetBakerRenderPassId);
+    Vector<PushConstantUpdateRule> pushConstantRules = renderPass.SubPassList().front().front().PushConstantUpdates;
+
     LoadMaterial(importMaterialPath);
-    textureSystem.GenerateTexture(AssetBakerRenderPassId);
-    textureBakerSystem.BakeTexture(importMaterialPath, exportMaterialPath, AssetBakerRenderPassId);
+    for (int x = 0; x < 2; x++)
+    {
+        for (int y = 0; y < pushConstantRules.size(); y++)
+        {
+            if (pushConstantRules[y].Variable == "MaterialBakerSubPassIndex")
+            {
+                pushConstantRules[y].Value[0] = std::to_string(x);
+            }
+        }
+
+        textureSystem.GenerateTexture(AssetBakerRenderPassId, &pushConstantRules);
+        vkQueueWaitIdle(vulkan.GraphicsQueue());
+        textureBakerSystem.BakeTexture(importMaterialPath, exportMaterialPath, AssetBakerRenderPassId, x);
+    }
     vkQueueWaitIdle(vulkan.GraphicsQueue());
     CleanRenderPass();
     materialMemoryPoolSystem.BakerResetMemoryPool();
@@ -75,12 +87,12 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
     auto AttenuationColor = v3(json["AttenuationColor"], 1, 1, 1);
     auto Emission = v3(json["Emission"], 0, 0, 0);
 
- /*   memcpy(m.Albedo, Albedo.data(), 12);
+    memcpy(m.Albedo, Albedo.data(), 12);
     memcpy(m.ClearcoatTint, ClearcoatTint.data(), 12);
     memcpy(m.SheenColor, SheenColor.data(), 12);
     memcpy(m.SSSColor, SSSColor.data(), 12);
     memcpy(m.AttenuationColor, AttenuationColor.data(), 12);
-    memcpy(m.Emission, Emission.data(), 12);*/
+    memcpy(m.Emission, Emission.data(), 12);
 
     m.Metallic = json.value("Metallic", 0.0f);
     m.Roughness = json.value("Roughness", 0.5f);
@@ -118,15 +130,15 @@ void MaterialBakerSystem::LoadMaterial(const String& materialPath)
     m.AmbientOcclusionMap = TextureExists(json, "AmbientOcclusionMap");
     m.EmissionMap = TextureExists(json, "EmissionMap");
     m.ClearCoatColorMap = TextureExists(json, "ClearCoatColorMap");
-    m.ClearCoatPropertiesMap = json.contains("ClearCoatPropertiesMap") ? TextureExists(json, "ClearCoatPropertiesMap") : TextureExists(json, "ClearCoatPropertyMap");
+    m.ClearCoatPropertiesMap = TextureExists(json, "ClearCoatPropertyMap");
     m.SheenMap = TextureExists(json, "SheenMap");
     m.SheenPropertiesMap = TextureExists(json, "SheenPropertiesMap");
-    m.SSSColorMap = json.contains("SSSColorMap") ? TextureExists(json, "SSSColorMap") : TextureExists(json, "SubSurfaceScatteringColorMap");
-    m.SSSPropertiesMap = json.contains("SSSPropertiesMap") ? TextureExists(json, "SSSPropertiesMap") : TextureExists(json, "SubSurfaceScatteringPropertiesMap");
-    m.AttenuationColorMap = json.contains("AttenuationColorMap") ? TextureExists(json, "AttenuationColorMap") : TextureExists(json, "AttenuationTexture");
-    m.AttenuationPropertiesMap = json.contains("AttenuationPropertiesMap") ? TextureExists(json, "AttenuationPropertiesMap") : TextureExists(json, "AttenuationPropertiesMap");
+    m.SSSColorMap = TextureExists(json, "SubSurfaceScatteringColorMap");
+    m.SSSPropertiesMap = TextureExists(json, "SubSurfaceScatteringPropertiesMap");
+    m.AttenuationColorMap = TextureExists(json, "AttenuationColorMap");
+    m.AttenuationPropertiesMap = TextureExists(json, "AttenuationPropertiesTexture");
     m.AnisotropyPropertiesMap = TextureExists(json, "AnisotropyPropertiesMap");
-    m.IORMap = TextureExists(json, "IORMap");
+    m.IORMap = TextureExists(json, "IORTexture");
 
     m.ShadingModel = json.value("ShadingModel", 0u);
     m.FeatureMask = json.value("FeatureMask", 0u);
@@ -154,52 +166,4 @@ uint32 MaterialBakerSystem::AddToMaterialMemoryPool(Texture& texture)
     materialMemoryPoolSystem.UpdateTextureDescriptorSet(texture, materialMemoryPoolSystem.BakerTexture2DBinding);
     materialMemoryPoolSystem.UpdateMemoryPool();
     return texture.gpuTextureBufferIndex;
-}
-
-void MaterialBakerSystem_BakeMaterial(const char* importMaterialPath, const char* exportMaterialPath)
-{
-    materialBakerSystem.BakeMaterial(importMaterialPath, exportMaterialPath);
-}
-
-Vector<RenderPassNode> MaterialBakerSystem::CreateDrawCommands(VkCommandBuffer& commandBuffer, const float& deltaTime)
-{
-    Vector<RenderPassNode> renderPassNodeList;
-    for (auto& renderPassGuid : RenderPassDrawList)
-    {
-        const VulkanRenderPass& renderPass = renderSystem.FindRenderPass(renderPassGuid);
-
-        uint32 maxMipLevelCount = 1;
-        Vector<Vector<VulkanDrawMessage>> vulkanDrawMessageList;
-        for (auto& renderPassList : renderPass.SubPassList())
-        {
-            Vector<VulkanDrawMessage> vulkanSubPassMessageList;
-            for (auto& subPass : renderPassList)
-            {
-                for (auto& inputTexture : subPass.InputTextureList)
-                {
-                    const Texture& texture = renderSystem.FindRenderPassAttachment(inputTexture);
-                    if (maxMipLevelCount < texture.texture.MipMapLevels()) maxMipLevelCount = texture.texture.MipMapLevels() - 1;
-                }
-
-                vulkanSubPassMessageList.emplace_back(VulkanDrawMessage
-                    {
-                        .RenderPassGuid = renderPassGuid,
-                        .PipelinePackageGuid = subPass.PipelinePackageId,
-                        .PushConstant = subPass.ShaderPushConstant,
-                        .PushConstantUpdateRules = subPass.PushConstantUpdates,
-                        .RenderPassInputs = subPass.InputTextureList,
-                        .RenderPassOutputs = subPass.OutputTextureList,
-                        .OffScreenRenderPass = subPass.OffScreenFrameBuffer,
-                    });
-            }
-            vulkanDrawMessageList.emplace_back(vulkanSubPassMessageList);
-        }
-        renderPassNodeList.emplace_back(RenderPassNode
-            {
-               .RenderPassGuid = renderPassGuid,
-               .SubPassDrawMessage = vulkanDrawMessageList,
-               .MipCount = maxMipLevelCount
-            });
-    }
-    return renderPassNodeList;
 }

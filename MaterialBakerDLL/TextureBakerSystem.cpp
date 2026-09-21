@@ -18,13 +18,15 @@
 
 TextureBakerSystem& textureBakerSystem = TextureBakerSystem::Get();
 
-void TextureBakerSystem::BakeTexture(const String& materialLoader, const String& baseFilePath, VkGuid renderPassId)
+void TextureBakerSystem::BakeTexture(const String& materialLoader, const String& baseFilePath, VkGuid renderPassId, uint materialBakerSubPassIndex)
 {
-    Vector<Texture> attachmentTextureList = renderSystem.FindRenderPassAttachmentList(renderPassId);
-    if (attachmentTextureList.empty())
+    Vector<Texture> attachmentTextureList;
+    if (materialBakerSubPassIndex == 0) attachmentTextureList = renderSystem.FindRenderPassAttachmentList(renderPassId);
+    else
     {
-        fprintf(stderr, "No rendered textures found for render pass %s\n", renderPassId.ToString().c_str());
-        return;
+        Vector<Texture> textureList = renderSystem.FindRenderPassAttachmentList(renderPassId);
+        attachmentTextureList.emplace_back(textureList[kFeatureAAttachment]);
+        attachmentTextureList.emplace_back(textureList[kFeatureBAttachment]);
     }
 
     nlohmann::json importJson = fileSystem.LoadJsonFile(materialLoader.c_str());
@@ -45,22 +47,28 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
         const bool isEmission = (x == kEmissionAttachment);
 
         String textureAttachment;
-        switch (x)
+        if (materialBakerSubPassIndex == 0)
         {
-            case  kAlbedoAttachment:                textureAttachment = "AlbedoData";                break;
-            case  kNormalDataAttachment:            textureAttachment = "NormalHeightData";          break;
-            case  kMROAttachment:                   textureAttachment = "MROData";                   break;
-            case  kFeatureAAttachment:              textureAttachment = "FeatureAData";              break;
-            case  kFeatureBAttachment:              textureAttachment = "FeatureBData";              break;
-            case  kFeatureCAttachment:              textureAttachment = "FeatureCData";              break;
-            case  kFeatureDAttachment:              textureAttachment = "FeatureDData";              break;
-            case  kTranslucentAttachment:           textureAttachment = "TranslucentData";           break;
-            case  kTranslucentPropertiesAttachment: textureAttachment = "TranslucentPropertiesData"; break;
-            case  kEmissionAttachment:              textureAttachment = "EmissionData";              break;
-            default: fprintf(stderr, "Unknown attachment index %zu\n", x);                           continue;
+            switch (x)
+            {
+                case  kAlbedoAttachment:                textureAttachment = "AlbedoData";                break;
+                case  kNormalDataAttachment:            textureAttachment = "NormalHeightData";          break;
+                case  kMROAttachment:                   textureAttachment = "MROData";                   break;
+                case  kFeatureAAttachment:              textureAttachment = "FeatureAData";              break;
+                case  kFeatureBAttachment:              textureAttachment = "FeatureBData";              break;
+                case  kFeatureCAttachment:              textureAttachment = "FeatureCData";              break;
+                case  kFeatureDAttachment:              textureAttachment = "FeatureDData";              break;
+                case  kEmissionAttachment:              textureAttachment = "EmissionData";              break;
+                default: fprintf(stderr, "Unknown attachment index %zu\n", x);                           continue;
+            }
+        }
+        else
+        {
+            if (x == 0) textureAttachment = "TranslucentData";
+            else if (x == 1) textureAttachment = "TranslucentPropertiesData";
         }
 
-        const String suffix = GetAttachmentSuffix(x);
+        const String suffix = GetAttachmentSuffix(x, materialBakerSubPassIndex);
         const std::filesystem::path ktxPath = textureName + suffix + ".ktx2";
         const std::filesystem::path previewPngPath = textureName + suffix + ".png";
 
@@ -119,7 +127,7 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
         CloseHandle(pi.hProcess);
 
         std::error_code ec;
-        std::filesystem::remove(previewPngPath, ec);
+      //  std::filesystem::remove(previewPngPath, ec);
 
         if (waitResult != WAIT_OBJECT_0 || exitCode != 0 ||
             !std::filesystem::exists(ktxPath) || std::filesystem::file_size(ktxPath) == 0)
@@ -220,10 +228,17 @@ void TextureBakerSystem::ExportToPng(const String& fileName, Texture& texture, u
         .imageExtent = {width, height, 1}
     };
 
-    vkCmdCopyImageToBuffer(cmd, texture.texture.TextureImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        stagingBuffer, 1, &region);
+    VkMemoryBarrier memBarrier
+    {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+        .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+        .dstAccessMask = VK_ACCESS_HOST_READ_BIT
+    };
 
+    vkCmdCopyImageToBuffer(cmd, texture.texture.TextureImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer, 1, &region);
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &memBarrier, 0, nullptr, 0, nullptr);
     vulkan.CommandBuffer().EndSingleUseCommand(cmd);
+    texture.texture.TransitionImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     void* mapped = allocInfoOut.pMappedData;
     bool needsUnmap = false;
@@ -487,22 +502,27 @@ void TextureBakerSystem::DestroyVMATextureBuffer(RawMipReadback& data)
     vmaDestroyBuffer(bufferSystem.VmaAllocatorHandle(), data.buffer, data.allocation);
 }
 
-String TextureBakerSystem::GetAttachmentSuffix(uint x)
+String TextureBakerSystem::GetAttachmentSuffix(uint x, uint materialBakerSubPassIndex)
 {
     String suffix;
-    switch (x)
+    if (materialBakerSubPassIndex == 0)
     {
-        case 0:  suffix = "_Albedo";                break;
-        case 1:  suffix = "_NormalHeight";          break;
-        case 2:  suffix = "_MRO";                   break;
-        case 3:  suffix = "_FeatureA";              break;
-        case 4:  suffix = "_FeatureB";              break;
-        case 5:  suffix = "_FeatureC";              break;
-        case 6:  suffix = "_FeatureD";              break;
-        case 7:  suffix = "_Translucent";           break;
-        case 8:  suffix = "_TranslucentProperties"; break;
-        case 9:  suffix = "_Emission";              break;
-        default: suffix = "_Attachment" + std::to_string(x);
+        switch (x)
+        {
+            case  kAlbedoAttachment:                suffix = "_Albedo";                break;
+            case  kNormalDataAttachment:            suffix = "_NormalHeight";          break;
+            case  kMROAttachment:                   suffix = "_MRO";                   break;
+            case  kFeatureAAttachment:              suffix = "_FeatureA";              break;
+            case  kFeatureBAttachment:              suffix = "_FeatureB";              break;
+            case  kFeatureCAttachment:              suffix = "_FeatureC";              break;
+            case  kFeatureDAttachment:              suffix = "_FeatureD";              break;
+            case  kEmissionAttachment:              suffix = "_Emission";              break;
+        }
+    }
+    else
+    {
+        if (x == 0) suffix = "_TranslucentData";
+        else if (x == 1) suffix = "_TranslucentPropertiesData";
     }
     return suffix;
 }

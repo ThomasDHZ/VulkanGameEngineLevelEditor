@@ -23,18 +23,17 @@ private:
     MaterialBakerSystem& operator=(MaterialBakerSystem&&) = delete;
 
     Vector<Texture>                         TextureList;
-
-    uint                                    TextureExists(nlohmann::json& j, const char* key);
-    uint                                    LoadTexture(nlohmann::json& json);
-    uint32									AddToMaterialMemoryPool(Texture& texture);
-    void                                    CleanRenderPass();
-public:
     VkGuid                                  AssetBakerRenderPassId;
     Vector<VkGuid>                          RenderPassDrawList;
+
     void                                    LoadMaterial(const String& materialPath);
+    uint                                    LoadTexture(nlohmann::json& json);
+    uint32									AddToMaterialMemoryPool(Texture& texture);
+    uint                                    TextureExists(nlohmann::json& j, const char* key);
+    void                                    CleanRenderPass();
+public:
 
     DLL_EXPORT void BakeMaterial(const String& importMaterialPath, const String& exportMaterialPath);
-    Vector<RenderPassNode> CreateDrawCommands(VkCommandBuffer& commandBuffer, const float& deltaTime);
 };
 extern DLL_EXPORT MaterialBakerSystem& materialBakerSystem;
 inline MaterialBakerSystem& MaterialBakerSystem::Get()
@@ -42,11 +41,3 @@ inline MaterialBakerSystem& MaterialBakerSystem::Get()
     static MaterialBakerSystem instance;
     return instance;
 }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    DLL_EXPORT void MaterialBakerSystem_BakeMaterial(const char* importMaterialPath, const char* exportMaterialPath);
-#ifdef __cplusplus
-}
-#endif

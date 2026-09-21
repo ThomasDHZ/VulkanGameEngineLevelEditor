@@ -147,19 +147,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DLL.h" />
-    <ClInclude Include="FrameTimer.h" />
     <ClInclude Include="MaterialBakerSystem.h" />
+    <ClInclude Include="MaterialBakerSystemDLL.h" />
     <ClInclude Include="MaterialMemoryPoolSystem.h" />
-    <ClInclude Include="SystemClock.h" />
     <ClInclude Include="TextureBakerSystem.h" />
     <ClInclude Include="TextureSamplers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\VulkanGameEngine\External\LodePNG\lodepng.cpp" />
-    <ClCompile Include="FrameTimer.cpp" />
     <ClCompile Include="MaterialBakerSystem.cpp" />
+    <ClCompile Include="MaterialBakerSystemDLL.cpp" />
     <ClCompile Include="MaterialMemoryPoolSystem.cpp" />
-    <ClCompile Include="SystemClock.cpp" />
     <ClCompile Include="TextureBakerSystem.cpp" />
     <ClCompile Include="TextureSamplers.cpp" />
   </ItemGroup>

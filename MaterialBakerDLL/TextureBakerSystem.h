@@ -17,8 +17,6 @@ enum RenderPassAttachmentEnum
     kFeatureBAttachment,
     kFeatureCAttachment,
     kFeatureDAttachment,
-    kTranslucentAttachment,
-    kTranslucentPropertiesAttachment,
     kEmissionAttachment
 };
 
@@ -72,13 +70,13 @@ private:
     TextureBakerSystem& operator=(TextureBakerSystem&&) = delete;
 
     Vector<byte>    ConvertMipToRGBA8(const void* rawData, size_t rawSize, uint32 width, uint32 height, VkFormat srcFormat);
-    String          GetAttachmentSuffix(uint x);
+    String          GetAttachmentSuffix(uint x, uint materialBakerSubPassIndex);
     RawMipReadback  ConvertToRawTextureData(Texture& importTexture, uint32 mipLevel);
     void            DestroyVMATextureBuffer(RawMipReadback& data);
     void            ExportToPng(const String& fileName, Texture& texture, uint32 mipLevel = 0, bool flipY = true);
 
 public:
-    DLL_EXPORT void BakeTexture(const String& materialLoader, const String& baseFilePath, VkGuid renderPassId);
+    DLL_EXPORT void BakeTexture(const String& materialLoader, const String& baseFilePath, VkGuid renderPassId, uint materialBakerSubPassIndex);
 };
 extern DLL_EXPORT TextureBakerSystem& textureBakerSystem;
 inline TextureBakerSystem& TextureBakerSystem::Get()
