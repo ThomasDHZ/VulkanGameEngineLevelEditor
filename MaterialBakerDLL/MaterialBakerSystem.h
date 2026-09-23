@@ -8,6 +8,7 @@
 #include <TextureSystem.h>
 #include <VulkanTexture.h>
 #include <RenderSystem.h>
+#include "MaterialMemoryPoolSystem.h"
 
 class MaterialBakerSystem
 {
@@ -26,14 +27,14 @@ private:
     VkGuid                                  AssetBakerRenderPassId;
     Vector<VkGuid>                          RenderPassDrawList;
 
-    void                                    LoadMaterial(const String& materialPath);
+    ImportMaterial                    LoadMaterial(nlohmann::json& materialJson);
     uint                                    LoadTexture(nlohmann::json& json);
     uint32									AddToMaterialMemoryPool(Texture& texture);
     uint                                    TextureExists(nlohmann::json& j, const char* key);
     void                                    CleanRenderPass();
 public:
 
-    DLL_EXPORT void BakeMaterial(const String& importMaterialPath, const String& exportMaterialPath);
+    DLL_EXPORT void BakeMaterial(const String& importMaterialJson);
 };
 extern DLL_EXPORT MaterialBakerSystem& materialBakerSystem;
 inline MaterialBakerSystem& MaterialBakerSystem::Get()

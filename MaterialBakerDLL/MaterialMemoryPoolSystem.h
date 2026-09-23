@@ -63,6 +63,7 @@ struct ImportMaterial
     float ThinFilmWeight;
     float ThinFilmThickness;
     float EmissionIntensity;
+    float AlphaCutOff;
 
     uint  AlbedoMap;
     uint  NormalMap;
@@ -86,7 +87,7 @@ struct ImportMaterial
     uint  ShadingModel;
     uint  FeatureMask;
 };
-static_assert(sizeof(ImportMaterial) == 59 * 4);
+static_assert(sizeof(ImportMaterial) == 60 * 4);
 
 class MaterialMemoryPoolSystem
 {

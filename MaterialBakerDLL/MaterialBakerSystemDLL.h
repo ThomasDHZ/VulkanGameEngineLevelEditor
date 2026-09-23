@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	DLL_EXPORT void MaterialBakerSystem_BakeMaterial(const char* importMaterialPath, const char* exportMaterialPath);
+	DLL_EXPORT void MaterialBakerSystem_BakeMaterial(const char* importMaterialJson);
 #ifdef __cplusplus
 }
 #endif

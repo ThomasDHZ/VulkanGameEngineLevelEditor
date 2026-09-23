@@ -74,9 +74,15 @@ private:
     RawMipReadback  ConvertToRawTextureData(Texture& importTexture, uint32 mipLevel);
     void            DestroyVMATextureBuffer(RawMipReadback& data);
     void            ExportToPng(const String& fileName, Texture& texture, uint32 mipLevel = 0, bool flipY = true);
+    void            ExportJson();
+    float           HalfToFloat(uint16 h);
+    void            FloatToRGBE(float r, float g, float b, byte out[4]);
+    bool            ExportToHdr(const String& fileName, Texture& texture, uint32 mipLevel, bool flipY);
+    nlohmann::json  TextureSlotJson(const String& path, VkFormat textureByteFormat);
+    nlohmann::json  SamplerAtlasJson();
 
 public:
-    DLL_EXPORT void BakeTexture(const String& materialLoader, const String& baseFilePath, VkGuid renderPassId, uint materialBakerSubPassIndex);
+    DLL_EXPORT  nlohmann::json BakeTexture(const String& MaterialName, VkGuid renderPassId, uint materialBakerSubPassIndex);
 };
 extern DLL_EXPORT TextureBakerSystem& textureBakerSystem;
 inline TextureBakerSystem& TextureBakerSystem::Get()

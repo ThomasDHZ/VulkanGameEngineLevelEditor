@@ -18,8 +18,12 @@
 
 TextureBakerSystem& textureBakerSystem = TextureBakerSystem::Get();
 
-void TextureBakerSystem::BakeTexture(const String& materialLoader, const String& baseFilePath, VkGuid renderPassId, uint materialBakerSubPassIndex)
+nlohmann::json TextureBakerSystem::BakeTexture(const String& materialName, VkGuid renderPassId, uint materialBakerSubPassIndex)
 {
+    String material = materialName;
+    if (const size_t pos = material.find(".json"); pos != String::npos) material.erase(pos, 5);
+    if (const size_t pos = material.find("Import"); pos != String::npos) material.erase(pos, 6);
+
     Vector<Texture> attachmentTextureList;
     if (materialBakerSubPassIndex == 0) attachmentTextureList = renderSystem.FindRenderPassAttachmentList(renderPassId);
     else
@@ -28,60 +32,73 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
         attachmentTextureList.emplace_back(textureList[kFeatureAAttachment]);
         attachmentTextureList.emplace_back(textureList[kFeatureBAttachment]);
     }
-
-    nlohmann::json importJson = fileSystem.LoadJsonFile(materialLoader.c_str());
-
-    String textureName = baseFilePath;
-    if (const size_t pos = textureName.find("Import"); pos != String::npos) textureName.erase(pos, 6);
+    nlohmann::json importJson = fileSystem.LoadJsonFile(configSystem.BakerImportMaterialPath + materialName);
 
     uint32 requestedMips = 1;
     importJson.at("ExportMipMapCount").get_to(requestedMips);
-
     const char* nvttExe = R"(C:\Program Files\NVIDIA Corporation\NVIDIA Texture Tools\nvtt_export.exe)";
 
+    nlohmann::json exportMaterial;
     for (size_t x = 0; x < attachmentTextureList.size(); ++x)
     {
         Texture& importTexture = attachmentTextureList[x];
+        const VkFormat srcFormat = importTexture.texture.TextureByteFormat();
 
-        const bool isAlbedo = (x == kAlbedoAttachment);
-        const bool isEmission = (x == kEmissionAttachment);
+        const bool isAlbedo = (materialBakerSubPassIndex == 0 && x == kAlbedoAttachment);
+        const bool isEmission = (materialBakerSubPassIndex == 0 && x == kEmissionAttachment);
+        const bool isNormalMap =
+            srcFormat == VK_FORMAT_R16G16_UNORM ||
+            srcFormat == VK_FORMAT_R16G16_SNORM ||
+            srcFormat == VK_FORMAT_R16G16B16A16_SNORM ||
+            srcFormat == VK_FORMAT_R8G8_SNORM;
 
-        String textureAttachment;
-        if (materialBakerSubPassIndex == 0)
-        {
-            switch (x)
-            {
-                case  kAlbedoAttachment:                textureAttachment = "AlbedoData";                break;
-                case  kNormalDataAttachment:            textureAttachment = "NormalHeightData";          break;
-                case  kMROAttachment:                   textureAttachment = "MROData";                   break;
-                case  kFeatureAAttachment:              textureAttachment = "FeatureAData";              break;
-                case  kFeatureBAttachment:              textureAttachment = "FeatureBData";              break;
-                case  kFeatureCAttachment:              textureAttachment = "FeatureCData";              break;
-                case  kFeatureDAttachment:              textureAttachment = "FeatureDData";              break;
-                case  kEmissionAttachment:              textureAttachment = "EmissionData";              break;
-                default: fprintf(stderr, "Unknown attachment index %zu\n", x);                           continue;
-            }
-        }
-        else
-        {
-            if (x == 0) textureAttachment = "TranslucentData";
-            else if (x == 1) textureAttachment = "TranslucentPropertiesData";
-        }
-
-        const String suffix = GetAttachmentSuffix(x, materialBakerSubPassIndex);
-        const std::filesystem::path ktxPath = textureName + suffix + ".ktx2";
-        const std::filesystem::path previewPngPath = textureName + suffix + ".png";
-
+        const String suffix = GetAttachmentSuffix(static_cast<uint>(x), materialBakerSubPassIndex);
+        const std::filesystem::path ktxPath = std::filesystem::current_path().string() + "/../../VulkanGameEngine/Assets/" + configSystem.BakerExportTexturePath + material + "_" + suffix + ".ktx2";
+        const std::filesystem::path previewPngPath = std::filesystem::current_path().string() + "/../..//VulkanGameEngine/Assets/" + configSystem.BakerExportTexturePath + material + "_" + suffix + ".png";
+        const std::filesystem::path hdrPath = std::filesystem::current_path().string() + "/../../VulkanGameEngine/Assets/" + configSystem.BakerExportTexturePath + material + "_" + suffix + ".hdr";
         if (std::filesystem::exists(ktxPath))
         {
             std::filesystem::remove(ktxPath);
             printf("Removed existing ktx: %s\n", ktxPath.string().c_str());
         }
-
         ExportToPng(previewPngPath.string(), importTexture, 0, false);
-        if (!std::filesystem::exists(previewPngPath) || std::filesystem::file_size(previewPngPath) == 0)
+
+        String nvttFormat;
+        VkFormat exportFormat;
+        String transferFn;
+        std::filesystem::path nvttInput = previewPngPath;
+
+        if (isEmission)
         {
-            fprintf(stderr, "ExportToPng failed for %s\n", textureAttachment.c_str());
+            nvttFormat = "bc6";
+            exportFormat = VK_FORMAT_BC6H_UFLOAT_BLOCK;
+            transferFn = "linear";
+            if (!ExportToHdr(hdrPath.string(), importTexture, 0, false) ||
+                !std::filesystem::exists(hdrPath) ||
+                std::filesystem::file_size(hdrPath) == 0)
+            {
+                fprintf(stderr, "ExportToHdr failed for %s\n", hdrPath.string().c_str());
+                continue;
+            }
+            nvttInput = hdrPath;
+        }
+        else if (isAlbedo)
+        {
+            nvttFormat = "bc7";
+            exportFormat = VK_FORMAT_BC7_SRGB_BLOCK;
+            transferFn = "srgb";
+        }
+        else
+        {
+            nvttFormat = "bc7";
+            exportFormat = VK_FORMAT_BC7_UNORM_BLOCK;
+            transferFn = "linear";
+        }
+
+        if (!isEmission &&
+            (!std::filesystem::exists(previewPngPath) || std::filesystem::file_size(previewPngPath) == 0))
+        {
+            fprintf(stderr, "ExportToPng failed for %s\n", previewPngPath.string().c_str());
             continue;
         }
 
@@ -90,27 +107,28 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
         const uint32 actualMips = (requestedMips == UINT32_MAX) ? maxMips : std::clamp(requestedMips, 1u, maxMips);
         const bool generateMips = (actualMips > 1);
 
-        const char* format = "bc7";
-        const char* transfer = isAlbedo ? "srgb" : "linear";
-        std::string cmd = fmt::format("\"{}\" \"{}\" -o \"{}\" --format {} --quality production --zcmp 22 --export-transfer-function {}", nvttExe, previewPngPath.string(), ktxPath.string(), format, transfer);
+        String cmd = String(nvttExe);
+        cmd += " " + nvttInput.string();
+        cmd += " -o " + ktxPath.string();
+        cmd += " --format " + nvttFormat;
+        cmd += " --quality production --zcmp 22 --export-transfer-function " + transferFn;
+        if (isNormalMap) cmd += " --normal-alpha unchanged";
         if (generateMips)
         {
             cmd += fmt::format(" --mips --mip-filter kaiser --max-mip-count {}", actualMips);
-            if (isAlbedo) cmd += " --mip-gamma-correct --mip-pre-alpha";
+            if (isAlbedo)
+                cmd += " --mip-gamma-correct --mip-pre-alpha";
         }
-        else
-        {
-            cmd += " --no-mips --max-mip-count 1";
-        }
-        printf("Launching NVTT for %s:\n%s\n", textureAttachment.c_str(), cmd.c_str());
+        else cmd += " --no-mips --max-mip-count 1";
+        printf("Launching NVTT for %s:\n%s\n", suffix.c_str(), cmd.c_str());
 
         STARTUPINFOA si{};
         si.cb = sizeof(si);
+
         PROCESS_INFORMATION pi{};
         if (!CreateProcessA(nullptr, cmd.data(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
         {
             fprintf(stderr, "CreateProcess failed (%lu): %s\n", GetLastError(), cmd.c_str());
-            std::filesystem::remove(previewPngPath);
             continue;
         }
 
@@ -118,7 +136,7 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
         do
         {
             waitResult = WaitForSingleObject(pi.hProcess, 30 * 1000);
-            if (waitResult == WAIT_TIMEOUT) printf("Still baking %s...\n", textureAttachment.c_str());
+            if (waitResult == WAIT_TIMEOUT) printf("Still baking %s...\n", suffix.c_str());
         } while (waitResult == WAIT_TIMEOUT);
 
         DWORD exitCode = 1;
@@ -127,17 +145,16 @@ void TextureBakerSystem::BakeTexture(const String& materialLoader, const String&
         CloseHandle(pi.hProcess);
 
         std::error_code ec;
-      //  std::filesystem::remove(previewPngPath, ec);
-
-        if (waitResult != WAIT_OBJECT_0 || exitCode != 0 ||
-            !std::filesystem::exists(ktxPath) || std::filesystem::file_size(ktxPath) == 0)
+        if (isEmission)  std::filesystem::remove(hdrPath, ec);
+        if (waitResult != WAIT_OBJECT_0 || exitCode != 0 || !std::filesystem::exists(ktxPath) || std::filesystem::file_size(ktxPath) == 0)
         {
-            fprintf(stderr, "NVTT failed for %s (wait=%lu exit=%lu)\n", textureAttachment.c_str(), waitResult, exitCode);
+            fprintf(stderr, "NVTT failed for %s (wait=%lu exit=%lu)\n", suffix.c_str(), waitResult, exitCode);
             continue;
         }
-
-        printf("Baked %s -> %s\n", textureAttachment.c_str(), ktxPath.string().c_str());
+        printf("Baked %s -> %s\n", suffix.c_str(), ktxPath.string().c_str());
+        exportMaterial[suffix] = TextureSlotJson(configSystem.BakerExportTexturePath + material + "_" + suffix + ".ktx2", exportFormat);
     }
+    return exportMaterial;
 }
 
 void TextureBakerSystem::ExportToPng(const String& fileName, Texture& texture, uint32 mipLevel, bool flipY)
@@ -304,6 +321,47 @@ void TextureBakerSystem::ExportToPng(const String& fileName, Texture& texture, u
 
     if (needsUnmap) vmaUnmapMemory(allocator, stagingAlloc);
     vmaDestroyBuffer(allocator, stagingBuffer, stagingAlloc);
+}
+
+nlohmann::json TextureBakerSystem::TextureSlotJson(const String& path, VkFormat textureByteFormat)
+{
+    return 
+    {
+        {"ImageType", 1},
+        {"IsSkyBox", false},
+        {"MipMapCount", 1},
+        {"SampleCount", 1},
+        {"SamplerCreateInfo", SamplerAtlasJson()},
+        {"TextureByteFormat", textureByteFormat},
+        {"TextureFilePath", nlohmann::json::array({path})},
+        {"TextureId", VkGuid::Generate().ToString()},
+        {"TextureType", textureByteFormat == 146 ? 1 : 4},
+        {"TextureUsageType", 9}
+    };
+
+}
+
+nlohmann::json TextureBakerSystem::SamplerAtlasJson()
+{
+    return
+    {
+          {"SType", 31},
+          {"MagFilter", 0},
+          {"MinFilter", 0},
+          {"MipmapMode", 0},
+          {"AddressModeU", 2},
+          {"AddressModeV", 2},
+          {"AddressModeW", 2},
+          {"MipLodBias", 0.0},
+          {"AnisotropyEnable", false},
+          {"MaxAnisotropy", 1.0},
+          {"CompareEnable", false},
+          {"CompareOp", 7},
+          {"MinLod", 0.0},
+          {"MaxLod", 0.0},
+          {"BorderColor", 2},
+          {"UnnormalizedCoordinates", false}
+    };
 }
 
 Vector<byte> TextureBakerSystem::ConvertMipToRGBA8(const void* rawData, size_t rawSize, uint32 width, uint32 height, VkFormat srcFormat)
@@ -505,25 +563,117 @@ void TextureBakerSystem::DestroyVMATextureBuffer(RawMipReadback& data)
 
 String TextureBakerSystem::GetAttachmentSuffix(uint x, uint materialBakerSubPassIndex)
 {
-    String suffix;
     if (materialBakerSubPassIndex == 0)
     {
         switch (x)
         {
-            case  kAlbedoAttachment:                suffix = "_Albedo";                break;
-            case  kNormalDataAttachment:            suffix = "_NormalHeight";          break;
-            case  kMROAttachment:                   suffix = "_MRO";                   break;
-            case  kFeatureAAttachment:              suffix = "_FeatureA";              break;
-            case  kFeatureBAttachment:              suffix = "_FeatureB";              break;
-            case  kFeatureCAttachment:              suffix = "_FeatureC";              break;
-            case  kFeatureDAttachment:              suffix = "_FeatureD";              break;
-            case  kEmissionAttachment:              suffix = "_Emission";              break;
+            case  kAlbedoAttachment:     return "AlbedoTexture";               break;
+            case  kNormalDataAttachment: return "NormalTexture";               break;
+            case  kMROAttachment:        return "MROTexture";                  break;
+            case  kFeatureAAttachment:   return "ClearCoatTexture";            break;
+            case  kFeatureBAttachment:   return "SubSurfaceScatteringTexture"; break;
+            case  kFeatureCAttachment:   return "SheenTexture";                break;
+            case  kFeatureDAttachment:   return "AnisotropyTexture";           break;
+            case  kEmissionAttachment:   return "EmissionTexture";             break;
         }
     }
     else
     {
-        if (x == 0) suffix = "_TranslucentData";
-        else if (x == 1) suffix = "_TranslucentPropertiesData";
+        if (x == 0)      return "TranslucentTexture";
+        else if (x == 1) return "TranslucentPropertiesTexture";
     }
-    return suffix;
+    return "Error";
+}
+
+float TextureBakerSystem::HalfToFloat(uint16 h)
+{
+    const uint32 sign = (h >> 15) & 0x1;
+    const uint32 exp = (h >> 10) & 0x1F;
+    const uint32 mant = h & 0x3FF;
+    float f;
+    if (exp == 0) f = (mant / 1024.0f) * std::pow(2.0f, -14.0f);
+    else if (exp == 31) f = mant ? NAN : INFINITY;
+    else f = (1.0f + mant / 1024.0f) * std::pow(2.0f, static_cast<int>(exp) - 15);
+    return sign ? -f : f;
+}
+
+void TextureBakerSystem::FloatToRGBE(float r, float g, float b, byte out[4])
+{
+    r = std::max(r, 0.0f);
+    g = std::max(g, 0.0f);
+    b = std::max(b, 0.0f);
+    const float maxc = std::max(r, std::max(g, b));
+    if (maxc < 1e-32f)
+    {
+        out[0] = out[1] = out[2] = out[3] = 0;
+        return;
+    }
+    int exp = 0;
+    const float n = static_cast<float>(std::frexp(maxc, &exp)) * 256.0f / maxc;
+    out[0] = static_cast<byte>(std::min(r * n, 255.0f));
+    out[1] = static_cast<byte>(std::min(g * n, 255.0f));
+    out[2] = static_cast<byte>(std::min(b * n, 255.0f));
+    out[3] = static_cast<byte>(exp + 128);
+}
+
+// Radiance HDR for NVTT BC6H.
+bool TextureBakerSystem::ExportToHdr(const String& fileName, Texture& texture, uint32 mipLevel, bool flipY)
+{
+    RawMipReadback rb = ConvertToRawTextureData(texture, mipLevel);
+    if (!rb.data || rb.size == 0)
+    {
+        fprintf(stderr, "ExportToHdr: readback failed for %s\n", fileName.c_str());
+        return false;
+    }
+
+    const uint32 width = std::max(1u, static_cast<uint32>(texture.texture.TextureSize().x) >> mipLevel);
+    const uint32 height = std::max(1u, static_cast<uint32>(texture.texture.TextureSize().y) >> mipLevel);
+    const VkFormat fmt = texture.texture.m_textureByteFormat;
+
+    std::ofstream out(fileName, std::ios::binary);
+    if (!out)
+    {
+        DestroyVMATextureBuffer(rb);
+        return false;
+    }
+
+    out << "#?RADIANCE\nFORMAT=32-bit_rle_rgbe\n\n";
+    out << "-Y " << height << " +X " << width << "\n";
+
+    Vector<byte> scan(width * 4);
+    for (uint32 y = 0; y < height; ++y)
+    {
+        const uint32 srcY = flipY ? (height - 1 - y) : y;
+        for (uint32 x = 0; x < width; ++x)
+        {
+            float r = 0, g = 0, b = 0;
+            if (fmt == VK_FORMAT_R16G16B16A16_SFLOAT)
+            {
+                const uint16* src = static_cast<const uint16*>(rb.data);
+                const size_t i = (static_cast<size_t>(srcY) * width + x) * 4;
+                r = HalfToFloat(src[i + 0]);
+                g = HalfToFloat(src[i + 1]);
+                b = HalfToFloat(src[i + 2]);
+            }
+            else if (fmt == VK_FORMAT_R32G32B32A32_SFLOAT)
+            {
+                const float* src = static_cast<const float*>(rb.data);
+                const size_t i = (static_cast<size_t>(srcY) * width + x) * 4;
+                r = src[i + 0];
+                g = src[i + 1];
+                b = src[i + 2];
+            }
+            else
+            {
+                fprintf(stderr, "ExportToHdr: unsupported format %d\n", static_cast<int>(fmt));
+                DestroyVMATextureBuffer(rb);
+                return false;
+            }
+            FloatToRGBE(r, g, b, &scan[x * 4]);
+        }
+        out.write(reinterpret_cast<const char*>(scan.data()), static_cast<std::streamsize>(scan.size()));
+    }
+
+    DestroyVMATextureBuffer(rb);
+    return out.good();
 }

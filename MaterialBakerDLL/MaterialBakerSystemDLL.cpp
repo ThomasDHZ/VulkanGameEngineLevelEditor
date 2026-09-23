@@ -1,6 +1,6 @@
 #include "MaterialBakerSystemDLL.h"
 
-void MaterialBakerSystem_BakeMaterial(const char* importMaterialPath, const char* exportMaterialPath)
+void MaterialBakerSystem_BakeMaterial(const char* importMaterialJson)
 {
-    materialBakerSystem.BakeMaterial(importMaterialPath, exportMaterialPath);
+    materialBakerSystem.BakeMaterial(importMaterialJson);
 }
