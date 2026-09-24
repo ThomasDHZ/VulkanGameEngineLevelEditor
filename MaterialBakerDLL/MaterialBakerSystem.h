@@ -27,7 +27,7 @@ private:
     VkGuid                                  AssetBakerRenderPassId;
     Vector<VkGuid>                          RenderPassDrawList;
 
-    ImportMaterial                    LoadMaterial(nlohmann::json& materialJson);
+    ImportMaterial                          LoadMaterial(nlohmann::json& materialJson);
     uint                                    LoadTexture(nlohmann::json& json);
     uint32									AddToMaterialMemoryPool(Texture& texture);
     uint                                    TextureExists(nlohmann::json& j, const char* key);

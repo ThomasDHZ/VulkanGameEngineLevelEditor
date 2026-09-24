@@ -30,7 +30,8 @@ nlohmann::json TextureBakerSystem::BakeTexture(const String& materialName, VkGui
     {
         Vector<Texture> textureList = renderSystem.FindRenderPassAttachmentList(renderPassId);
         attachmentTextureList.emplace_back(textureList[kFeatureAAttachment]);
-        attachmentTextureList.emplace_back(textureList[kFeatureBAttachment]);
+        attachmentTextureList.emplace_back(textureList[kFeatureBAttachment]); 
+        attachmentTextureList.emplace_back(textureList[kFeatureCAttachment]);
     }
     nlohmann::json importJson = fileSystem.LoadJsonFile(configSystem.BakerImportMaterialPath + materialName);
 
@@ -252,8 +253,7 @@ void TextureBakerSystem::ExportToPng(const String& fileName, Texture& texture, u
     };
 
     vkCmdCopyImageToBuffer(cmd, texture.texture.TextureImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer, 1, &region);
-    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT,
-        0, 1, &mem, 0, nullptr, 0, nullptr);
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mem, 0, nullptr, 0, nullptr);
     vulkan.CommandBuffer().EndSingleUseCommand(cmd);
     vmaInvalidateAllocation(allocator, stagingAlloc, 0, VK_WHOLE_SIZE);
     texture.texture.TransitionImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -581,6 +581,7 @@ String TextureBakerSystem::GetAttachmentSuffix(uint x, uint materialBakerSubPass
     {
         if (x == 0)      return "TranslucentTexture";
         else if (x == 1) return "TranslucentPropertiesTexture";
+        else if (x == 2) return "SubSurfaceScatteringPropertiesTexture";
     }
     return "Error";
 }

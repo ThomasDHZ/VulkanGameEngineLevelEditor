@@ -26,7 +26,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_AlbedoTexture.ktx2"
     ],
-    "TextureId": "{DABBE9C0-4312-4AE6-ADE2-C8AF43DD6663}",
+    "TextureId": "{FE0645EA-8A6E-40E8-B213-198778108E8A}",
     "TextureType": 1,
     "TextureUsageType": 9
   },
@@ -58,7 +58,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_AnisotropyTexture.ktx2"
     ],
-    "TextureId": "{48E519E5-3349-43BC-8FAF-58B0A979722E}",
+    "TextureId": "{71F20019-3F43-4641-9BCB-B0A38CF92645}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -89,7 +89,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_ClearCoatTexture.ktx2"
     ],
-    "TextureId": "{96A3012C-A69C-4864-915D-827DCFC95142}",
+    "TextureId": "{68AEBFBB-2BFF-4DF8-B7B2-AE0C6B6E258B}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -125,7 +125,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_EmissionTexture.ktx2"
     ],
-    "TextureId": "{687BA333-5A38-4996-8D3B-B7AFB096AF0B}",
+    "TextureId": "{0BD1BDAB-CA54-43A5-993C-00C10CDB6940}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -158,11 +158,11 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_MROTexture.ktx2"
     ],
-    "TextureId": "{5577B868-F142-4590-8ADB-9788C83D144E}",
+    "TextureId": "{85E40C76-8138-44BB-B93B-79A9BDAEFF8B}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
-  "MaterialId": "{AFA9A17B-C518-4D6E-82BB-C6B44733F800}",
+  "MaterialId": "{D05470AF-6C6E-4EF8-AB07-AC160943B5BC}",
   "NormalTexture": {
     "ImageType": 1,
     "IsSkyBox": false,
@@ -190,14 +190,11 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_NormalTexture.ktx2"
     ],
-    "TextureId": "{8783EE74-046A-4B18-996C-85BB074622FE}",
+    "TextureId": "{2A5CBDB2-1D3F-408C-9BA0-CA23494B5C61}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
-  "SSSProfile": 0.0,
-  "SSSWeight": 0.0,
   "ShadingModel": 0,
-  "SheenRoughness": 0.5,
   "SheenTexture": {
     "ImageType": 1,
     "IsSkyBox": false,
@@ -225,7 +222,38 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_SheenTexture.ktx2"
     ],
-    "TextureId": "{80330121-B054-448E-B523-AD5BA17AE197}",
+    "TextureId": "{F694ACD9-B393-46C3-8DA9-F83425B3E813}",
+    "TextureType": 4,
+    "TextureUsageType": 9
+  },
+  "SubSurfaceScatteringPropertiesTexture": {
+    "ImageType": 1,
+    "IsSkyBox": false,
+    "MipMapCount": 1,
+    "SampleCount": 1,
+    "SamplerCreateInfo": {
+      "AddressModeU": 2,
+      "AddressModeV": 2,
+      "AddressModeW": 2,
+      "AnisotropyEnable": false,
+      "BorderColor": 2,
+      "CompareEnable": false,
+      "CompareOp": 7,
+      "MagFilter": 0,
+      "MaxAnisotropy": 1.0,
+      "MaxLod": 0.0,
+      "MinFilter": 0,
+      "MinLod": 0.0,
+      "MipLodBias": 0.0,
+      "MipmapMode": 0,
+      "SType": 31,
+      "UnnormalizedCoordinates": false
+    },
+    "TextureByteFormat": 145,
+    "TextureFilePath": [
+      "Textures\\MegaManShotMaterial_SubSurfaceScatteringPropertiesTexture.ktx2"
+    ],
+    "TextureId": "{CB1C8BE8-197D-4CB2-9633-DD440D442EA8}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -256,7 +284,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_SubSurfaceScatteringTexture.ktx2"
     ],
-    "TextureId": "{EE1B3F97-8480-48A8-9E69-DC80027EBA9D}",
+    "TextureId": "{A0516DE3-863E-4CE1-BD13-172A36A8E990}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -287,7 +315,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_TranslucentPropertiesTexture.ktx2"
     ],
-    "TextureId": "{EDC4A2ED-10FE-4FEA-856B-9FA3281BE024}",
+    "TextureId": "{136477B6-444F-4C7B-BADB-28DB20567F43}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -318,7 +346,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_TranslucentTexture.ktx2"
     ],
-    "TextureId": "{23E109A7-825C-48F6-A85B-ED340AD04A45}",
+    "TextureId": "{8E357A2E-D355-4469-83C0-B0C2E0AAEB9E}",
     "TextureType": 4,
     "TextureUsageType": 9
   }

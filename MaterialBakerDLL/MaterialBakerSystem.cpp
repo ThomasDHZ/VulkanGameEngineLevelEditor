@@ -52,9 +52,6 @@ void MaterialBakerSystem::BakeMaterial(const String& importMaterialJson)
     exportMaterial["ShadingModel"]   = material.ShadingModel;
     exportMaterial["FeatureMask"]    = material.FeatureMask;
     exportMaterial["ClearcoatTint"]  = material.ClearcoatTint;
-    exportMaterial["SheenRoughness"] = material.SheenRoughness;
-    exportMaterial["SSSWeight"]      = material.SSSWeight;
-    exportMaterial["SSSProfile"]     = material.SSSProfile;
     exportMaterial["IOR"]            = material.IOR;
     exportMaterial["AlphaCutOff"]    = material.AlphaCutOff;
     std::ofstream(std::filesystem::current_path().string() + "/../../VulkanGameEngine/Assets/" + configSystem.BakerExportMaterialPath + textureName + ".json") << exportMaterial.dump(2);

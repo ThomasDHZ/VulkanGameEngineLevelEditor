@@ -26,7 +26,7 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_AlbedoTexture.ktx2"
     ],
-    "TextureId": "{7AB6B299-A60F-4201-905A-94FBA0ADA580}",
+    "TextureId": "{82175429-FF6B-4DCD-AC5C-E608D163FDC3}",
     "TextureType": 1,
     "TextureUsageType": 9
   },
@@ -58,7 +58,7 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_AnisotropyTexture.ktx2"
     ],
-    "TextureId": "{C1CA3B99-284C-480D-AB2D-3DC59A7BB13D}",
+    "TextureId": "{7C3F4893-AA40-4C38-8989-47F3AA2A6827}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -89,7 +89,7 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_ClearCoatTexture.ktx2"
     ],
-    "TextureId": "{68887CFC-4772-4CEA-81FD-0DAEF49CDC1E}",
+    "TextureId": "{BEC01E33-4509-4A30-B8F1-C2256F747358}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -125,7 +125,7 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_EmissionTexture.ktx2"
     ],
-    "TextureId": "{86875408-F2DA-40E5-8BC1-3F2AC1B07940}",
+    "TextureId": "{7DCDB3C5-BC64-4B1D-AECF-503701AD975C}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -158,11 +158,11 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_MROTexture.ktx2"
     ],
-    "TextureId": "{82891E62-9409-4D49-8765-F12B2DFBB073}",
+    "TextureId": "{2F6A138A-282D-487A-83B0-2A02603A884E}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
-  "MaterialId": "{2178B830-F5D8-4220-BF91-355302D3C1C0}",
+  "MaterialId": "{086E862E-EC09-4AD7-BBBE-CD5CEE4922F8}",
   "NormalTexture": {
     "ImageType": 1,
     "IsSkyBox": false,
@@ -190,14 +190,11 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_NormalTexture.ktx2"
     ],
-    "TextureId": "{A734CE71-F62D-4E8F-BA74-06873475817C}",
+    "TextureId": "{5ADD2938-30F9-49EF-8E44-4C8CC59DC13D}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
-  "SSSProfile": 0.0,
-  "SSSWeight": 0.5,
   "ShadingModel": 0,
-  "SheenRoughness": 0.0,
   "SheenTexture": {
     "ImageType": 1,
     "IsSkyBox": false,
@@ -225,7 +222,38 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_SheenTexture.ktx2"
     ],
-    "TextureId": "{D59C61D8-BA29-4946-A7F3-383F46B74AF0}",
+    "TextureId": "{0813D64D-43B8-4B16-8590-1CDCBE3224BA}",
+    "TextureType": 4,
+    "TextureUsageType": 9
+  },
+  "SubSurfaceScatteringPropertiesTexture": {
+    "ImageType": 1,
+    "IsSkyBox": false,
+    "MipMapCount": 1,
+    "SampleCount": 1,
+    "SamplerCreateInfo": {
+      "AddressModeU": 2,
+      "AddressModeV": 2,
+      "AddressModeW": 2,
+      "AnisotropyEnable": false,
+      "BorderColor": 2,
+      "CompareEnable": false,
+      "CompareOp": 7,
+      "MagFilter": 0,
+      "MaxAnisotropy": 1.0,
+      "MaxLod": 0.0,
+      "MinFilter": 0,
+      "MinLod": 0.0,
+      "MipLodBias": 0.0,
+      "MipmapMode": 0,
+      "SType": 31,
+      "UnnormalizedCoordinates": false
+    },
+    "TextureByteFormat": 145,
+    "TextureFilePath": [
+      "Textures\\SparkManTileSetMaterial_SubSurfaceScatteringPropertiesTexture.ktx2"
+    ],
+    "TextureId": "{36AB2124-7909-411B-B9C3-1BF2850C1F99}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -256,7 +284,7 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_SubSurfaceScatteringTexture.ktx2"
     ],
-    "TextureId": "{D8D5B81B-B1CB-417E-941C-4E5610A5AF92}",
+    "TextureId": "{9F4C6765-9AB9-40EC-897C-50594E36E3C7}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -287,7 +315,7 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_TranslucentPropertiesTexture.ktx2"
     ],
-    "TextureId": "{F0CE4926-5E8B-47F2-A6BB-CC61C324D48A}",
+    "TextureId": "{0E0D21FA-972E-40BF-A36E-1A240CD397E5}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -318,7 +346,7 @@
     "TextureFilePath": [
       "Textures\\SparkManTileSetMaterial_TranslucentTexture.ktx2"
     ],
-    "TextureId": "{8B8F1254-EE85-407D-BFC6-0E76FAB319A6}",
+    "TextureId": "{73685010-8A41-497D-99BC-03B736A26E03}",
     "TextureType": 4,
     "TextureUsageType": 9
   }
