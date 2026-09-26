@@ -46,9 +46,8 @@ nlohmann::json TextureBakerSystem::BakeTexture(const String& materialName, VkGui
         const VkFormat srcFormat = importTexture.texture.TextureByteFormat();
 
         const bool isAlbedo = (materialBakerSubPassIndex == 0 && x == kAlbedoAttachment);
-        const bool isAO = (materialBakerSubPassIndex == 0 && x == kFeatureDAttachment);
+        const bool isNormalMap = (materialBakerSubPassIndex == 0 && x == kNormalDataAttachment);
         const bool isEmission = (materialBakerSubPassIndex == 0 && x == kEmissionAttachment);
-        const bool isNormalMap = srcFormat == VK_FORMAT_R16G16_UNORM || srcFormat == VK_FORMAT_R16G16_SNORM || srcFormat == VK_FORMAT_R16G16B16A16_SNORM || srcFormat == VK_FORMAT_R8G8_SNORM;
 
         const String suffix = GetAttachmentSuffix(static_cast<uint>(x), materialBakerSubPassIndex);
         const std::filesystem::path ktxPath = std::filesystem::current_path().string() + "/../../VulkanGameEngine/Assets/" + configSystem.BakerExportTexturePath + material + "_" + suffix + ".ktx2";
@@ -84,6 +83,12 @@ nlohmann::json TextureBakerSystem::BakeTexture(const String& materialName, VkGui
             exportFormat = VK_FORMAT_BC7_SRGB_BLOCK;
             transferFn = "srgb";
         }
+   /*     else if (isNormalMap)
+        {
+            nvttFormat = "bc5";
+            exportFormat = VK_FORMAT_BC7_UNORM_BLOCK;
+            transferFn = "linear";
+        }*/
         else
         {
             nvttFormat = "bc7";
@@ -108,7 +113,7 @@ nlohmann::json TextureBakerSystem::BakeTexture(const String& materialName, VkGui
         cmd += " -o " + ktxPath.string();
         cmd += " --format " + nvttFormat;
         cmd += " --quality production --zcmp 22 --export-transfer-function " + transferFn;
-        if (isNormalMap) cmd += " --normal-alpha unchanged";
+     //   if (isNormalMap) cmd += " --normal-alpha unchanged";
         if (generateMips)
         {
             cmd += fmt::format(" --mips --mip-filter kaiser --max-mip-count {}", actualMips);
