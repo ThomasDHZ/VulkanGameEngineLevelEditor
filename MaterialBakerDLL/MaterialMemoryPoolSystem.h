@@ -112,7 +112,7 @@ private:
 
 public:
     static constexpr size_t									              BakerMaterialCapacity = 1;
-    static constexpr size_t									              BakerTexture2DCapacity = 20;
+    static constexpr size_t									              BakerTexture2DCapacity = 64;
     static constexpr size_t									              BakerTexture3DCapacity = 4;
     static constexpr size_t									              BakerTextureCubeMapCapacity = 4;
 

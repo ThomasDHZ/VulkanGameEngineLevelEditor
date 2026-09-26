@@ -30,7 +30,7 @@ nlohmann::json TextureBakerSystem::BakeTexture(const String& materialName, VkGui
     {
         Vector<Texture> textureList = renderSystem.FindRenderPassAttachmentList(renderPassId);
         attachmentTextureList.emplace_back(textureList[kFeatureAAttachment]);
-        attachmentTextureList.emplace_back(textureList[kFeatureBAttachment]); 
+        attachmentTextureList.emplace_back(textureList[kFeatureBAttachment]);
         attachmentTextureList.emplace_back(textureList[kFeatureCAttachment]);
     }
     nlohmann::json importJson = fileSystem.LoadJsonFile(configSystem.BakerImportMaterialPath + materialName);
@@ -46,22 +46,17 @@ nlohmann::json TextureBakerSystem::BakeTexture(const String& materialName, VkGui
         const VkFormat srcFormat = importTexture.texture.TextureByteFormat();
 
         const bool isAlbedo = (materialBakerSubPassIndex == 0 && x == kAlbedoAttachment);
+        const bool isAO = (materialBakerSubPassIndex == 0 && x == kFeatureDAttachment);
         const bool isEmission = (materialBakerSubPassIndex == 0 && x == kEmissionAttachment);
-        const bool isNormalMap =
-            srcFormat == VK_FORMAT_R16G16_UNORM ||
-            srcFormat == VK_FORMAT_R16G16_SNORM ||
-            srcFormat == VK_FORMAT_R16G16B16A16_SNORM ||
-            srcFormat == VK_FORMAT_R8G8_SNORM;
+        const bool isNormalMap = srcFormat == VK_FORMAT_R16G16_UNORM || srcFormat == VK_FORMAT_R16G16_SNORM || srcFormat == VK_FORMAT_R16G16B16A16_SNORM || srcFormat == VK_FORMAT_R8G8_SNORM;
 
         const String suffix = GetAttachmentSuffix(static_cast<uint>(x), materialBakerSubPassIndex);
         const std::filesystem::path ktxPath = std::filesystem::current_path().string() + "/../../VulkanGameEngine/Assets/" + configSystem.BakerExportTexturePath + material + "_" + suffix + ".ktx2";
         const std::filesystem::path previewPngPath = std::filesystem::current_path().string() + "/../..//VulkanGameEngine/Assets/" + configSystem.BakerExportTexturePath + material + "_" + suffix + ".png";
         const std::filesystem::path hdrPath = std::filesystem::current_path().string() + "/../../VulkanGameEngine/Assets/" + configSystem.BakerExportTexturePath + material + "_" + suffix + ".hdr";
-        if (std::filesystem::exists(ktxPath))
-        {
-            std::filesystem::remove(ktxPath);
-            printf("Removed existing ktx: %s\n", ktxPath.string().c_str());
-        }
+
+        if (std::filesystem::exists(ktxPath)) std::filesystem::remove(ktxPath); 
+        if (std::filesystem::exists(previewPngPath)) std::filesystem::remove(previewPngPath);
         ExportToPng(previewPngPath.string(), importTexture, 0, false);
 
         String nvttFormat;
@@ -160,167 +155,52 @@ nlohmann::json TextureBakerSystem::BakeTexture(const String& materialName, VkGui
 
 void TextureBakerSystem::ExportToPng(const String& fileName, Texture& texture, uint32 mipLevel, bool flipY)
 {
-    if (mipLevel >= texture.texture.MipMapLevels()) {
-        std::cerr << "Invalid mip level " << mipLevel << " (max " << texture.texture.MipMapLevels() << ")\n";
+    if (mipLevel >= texture.texture.MipMapLevels())
+    {
+        std::cerr << "Invalid mip level " << mipLevel << "\n";
         return;
     }
 
-    VmaAllocator allocator = bufferSystem.VmaAllocatorHandle();
-
-    uint32 width = std::max(1u, static_cast<uint32>(texture.texture.TextureSize().x) >> mipLevel);
-    uint32 height = std::max(1u, static_cast<uint32>(texture.texture.TextureSize().y) >> mipLevel);
-
-    bool is16Bit = false;
-    bool is32BitFloat = false;
-    size_t bytesPerPixel = 4;
-    if (texture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_SFLOAT ||
-        texture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_UINT ||
-        texture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_SINT)
+    RawMipReadback rb = ConvertToRawTextureData(texture, mipLevel);
+    if (!rb.data || rb.size == 0)
     {
-        bytesPerPixel = 16;
-        is32BitFloat = true;
-        std::cerr << "32-bit float formats not supported for PNG export yet\n";
+        fprintf(stderr, "ExportToPng: readback failed for %s\n", fileName.c_str());
         return;
     }
-    else if (texture.texture.m_textureByteFormat >= VK_FORMAT_R16G16B16A16_UNORM &&
-             texture.texture.m_textureByteFormat <= VK_FORMAT_R16G16B16A16_SFLOAT) 
-    {
-        bytesPerPixel = 8;
-        is16Bit = true;
-    }
 
-    VkImageMemoryBarrier barrier = {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-        .srcAccessMask = 0,
-        .dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
-        .oldLayout = texture.texture.TextureImageLayout(),
-        .newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .image = texture.texture.TextureImage(),
-        .subresourceRange = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .baseMipLevel = mipLevel,
-            .levelCount = 1,
-            .baseArrayLayer = 0,
-            .layerCount = 1
-        }
-    };
+    const uint32 width = std::max(1u, static_cast<uint32>(texture.texture.TextureSize().x) >> mipLevel);
+    const uint32 height = std::max(1u, static_cast<uint32>(texture.texture.TextureSize().y) >> mipLevel);
+    const VkFormat fmt = texture.texture.m_textureByteFormat;
 
-    if (texture.texture.TextureImageLayout() == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    else if (texture.texture.TextureImageLayout() == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    else if (texture.texture.TextureImageLayout() == VK_IMAGE_LAYOUT_GENERAL) barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-    else barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-
-    VkCommandBuffer cmd = vulkan.CommandBuffer().BeginSingleUseCommand();
-    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
-
-    VkBufferCreateInfo bufferInfo = {
-        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .size = static_cast<VkDeviceSize>(width) * height * bytesPerPixel,
-        .usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE
-    };
-
-    VmaAllocationCreateInfo allocInfo = {
-        .flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
-        .usage = VMA_MEMORY_USAGE_AUTO
-    };
-
-    VmaAllocationInfo allocInfoOut{};
-    VkBuffer stagingBuffer = VK_NULL_HANDLE;
-    VmaAllocation stagingAlloc = VK_NULL_HANDLE;
-    VULKAN_THROW_IF_FAIL(vmaCreateBuffer(allocator, &bufferInfo, &allocInfo, &stagingBuffer, &stagingAlloc, &allocInfoOut));
-
-    VkBufferImageCopy region = {
-        .bufferOffset = 0,
-        .bufferRowLength = 0,
-        .bufferImageHeight = 0,
-        .imageSubresource = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .mipLevel = mipLevel,
-            .baseArrayLayer = 0,
-            .layerCount = 1
-        },
-        .imageOffset = {0, 0, 0},
-        .imageExtent = {width, height, 1}
-    };
-
-    VkMemoryBarrier mem{
-        .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
-        .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-        .dstAccessMask = VK_ACCESS_HOST_READ_BIT
-    };
-
-    vkCmdCopyImageToBuffer(cmd, texture.texture.TextureImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer, 1, &region);
-    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mem, 0, nullptr, 0, nullptr);
-    vulkan.CommandBuffer().EndSingleUseCommand(cmd);
-    vmaInvalidateAllocation(allocator, stagingAlloc, 0, VK_WHOLE_SIZE);
+    Vector<byte> rgba = ConvertMipToRGBA8(rb.data, static_cast<size_t>(rb.size), width, height, fmt);
+    DestroyVMATextureBuffer(rb);
     texture.texture.TransitionImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-    void* mapped = allocInfoOut.pMappedData;
-    bool needsUnmap = false;
-    if (!mapped) {
-        VULKAN_THROW_IF_FAIL(vmaMapMemory(allocator, stagingAlloc, &mapped));
-        needsUnmap = true;
+    if (rgba.empty())
+    {
+        fprintf(stderr, "ExportToPng: convert failed for %s\n", fileName.c_str());
+        return;
+    }
+
+    Vector<byte> pixels(width * height * 4);
+    for (uint32 y = 0; y < height; ++y)
+    {
+        const uint32 srcY = flipY ? (height - 1 - y) : y;
+        memcpy(pixels.data() + size_t(y) * width * 4,
+            rgba.data() + size_t(srcY) * width * 4,
+            size_t(width) * 4);
     }
 
     Vector<byte> pngData;
-    if (!is16Bit)
+    const unsigned err = lodepng::encode(pngData, pixels.data(), width, height, LCT_RGBA, 8);
+    if (err)
     {
-        // 8-bit RGBA
-        Vector<byte> pixels(width * height * 4);
-
-        const byte* src = static_cast<const byte*>(mapped);
-        byte* dst = pixels.data();
-
-        for (uint32 y = 0; y < height; ++y)
-        {
-            uint32 srcY = flipY ? (height - 1 - y) : y;
-            const byte* srcRow = src + srcY * width * 4;
-            byte* dstRow = dst + y * width * 4;
-            memcpy(dstRow, srcRow, width * 4);
-        }
-
-        unsigned error = lodepng::encode(pngData, pixels.data(), width, height, LCT_RGBA, 8);
-        if (error) std::cerr << "lodepng encode error (8-bit): " << lodepng_error_text(error) << "\n";
+        std::cerr << "lodepng encode: " << lodepng_error_text(err) << "\n";
+        return;
     }
-    else
-    {
-        // 16-bit RGBA (PNG big-endian)
-        Vector<uint16> pixels(width * height * 4);
-
-        const uint16* src = static_cast<const uint16*>(mapped);
-        uint16* dst = pixels.data();
-
-        for (uint32 y = 0; y < height; ++y) {
-            uint32 srcY = flipY ? (height - 1 - y) : y;
-            const uint16* srcRow = src + srcY * width * 4;
-            uint16* dstRow = dst + y * width * 4;
-
-            for (uint32 x = 0; x < width * 4; ++x)
-            {
-                uint16 val = srcRow[x];
-                dstRow[x] = ((val >> 8) & 0xFF) | ((val & 0xFF) << 8);
-            }
-        }
-
-        unsigned error = lodepng::encode(pngData, reinterpret_cast<unsigned char*>(pixels.data()), width, height, LCT_RGBA, 16);
-        if (error) std::cerr << "lodepng encode error (16-bit): " << lodepng_error_text(error) << "\n";
-    }
-
-    if (!pngData.empty()) {
-        unsigned saveError = lodepng::save_file(pngData, fileName);
-        if (saveError) {
-            std::cerr << "Failed to save PNG: " << lodepng_error_text(saveError) << "\n";
-        }
-        else {
-            std::cout << "Exported PNG: " << fileName << "\n";
-        }
-    }
-
-    if (needsUnmap) vmaUnmapMemory(allocator, stagingAlloc);
-    vmaDestroyBuffer(allocator, stagingBuffer, stagingAlloc);
+    const unsigned saveErr = lodepng::save_file(pngData, fileName);
+    if (saveErr) std::cerr << "lodepng save: " << lodepng_error_text(saveErr) << "\n";
+    else std::cout << "Exported PNG: " << fileName << "\n";
 }
 
 nlohmann::json TextureBakerSystem::TextureSlotJson(const String& path, VkFormat textureByteFormat)
@@ -367,25 +247,26 @@ nlohmann::json TextureBakerSystem::SamplerAtlasJson()
 Vector<byte> TextureBakerSystem::ConvertMipToRGBA8(const void* rawData, size_t rawSize, uint32 width, uint32 height, VkFormat srcFormat)
 {
     Vector<byte> rgba8(width * height * 4);
-
-    size_t bytesPerPixel = 4;
-    if (srcFormat == VK_FORMAT_R32G32B32A32_SFLOAT ||
-        srcFormat == VK_FORMAT_R32G32B32A32_UINT ||
-        srcFormat == VK_FORMAT_R32G32B32A32_SINT)
-    {
-        bytesPerPixel = 16;
-    }
-    else if (srcFormat >= VK_FORMAT_R16G16B16A16_UNORM &&
-        srcFormat <= VK_FORMAT_R16G16B16A16_SFLOAT)
-    {
-        bytesPerPixel = 8;
-    }
-
+    size_t bytesPerPixel = BytesPerPixel(srcFormat);
     size_t expectedSize = static_cast<size_t>(width) * height * bytesPerPixel;
     if (rawSize != expectedSize)
     {
         fprintf(stderr, "ConvertMipToRGBA8: size mismatch (expected %zu, got %zu)\n", expectedSize, rawSize);
         return {};
+    }
+
+    if (srcFormat == VK_FORMAT_R8_UNORM)
+    {
+        const byte* s = static_cast<const byte*>(rawData);
+        for (size_t i = 0; i < size_t(width) * height; ++i)
+        {
+            byte g = s[i];
+            rgba8[i * 4 + 0] = g;
+            rgba8[i * 4 + 1] = g;
+            rgba8[i * 4 + 2] = g;
+            rgba8[i * 4 + 3] = 255;
+        }
+        return rgba8;
     }
 
     if (bytesPerPixel == 4)
@@ -453,18 +334,7 @@ RawMipReadback TextureBakerSystem::ConvertToRawTextureData(Texture& importTextur
     VmaAllocator allocator = bufferSystem.VmaAllocatorHandle();
     uint32 mipWidth = std::max(1u, static_cast<uint32>(importTexture.texture.TextureSize().x) >> mipLevel);
     uint32 mipHeight = std::max(1u, static_cast<uint32>(importTexture.texture.TextureSize().y) >> mipLevel);
-
-    size_t bytesPerPixel = 4;
-    if (importTexture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_SFLOAT ||
-        importTexture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_UINT ||
-        importTexture.texture.m_textureByteFormat == VK_FORMAT_R32G32B32A32_SINT) {
-        bytesPerPixel = 16;
-    }
-    else if (importTexture.texture.m_textureByteFormat >= VK_FORMAT_R16G16B16A16_UNORM &&
-        importTexture.texture.m_textureByteFormat <= VK_FORMAT_R16G16B16A16_SFLOAT)
-    {
-        bytesPerPixel = 8;
-    }
+    size_t bytesPerPixel = BytesPerPixel(importTexture.texture.m_textureByteFormat);
 
     VkBufferCreateInfo bufferInfo =
     {
@@ -532,6 +402,14 @@ RawMipReadback TextureBakerSystem::ConvertToRawTextureData(Texture& importTextur
     VkCommandBuffer command = vulkan.CommandBuffer().BeginSingleUseCommand();
     vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
     vkCmdCopyImageToBuffer(command, importTexture.texture.TextureImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer, 1, &region);
+
+    VkMemoryBarrier mem
+    {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+        .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+        .dstAccessMask = VK_ACCESS_HOST_READ_BIT
+    };
+    vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mem, 0, nullptr, 0, nullptr);
     vulkan.CommandBuffer().EndSingleUseCommand(command);
 
     bool needsUnmap = false;
@@ -577,7 +455,7 @@ String TextureBakerSystem::GetAttachmentSuffix(uint x, uint materialBakerSubPass
             case  kEmissionAttachment:   return "EmissionTexture";             break;
         }
     }
-    else
+    else if(materialBakerSubPassIndex == 1)
     {
         if (x == 0)      return "TranslucentTexture";
         else if (x == 1) return "TranslucentPropertiesTexture";
@@ -677,4 +555,32 @@ bool TextureBakerSystem::ExportToHdr(const String& fileName, Texture& texture, u
 
     DestroyVMATextureBuffer(rb);
     return out.good();
+}
+
+size_t TextureBakerSystem::BytesPerPixel(VkFormat format)
+{
+    switch (format)
+    {
+    case VK_FORMAT_R8_UNORM:
+    case VK_FORMAT_R8_SNORM:
+    case VK_FORMAT_R8_UINT:
+        return 1;
+    case VK_FORMAT_R8G8_UNORM:
+        return 2;
+    case VK_FORMAT_R16_UNORM:
+    case VK_FORMAT_R16_SFLOAT:
+        return 2;
+    case VK_FORMAT_R8G8B8A8_UNORM:
+    case VK_FORMAT_R8G8B8A8_SRGB:
+    case VK_FORMAT_B8G8R8A8_UNORM:
+    case VK_FORMAT_B8G8R8A8_SRGB:
+        return 4;
+    case VK_FORMAT_R16G16B16A16_UNORM:
+    case VK_FORMAT_R16G16B16A16_SFLOAT:
+        return 8;
+    case VK_FORMAT_R32G32B32A32_SFLOAT:
+        return 16;
+    default:
+        return 4;
+    }
 }

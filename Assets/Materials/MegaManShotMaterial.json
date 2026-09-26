@@ -26,7 +26,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_AlbedoTexture.ktx2"
     ],
-    "TextureId": "{FE0645EA-8A6E-40E8-B213-198778108E8A}",
+    "TextureId": "{CCB71C5E-86BA-419D-831E-08930410B08C}",
     "TextureType": 1,
     "TextureUsageType": 9
   },
@@ -58,7 +58,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_AnisotropyTexture.ktx2"
     ],
-    "TextureId": "{71F20019-3F43-4641-9BCB-B0A38CF92645}",
+    "TextureId": "{DD4B1F9D-555D-4FDF-8128-40A7DA623FD0}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -89,7 +89,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_ClearCoatTexture.ktx2"
     ],
-    "TextureId": "{68AEBFBB-2BFF-4DF8-B7B2-AE0C6B6E258B}",
+    "TextureId": "{182B966D-2493-4CA4-9120-55A3A2706870}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -125,7 +125,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_EmissionTexture.ktx2"
     ],
-    "TextureId": "{0BD1BDAB-CA54-43A5-993C-00C10CDB6940}",
+    "TextureId": "{7CDAC730-D676-4469-B853-3E6B274FDC97}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -158,11 +158,11 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_MROTexture.ktx2"
     ],
-    "TextureId": "{85E40C76-8138-44BB-B93B-79A9BDAEFF8B}",
+    "TextureId": "{39A9F29D-9687-49C2-A502-E515EF56C08D}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
-  "MaterialId": "{D05470AF-6C6E-4EF8-AB07-AC160943B5BC}",
+  "MaterialId": "{8B29C645-4E30-4DD7-AC1B-0735D4F86DFE}",
   "NormalTexture": {
     "ImageType": 1,
     "IsSkyBox": false,
@@ -190,7 +190,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_NormalTexture.ktx2"
     ],
-    "TextureId": "{2A5CBDB2-1D3F-408C-9BA0-CA23494B5C61}",
+    "TextureId": "{D3B793F0-B53D-4B81-97B3-ADFC4DA74753}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -222,7 +222,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_SheenTexture.ktx2"
     ],
-    "TextureId": "{F694ACD9-B393-46C3-8DA9-F83425B3E813}",
+    "TextureId": "{6B330400-3D34-439B-9C68-4234444DDACB}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -253,7 +253,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_SubSurfaceScatteringPropertiesTexture.ktx2"
     ],
-    "TextureId": "{CB1C8BE8-197D-4CB2-9633-DD440D442EA8}",
+    "TextureId": "{F31A4E44-C9E1-43DA-9619-6118DDAB821F}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -284,7 +284,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_SubSurfaceScatteringTexture.ktx2"
     ],
-    "TextureId": "{A0516DE3-863E-4CE1-BD13-172A36A8E990}",
+    "TextureId": "{EB0D3328-D9C1-4E8C-B476-449CF3C8D948}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -315,7 +315,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_TranslucentPropertiesTexture.ktx2"
     ],
-    "TextureId": "{136477B6-444F-4C7B-BADB-28DB20567F43}",
+    "TextureId": "{CE70F359-E212-40D5-B7E8-390AD3053544}",
     "TextureType": 4,
     "TextureUsageType": 9
   },
@@ -346,7 +346,7 @@
     "TextureFilePath": [
       "Textures\\MegaManShotMaterial_TranslucentTexture.ktx2"
     ],
-    "TextureId": "{8E357A2E-D355-4469-83C0-B0C2E0AAEB9E}",
+    "TextureId": "{AA8007E4-3B0A-4131-9BD3-89CAE9658FED}",
     "TextureType": 4,
     "TextureUsageType": 9
   }

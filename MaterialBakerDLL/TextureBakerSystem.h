@@ -80,7 +80,7 @@ private:
     bool            ExportToHdr(const String& fileName, Texture& texture, uint32 mipLevel, bool flipY);
     nlohmann::json  TextureSlotJson(const String& path, VkFormat textureByteFormat);
     nlohmann::json  SamplerAtlasJson();
-
+    size_t          BytesPerPixel(VkFormat format);
 public:
     DLL_EXPORT  nlohmann::json BakeTexture(const String& MaterialName, VkGuid renderPassId, uint materialBakerSubPassIndex);
 };

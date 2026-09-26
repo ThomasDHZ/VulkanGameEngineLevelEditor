@@ -1,7 +1,7 @@
 {
   "Name": "LightbulbMaterial",
-  "TextureSetResolution": [ 128, 128 ],
-  "MaterialGuid": "a7c3e21f-8b44-4d1a-9e2c-1f6d0a8b3c5e",
+  "TextureSetResolution": [ 8, 8 ],
+  "MaterialGuid": "97627bd3-2ff4-48e7-bd16-26e9c1cacbe9",
   "Albedo": [ 1.0, 1.0, 1.0 ],
   "Metallic": 0.0,
   "Roughness": 0.5,
@@ -47,8 +47,8 @@
   "EmissionAttachmentId": "02c5e678-9d0f-4e34-c051-6c7d8e9f0123",
   "IsSkyBox": false,
   "AlbedoMap": {
-    "TextureFilePath": [ "ImportTextures/Lightbulb.png" ],
-    "TextureId": "76f4a69e-20c5-407c-99bd-e4ce89fe494c",
+    "TextureFilePath": [ "ImportTextures/MegaManShot.png" ],
+    "TextureId": "64c3d8f7-4489-4509-ba95-758f52ba2089",
     "TextureByteFormat": 43,
     "SampleCount": 1,
     "ImageType": 1,

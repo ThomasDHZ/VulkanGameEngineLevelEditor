@@ -15,8 +15,8 @@ int main(int argc, char** argv)
     vulkan.VulkanSetUp(configSystem.WindowResolution, configSystem.RenderResolution);
     bufferSystem.SetUpVmaAllocation();
     memoryPoolSystem.StartUp();
-    //materialBakerSystem.BakeMaterial("AnimeGirlImportMaterial.json");
-  //  materialBakerSystem.BakeMaterial("LightIconImportMaterial.json");
-    materialBakerSystem.BakeMaterial("MegaManShotImportMaterial.json");
-  //  materialBakerSystem.BakeMaterial("SparkManTileSetImportMaterial.json");
+  //  materialBakerSystem.BakeMaterial("AnimeGirlImportMaterial.json");
+ //   materialBakerSystem.BakeMaterial("LightIconImportMaterial.json");
+  // materialBakerSystem.BakeMaterial("MegaManShotImportMaterial.json");
+    materialBakerSystem.BakeMaterial("SparkManTileSetImportMaterial.json");
 }
