@@ -194,7 +194,7 @@ void MaterialMemoryPoolSystem::UpdateMemoryPool()
     {
         if (sub.IsDirty)
         {
-            size_t start = sizeof(MaterialBakerBufferHeader) + sub.Offset;
+            size_t start = sub.Offset;
             size_t len = sub.ActiveCount * sub.Size;
             if (len > 0)
             {
@@ -399,44 +399,4 @@ void MaterialMemoryPoolSystem::CreateMaterialBakerBindlessDescriptorSet()
     };
 
     vkUpdateDescriptorSets(vulkan.LogicalDevice(), 1, &materialWrite, 0, nullptr);
-}
-
-void MaterialMemoryPoolSystem_StartUp()
-{
-    materialMemoryPoolSystem.StartUp();
-}
-
-uint32 MaterialMemoryPoolSystem_AllocateObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate)
-{
-    return uint32();
-}
-
-void MaterialMemoryPoolSystem_UpdateMemoryPool(Vector<VulkanPipeline>& pipelineList)
-{
-    return void();
-}
-
-ImportMaterial& MaterialMemoryPoolSystem_UpdateMaterial(uint32 index)
-{
-    return materialMemoryPoolSystem.UpdateMaterial(index);
-}
-
-void MaterialMemoryPoolSystem_UpdateTextureDescriptorSet(Texture& texture, uint binding)
-{
-
-}
-
-void MaterialMemoryPoolSystem_UpdateDataBufferDescriptorSet(uint32 vulkanBufferIndex, uint binding)
-{
-
-}
-
-void MaterialMemoryPoolSystem_FreeObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate, uint32 index)
-{
-
-}
-
-void MaterialMemoryPoolSystem_BakerResetMemoryPool()
-{
-
 }

@@ -6,30 +6,16 @@
     "TextureLoader/HDRITexture.json"
   ],
   "LoadMaterials": [
-    "Materials/SparkManTileSetMaterial.json",
-    "Materials/LavaCubeMapMaterial.json"
+    "Materials/AnimeGirlMaterial.json",
+    "Materials/MegaManShotMaterial.json",
+    "Materials/LightIconMaterial.json",
+    "Materials/SparkManTileSetMaterial.json"
   ],
   "LoadTileSetVRAM": [
     "TileSets/SparkManTileSet.json"
   ],
   "PresentingAttachmentTextureId": "de6ca646-874f-4986-9daf-912dbc3aa7d0",
   "MainRenderPassList": [
-    {
-      "RenderPass": "RenderPass/BRDFRenderPass.json",
-      "OneTimeDraw": true
-    },
-    {
-      "RenderPass": "RenderPass/EnvironmentToCubeMapRenderPass.json",
-      "OneTimeDraw": true
-    },
-    {
-      "RenderPass": "RenderPass/IrradianceRenderPass.json",
-      "OneTimeDraw": false
-    },
-    {
-      "RenderPass": "RenderPass/PrefilterRenderPass.json",
-      "OneTimeDraw": false
-    },
     {
       "RenderPass": "RenderPass/GBufferRenderPass.json",
       "OneTimeDraw": false
@@ -51,24 +37,23 @@
   ],
   "LoadGameObjects": [
     "GameObjects/TestGameObject.json",
-    "GameObjects/MegaManObject.json",
     "GameObjects/MegaManShotObject.json",
     "GameObjects/DirectionalLightGameObject.json",
     "GameObjects/PointLightGameObject.json"
   ],
   "GameObjectList": [
     {
-      "GameObjectType": 1,
-      "GameObjectPositionOverride": [
-        527.6328,
-        217.1766
-      ]
-    },
-    {
       "GameObjectType": 3,
       "GameObjectPositionOverride": [
         0.0,
         0.0
+      ]
+    },
+    {
+      "GameObjectType": 1,
+      "GameObjectPositionOverride": [
+        527.6328,
+        217.1766
       ]
     },
     {

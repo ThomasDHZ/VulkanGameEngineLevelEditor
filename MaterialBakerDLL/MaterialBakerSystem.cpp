@@ -8,32 +8,56 @@
 #include <regex>
 #include "TextureSamplers.h"
 #include <RenderSystem.h>
+#include <EngineConfigSystem.h>
 
 MaterialBakerSystem& materialBakerSystem = MaterialBakerSystem::Get();
 
-void MaterialBakerSystem::BakeMaterial(const String& importMaterialPath, const String& exportMaterialPath)
+void MaterialBakerSystem::BakeMaterial(const String& importMaterialJson)
 {
-    vulkan.VulkanSetUp(configSystem.WindowResolution, configSystem.RenderResolution);
-    bufferSystem.SetUpVmaAllocation();
-    memoryPoolSystem.StartUp();
     materialMemoryPoolSystem.StartUp();
+    nlohmann::json importJson = fileSystem.LoadJsonFile(configSystem.BakerImportMaterialPath + importMaterialJson);
 
-    nlohmann::json json = fileSystem.LoadJsonFile(importMaterialPath.c_str());
-    ivec2 materialSetResolution = ivec2(json["TextureSetResolution"][0], json["TextureSetResolution"][1]);
+    String textureName = importMaterialJson;
+    if (const size_t pos = textureName.find(".json"); pos != String::npos) textureName.erase(pos, 5);
+    if (const size_t pos = textureName.find("Import"); pos != String::npos) textureName.erase(pos, 6);
 
+    ivec2 materialSetResolution = ivec2(importJson["TextureSetResolution"][0], importJson["TextureSetResolution"][1]);
     RenderPassLoader renderPassLoader = fileSystem.LoadJsonFile("RenderPass/AssetCreatorRenderPass.json").get<RenderPassLoader>();
     renderPassLoader.RenderPassResolution = materialSetResolution;
     AssetBakerRenderPassId = renderSystem.LoadRenderPass(renderPassLoader, materialMemoryPoolSystem.GetMemoryPoolInfo());
-    
-    LoadMaterial(importMaterialPath);
-    textureSystem.GenerateTexture(AssetBakerRenderPassId);
-    textureBakerSystem.BakeTexture(importMaterialPath, exportMaterialPath, AssetBakerRenderPassId);
+
+    VulkanRenderPass renderPass = renderSystem.FindRenderPass(AssetBakerRenderPassId);
+    Vector<PushConstantUpdateRule> pushConstantRules = renderPass.SubPassList().front().front().PushConstantUpdates;
+    ImportMaterial material = LoadMaterial(importJson);
+
+    nlohmann::json exportMaterial;
+    exportMaterial["MaterialId"] = VkGuid::Generate().ToString();
+    for (int x = 0; x < 2; x++)
+    {
+        for (int y = 0; y < pushConstantRules.size(); y++)
+        {
+            if (pushConstantRules[y].Variable == "MaterialBakerSubPassIndex") pushConstantRules[y].Value[0] = std::to_string(x);
+        }
+
+        textureSystem.GenerateTexture(AssetBakerRenderPassId, &pushConstantRules);
+        vkQueueWaitIdle(vulkan.GraphicsQueue());
+        nlohmann::json bakedSlots = textureBakerSystem.BakeTexture(importMaterialJson, AssetBakerRenderPassId, x);
+        exportMaterial.update(bakedSlots);
+    }
     vkQueueWaitIdle(vulkan.GraphicsQueue());
     CleanRenderPass();
     materialMemoryPoolSystem.BakerResetMemoryPool();
+
+    nlohmann::json root;
+    exportMaterial["ShadingModel"]   = material.ShadingModel;
+    exportMaterial["FeatureMask"]    = material.FeatureMask;
+    exportMaterial["ClearcoatTint"]  = material.ClearcoatTint;
+    exportMaterial["IOR"]            = material.IOR;
+    exportMaterial["AlphaCutOff"]    = material.AlphaCutOff;
+    std::ofstream(std::filesystem::current_path().string() + "/../../VulkanGameEngine/Assets/" + configSystem.BakerExportMaterialPath + textureName + ".json") << exportMaterial.dump(2);
+
     std::cout << "Material Baking Finished" << std::endl;
 }
-
 
 void MaterialBakerSystem::CleanRenderPass()
 {
@@ -56,128 +80,89 @@ void MaterialBakerSystem::CleanRenderPass()
     TextureList.clear();
 }
 
-void MaterialBakerSystem::LoadMaterial(const String& materialPath)
+ImportMaterial MaterialBakerSystem::LoadMaterial(nlohmann::json& materialJson)
 {
-    nlohmann::json json = fileSystem.LoadJsonFile(materialPath.c_str());
-    ivec2 materialSetResolution = ivec2(json["TextureSetResolution"][0], json["TextureSetResolution"][1]);
-
     uint materialId = materialMemoryPoolSystem.AllocateObject(BakerMaterialBuffer);
     ImportMaterial& material = materialMemoryPoolSystem.UpdateMaterial(materialId);
-    material.Albedo = vec3(json["Albedo"][0], json["Albedo"][1], json["Albedo"][2]);
-    material.SheenColor = vec3(json["SheenColor"][0], json["SheenColor"][1], json["SheenColor"][2]);
-    material.SubSurfaceScatteringColor = vec3(json["SubSurfaceScatteringColor"][0], json["SubSurfaceScatteringColor"][1], json["SubSurfaceScatteringColor"][2]);
-    material.Emission = vec3(json["Emission"][0], json["Emission"][1], json["Emission"][2]);
-    material.ClearcoatTint = json["ClearcoatTint"];
-    material.Metallic = json["Metallic"];
-    material.Roughness = json["Roughness"];
-    material.AmbientOcclusion = json["AmbientOcclusion"];
-    material.ClearcoatStrength = json["ClearcoatStrength"];
-    material.ClearcoatRoughness = json["ClearcoatRoughness"];
-    material.Thickness = json["Thickness"];
-    material.SheenIntensity = json["SheenIntensity"];
-    material.NormalStrength = json["NormalStrength"];
-    material.HeightScale = json["HeightScale"];
-    material.Height = json["Height"];
-    material.Alpha = json["Alpha"];
 
-    if (!json["AlbedoMap"].is_null())
-    {
-        TextureLoader loader = json["AlbedoMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportAlbedoMapSamplerSettings();
+    auto v3 = [](const nlohmann::json& a, float x, float y, float z) 
+        {
+            if (a.is_array() && a.size() >= 3) return std::array<float, 3>{ a[0].get<float>(), a[1].get<float>(), a[2].get<float>() };
+            return std::array<float, 3>{ x, y, z };
+        };
 
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.AlbedoMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["MetallicMap"].is_null())
-    {
-        TextureLoader loader = json["MetallicMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportPackedORMMapSamplerSettings();
+    auto Albedo = v3(materialJson["Albedo"], 1, 1, 1);
+    auto ClearcoatTint = v3(materialJson["ClearcoatTint"], 1, 1, 1);
+    auto SheenColor = v3(materialJson["SheenColor"], 1, 1, 1);
+    auto SSSColor = v3(materialJson["SubSurfaceScatteringColor"], 1, 0.45f, 0.35f);
+    auto AttenuationColor = v3(materialJson["AttenuationColor"], 1, 1, 1);
+    auto Emission = v3(materialJson["Emission"], 0, 0, 0);
 
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.MetallicMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["RoughnessMap"].is_null())
-    {
-        TextureLoader loader = json["RoughnessMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportPackedORMMapSamplerSettings();
+    material.Metallic = materialJson.value("Metallic", 0.0f);
+    material.Roughness = materialJson.value("Roughness", 0.5f);
+    material.AmbientOcclusion = materialJson.value("AmbientOcclusion", 1.0f);
+    material.IOR = materialJson.value("IOR", 1.45f);
+    material.NormalStrength = materialJson.value("NormalStrength", 1.0f);
+    material.Height = materialJson.value("HeightScale", 0.0f);
+    material.CoatWeight = materialJson.value("ClearcoatWeight", 0.0f);
+    material.CoatRoughness = materialJson.value("ClearcoatRoughness", 0.08f);
+    material.CoatDarkening = materialJson.value("CoatDarkening", 1.0f);
+    material.SheenWeight = materialJson.value("SheenWeight", 0.0f);
+    material.SheenRoughness = materialJson.value("SheenRoughness", 0.5f);
+    material.SSSWeight = materialJson.value("SSSWeight", 0.0f);
+    material.SSSProfile = materialJson.value("SSSProfile", 0.0f);
+    material.Thickness = materialJson.value("Thickness", 0.5f);
+    material.TransmissionWeight = materialJson.value("TransmissionWeight", 0.0f);
+    material.AttenuationDistance = materialJson.value("AttenuationDistance", 1.0f);
+    material.Anisotropy = materialJson.value("Anisotropy", 0.0f);
+    material.AnisotropyRotation = materialJson.value("AnisotropyRotation", 0.0f);
+    material.ThinFilmWeight = materialJson.value("ThinFilmWeight", 0.0f);
+    material.ThinFilmThickness = materialJson.value("ThinFilmThickness", 0.5f);
+    material.EmissionIntensity = materialJson.value("EmissionIntensity", 0.0f);
+    material.AlphaCutOff = materialJson.value("AlphaCutoff", 0.1f);
+    material.AlbedoMap = TextureExists(materialJson, "AlbedoMap");
+    material.NormalMap = TextureExists(materialJson, "NormalMap");
+    material.HeightMap = TextureExists(materialJson, "HeightMap");
+    material.AlphaMap = TextureExists(materialJson, "AlphaMap");
+    material.MetallicMap = TextureExists(materialJson, "MetallicMap");
+    material.RoughnessMap = TextureExists(materialJson, "RoughnessMap");
+    material.AmbientOcclusionMap = TextureExists(materialJson, "AmbientOcclusionMap");
+    material.EmissionMap = TextureExists(materialJson, "EmissionMap");
+    material.ClearCoatColorMap = TextureExists(materialJson, "ClearCoatColorMap");
+    material.ClearCoatPropertiesMap = TextureExists(materialJson, "ClearCoatPropertiesMap");
+    material.SheenMap = TextureExists(materialJson, "SheenMap");
+    material.SheenPropertiesMap = TextureExists(materialJson, "SheenPropertiesMap");
+    material.SSSColorMap = TextureExists(materialJson, "SubSurfaceScatteringColorMap");
+    material.SSSPropertiesMap = TextureExists(materialJson, "SubSurfaceScatteringPropertiesMap");
+    material.AttenuationColorMap = TextureExists(materialJson, "AttenuationColorMap");
+    material.AttenuationPropertiesMap = TextureExists(materialJson, "AttenuationPropertiesTexture");
+    material.AnisotropyPropertiesMap = TextureExists(materialJson, "AnisotropyPropertiesMap");
+    material.IORMap = TextureExists(materialJson, "IORTexture");
+    material.ShadingModel = materialJson.value("ShadingModel", 0u);
+    material.FeatureMask = materialJson.value("FeatureMask", 0u);
+    memcpy(material.Albedo, Albedo.data(), 12);
+    memcpy(material.ClearcoatTint, ClearcoatTint.data(), 12);
+    memcpy(material.SheenColor, SheenColor.data(), 12);
+    memcpy(material.SSSColor, SSSColor.data(), 12);
+    memcpy(material.AttenuationColor, AttenuationColor.data(), 12);
+    memcpy(material.Emission, Emission.data(), 12);
 
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.RoughnessMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["ThicknessMap"].is_null())
-    {
-        TextureLoader loader = json["ThicknessMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportThicknessMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.ThicknessMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["SubSurfaceScatteringColorMap"].is_null())
-    {
-        TextureLoader loader = json["SubSurfaceScatteringColorMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportSubSurfaceScatteringMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.SubSurfaceScatteringColorMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["SheenMap"].is_null())
-    {
-        TextureLoader loader = json["SheenMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportSheenMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.SheenMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["ClearCoatMap"].is_null())
-    {
-        TextureLoader loader = json["ClearCoatMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportClearCoatMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.ClearCoatMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["AmbientOcclusionMap"].is_null())
-    {
-        TextureLoader loader = json["AmbientOcclusionMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportPackedORMMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.AmbientOcclusionMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["NormalMap"].is_null())
-    {
-        TextureLoader loader = json["NormalMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportNormalMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.NormalMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["AlphaMap"].is_null())
-    {
-        TextureLoader loader = json["AlphaMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportAlphaMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.AlphaMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["EmissionMap"].is_null())
-    {
-        TextureLoader loader = json["EmissionMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportEmissionMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.EmissionMap = AddToMaterialMemoryPool(TextureList.back());
-    }
-    if (!json["HeightMap"].is_null())
-    {
-        TextureLoader loader = json["HeightMap"].get<TextureLoader>();
-        loader.SamplerCreateInfo = TextureSamplers::GetImportParallaxMapSamplerSettings();
-
-        TextureList.emplace_back(textureSystem.LoadTexture(loader));
-        material.HeightMap = AddToMaterialMemoryPool(TextureList.back());
-    }
     materialMemoryPoolSystem.IsHeaderDirty = true;
     materialMemoryPoolSystem.IsDescriptorSetDirty = true;
+    return material;
+}
+
+uint MaterialBakerSystem::TextureExists(nlohmann::json& j, const char* key)
+{
+    if (!j.contains(key) || j[key].is_null()) return 0xFFFFFFFFu;
+    return LoadTexture(j[key]);
+}
+
+uint MaterialBakerSystem::LoadTexture(nlohmann::json& json)
+{
+    TextureLoader loader = json.get<TextureLoader>();
+    TextureList.emplace_back(textureSystem.LoadTexture(loader));
+    return AddToMaterialMemoryPool(TextureList.back());
 }
 
 uint32 MaterialBakerSystem::AddToMaterialMemoryPool(Texture& texture)
@@ -186,51 +171,4 @@ uint32 MaterialBakerSystem::AddToMaterialMemoryPool(Texture& texture)
     materialMemoryPoolSystem.UpdateTextureDescriptorSet(texture, materialMemoryPoolSystem.BakerTexture2DBinding);
     materialMemoryPoolSystem.UpdateMemoryPool();
     return texture.gpuTextureBufferIndex;
-}
-
-void MaterialBakerSystem_BakeMaterial(const char* importMaterialPath, const char* exportMaterialPath)
-{
-    materialBakerSystem.BakeMaterial(importMaterialPath, exportMaterialPath);
-}
-
-Vector<RenderPassNode> MaterialBakerSystem::CreateDrawCommands(VkCommandBuffer& commandBuffer, const float& deltaTime)
-{
-    Vector<RenderPassNode> renderPassNodeList;
-    for (auto& renderPassGuid : RenderPassDrawList)
-    {
-        const VulkanRenderPass& renderPass = renderSystem.FindRenderPass(renderPassGuid);
-
-        uint32 maxMipLevelCount = 1;
-        Vector<Vector<VulkanDrawMessage>> vulkanDrawMessageList;
-        for (auto& renderPassList : renderPass.SubPassList())
-        {
-            Vector<VulkanDrawMessage> vulkanSubPassMessageList;
-            for (auto& subPass : renderPassList)
-            {
-                for (auto& inputTexture : subPass.InputTextureList)
-                {
-                    const Texture& texture = renderSystem.FindRenderPassAttachment(inputTexture);
-                    if (maxMipLevelCount < texture.texture.MipMapLevels()) maxMipLevelCount = texture.texture.MipMapLevels() - 1;
-                }
-
-                vulkanSubPassMessageList.emplace_back(VulkanDrawMessage
-                    {
-                        .RenderPassGuid = renderPassGuid,
-                        .PipelinePackageGuid = subPass.PipelinePackageId,
-                        .PushConstant = subPass.ShaderPushConstant,
-                        .RenderPassInputs = subPass.InputTextureList,
-                        .RenderPassOutputs = subPass.OutputTextureList,
-                        .OffScreenRenderPass = subPass.OffScreenFrameBuffer
-                    });
-            }
-            vulkanDrawMessageList.emplace_back(vulkanSubPassMessageList);
-        }
-        renderPassNodeList.emplace_back(RenderPassNode
-            {
-               .RenderPassGuid = renderPassGuid,
-               .SubPassDrawMessage = vulkanDrawMessageList,
-               .MipCount = maxMipLevelCount
-            });
-    }
-    return renderPassNodeList;
 }

@@ -10,12 +10,14 @@
 
 enum RenderPassAttachmentEnum
 {
-    AlbedoAttachment,
-    NormalDataAttachment,
-    PackedMROAttachment,
-    PackedSheenSSSAttachment,
-    UnusedAttachment,
-    EmissionAttachment
+    kAlbedoAttachment,
+    kNormalDataAttachment,
+    kMROAttachment,
+    kFeatureAAttachment,
+    kFeatureBAttachment,
+    kFeatureCAttachment,
+    kFeatureDAttachment,
+    kEmissionAttachment
 };
 
 struct RawMipReadback
@@ -68,13 +70,19 @@ private:
     TextureBakerSystem& operator=(TextureBakerSystem&&) = delete;
 
     Vector<byte>    ConvertMipToRGBA8(const void* rawData, size_t rawSize, uint32 width, uint32 height, VkFormat srcFormat);
-    String          GetAttachmentSuffix(uint x);
+    String          GetAttachmentSuffix(uint x, uint materialBakerSubPassIndex);
     RawMipReadback  ConvertToRawTextureData(Texture& importTexture, uint32 mipLevel);
     void            DestroyVMATextureBuffer(RawMipReadback& data);
     void            ExportToPng(const String& fileName, Texture& texture, uint32 mipLevel = 0, bool flipY = true);
-
+    void            ExportJson();
+    float           HalfToFloat(uint16 h);
+    void            FloatToRGBE(float r, float g, float b, byte out[4]);
+    bool            ExportToHdr(const String& fileName, Texture& texture, uint32 mipLevel, bool flipY);
+    nlohmann::json  TextureSlotJson(const String& path, VkFormat textureByteFormat);
+    nlohmann::json  SamplerAtlasJson();
+    size_t          BytesPerPixel(VkFormat format);
 public:
-    DLL_EXPORT void BakeTexture(const String& materialLoader, const String& baseFilePath, VkGuid renderPassId);
+    DLL_EXPORT  nlohmann::json BakeTexture(const String& MaterialName, VkGuid renderPassId, uint materialBakerSubPassIndex);
 };
 extern DLL_EXPORT TextureBakerSystem& textureBakerSystem;
 inline TextureBakerSystem& TextureBakerSystem::Get()

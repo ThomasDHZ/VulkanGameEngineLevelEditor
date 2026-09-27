@@ -10,7 +10,9 @@
   <Project Path="../VulkanEngineCore/VulkanEngineCoreCS/VulkanEngineCoreCS.csproj" />
   <Project Path="../VulkanGameEngine/GameScriptLibraryDLL/GameScriptLibraryDLL.csproj" />
   <Project Path="../VulkanGameEngine/VulkanEngineCS/VulkanEngineCS.csproj" />
-  <Project Path="../VulkanGameEngine/VulkanEngineDLL/VulkanEngineDLL.vcxproj" Id="d22b29fb-1f02-471c-81ac-a352862f6951" />
+  <Project Path="../VulkanGameEngine/VulkanEngineDLL/VulkanEngineDLL.vcxproj" Id="d22b29fb-1f02-471c-81ac-a352862f6951">
+    <BuildDependency Project="../VulkanEngineCore/VulkanEngineCore/VulkanEngineCore.vcxproj" />
+  </Project>
   <Project Path="../VulkanGameEngine/VulkanEngineInterop/VulkanEngineInterop.vcxproj" Id="4e6eca4c-4490-4c21-a892-534579a1f906">
     <BuildDependency Project="../VulkanEngineCore/VulkanEngineCore/VulkanEngineCore.vcxproj" />
     <BuildDependency Project="../VulkanGameEngine/VulkanEngineDLL/VulkanEngineDLL.vcxproj" />

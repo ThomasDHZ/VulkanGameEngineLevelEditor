@@ -75,7 +75,7 @@
       "ColorWriteMask": 15
     },
     {
-      "TextureAttachment": "Attachment 4: PackedSheenSSS",
+      "TextureAttachment": "Attachment 4: FeatureA",
       "BlendEnable": false,
       "SrcColorBlendFactor": 1,
       "DstColorBlendFactor": 0,
@@ -86,7 +86,7 @@
       "ColorWriteMask": 15
     },
     {
-      "TextureAttachment": "Attachment 5: Unused Attachment",
+      "TextureAttachment": "Attachment 5: FeatureB",
       "BlendEnable": false,
       "SrcColorBlendFactor": 1,
       "DstColorBlendFactor": 0,
@@ -97,7 +97,7 @@
       "ColorWriteMask": 15
     },
     {
-      "TextureAttachment": "Attachment 6: ParallaxInfo",
+      "TextureAttachment": "Attachment 6: FeatureC",
       "BlendEnable": false,
       "SrcColorBlendFactor": 1,
       "DstColorBlendFactor": 0,

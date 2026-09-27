@@ -8,6 +8,7 @@
 #include <TextureSystem.h>
 #include <VulkanTexture.h>
 #include <RenderSystem.h>
+#include "MaterialMemoryPoolSystem.h"
 
 class MaterialBakerSystem
 {
@@ -23,17 +24,17 @@ private:
     MaterialBakerSystem& operator=(MaterialBakerSystem&&) = delete;
 
     Vector<Texture>                         TextureList;
-
-    uint32									AddToMaterialMemoryPool(Texture& texture);
-    void                                    CleanRenderPass();
-
-public:
     VkGuid                                  AssetBakerRenderPassId;
     Vector<VkGuid>                          RenderPassDrawList;
-    void                                    LoadMaterial(const String& materialPath);
 
-    DLL_EXPORT void BakeMaterial(const String& importMaterialPath, const String& exportMaterialPath);
-    Vector<RenderPassNode> CreateDrawCommands(VkCommandBuffer& commandBuffer, const float& deltaTime);
+    ImportMaterial                          LoadMaterial(nlohmann::json& materialJson);
+    uint                                    LoadTexture(nlohmann::json& json);
+    uint32									AddToMaterialMemoryPool(Texture& texture);
+    uint                                    TextureExists(nlohmann::json& j, const char* key);
+    void                                    CleanRenderPass();
+public:
+
+    DLL_EXPORT void BakeMaterial(const String& importMaterialJson);
 };
 extern DLL_EXPORT MaterialBakerSystem& materialBakerSystem;
 inline MaterialBakerSystem& MaterialBakerSystem::Get()
@@ -41,11 +42,3 @@ inline MaterialBakerSystem& MaterialBakerSystem::Get()
     static MaterialBakerSystem instance;
     return instance;
 }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    DLL_EXPORT void MaterialBakerSystem_BakeMaterial(const char* importMaterialPath, const char* exportMaterialPath);
-#ifdef __cplusplus
-}
-#endif

@@ -21,6 +21,8 @@ namespace VulkanGameEngineLevelEditor
                 MessageBox.Show(ex?.Message ?? e.ExceptionObject.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             };
 
+            Directory.SetCurrentDirectory(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "Assets")));
+
             ComponentRegistry.Initialize();
             ApplicationConfiguration.Initialize();
             Application.Run(new RenderViewForm());

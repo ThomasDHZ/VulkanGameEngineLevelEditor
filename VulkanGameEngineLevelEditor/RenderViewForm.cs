@@ -84,7 +84,7 @@ namespace VulkanGameEngineLevelEditor
             _callbackHandle = GCHandle.Alloc(callback);
             VulkanSystem.CreateLogMessageCallback(callback);
 
-            LoadExports("VulkanEngineInterop.dll");
+            LoadExports("../x64/Debug/VulkanEngineInterop.dll");
             string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\GBufferRenderPass.json");
             RenderPassLoader awer = JsonConvert.DeserializeObject<RenderPassLoader>(jsonContent);
 
@@ -501,7 +501,7 @@ namespace VulkanGameEngineLevelEditor
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-            MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\SparkManTileSetImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\Textures\\SparkManTileSetMaterial");
+            MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\AnimeGirlImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\Textures\\AnimeGirlImportMaterial");
         }
     }
 }

@@ -30,39 +30,64 @@ struct MaterialBakerBufferHeader
 
 struct ImportMaterial
 {
-    vec3  Albedo;
-    vec3  SheenColor;
-    vec3  SubSurfaceScatteringColor;
-    vec3  Emission;
-    float ClearcoatTint;
+    float  Albedo[3];
+    float  ClearcoatTint[3];
+    float  SheenColor[3];
+    float  SSSColor[3];
+    float  AttenuationColor[3];
+    float  Emission[3];
+
     float Metallic;
     float Roughness;
     float AmbientOcclusion;
-    float ClearcoatStrength;
-    float ClearcoatRoughness;
-    float SheenIntensity;
+    float IOR;
+    float NormalStrength;
+    float Height;
+
+    float CoatWeight;
+    float CoatRoughness;
+    float CoatDarkening;
+
+    float SheenWeight;
+    float SheenRoughness;
+
+    float SSSWeight;
+    float SSSProfile;
     float Thickness;
+
+    float TransmissionWeight;
+    float AttenuationDistance;
+
     float Anisotropy;
     float AnisotropyRotation;
-    float NormalStrength;
-    float HeightScale;
-    float Height;
-    float Alpha;
+    float ThinFilmWeight;
+    float ThinFilmThickness;
+    float EmissionIntensity;
+    float AlphaCutOff;
 
-    uint AlbedoMap;
-    uint MetallicMap;
-    uint RoughnessMap;
-    uint ThicknessMap;
-    uint SubSurfaceScatteringColorMap;
-    uint SheenMap;
-    uint ClearCoatMap;
-    uint AnisotropyMap;
-    uint AmbientOcclusionMap;
-    uint NormalMap;
-    uint AlphaMap;
-    uint EmissionMap;
-    uint HeightMap;
+    uint  AlbedoMap;
+    uint  NormalMap;
+    uint  HeightMap;
+    uint  AlphaMap;
+    uint  MetallicMap;
+    uint  RoughnessMap;
+    uint  AmbientOcclusionMap;
+    uint  EmissionMap;
+    uint  ClearCoatColorMap;
+    uint  ClearCoatPropertiesMap;
+    uint  SheenMap;
+    uint  SheenPropertiesMap;
+    uint  SSSColorMap;
+    uint  SSSPropertiesMap;
+    uint  AttenuationColorMap;
+    uint  AttenuationPropertiesMap;
+    uint  AnisotropyPropertiesMap;
+    uint  IORMap;
+
+    uint  ShadingModel;
+    uint  FeatureMask;
 };
+static_assert(sizeof(ImportMaterial) == 60 * 4);
 
 class MaterialMemoryPoolSystem
 {
@@ -87,7 +112,7 @@ private:
 
 public:
     static constexpr size_t									              BakerMaterialCapacity = 1;
-    static constexpr size_t									              BakerTexture2DCapacity = 20;
+    static constexpr size_t									              BakerTexture2DCapacity = 64;
     static constexpr size_t									              BakerTexture3DCapacity = 4;
     static constexpr size_t									              BakerTextureCubeMapCapacity = 4;
 
@@ -123,18 +148,3 @@ inline MaterialMemoryPoolSystem& MaterialMemoryPoolSystem::Get()
     static MaterialMemoryPoolSystem instance;
     return instance;
 }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_StartUp();
-    DLL_EXPORT uint32										              MaterialMemoryPoolSystem_AllocateObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate);
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateMemoryPool(Vector<VulkanPipeline>& pipelineList);
-    DLL_EXPORT ImportMaterial&                                            MaterialMemoryPoolSystem_UpdateMaterial(uint32 index);
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateTextureDescriptorSet(Texture& texture, uint binding);
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_UpdateDataBufferDescriptorSet(uint32 vulkanBufferIndex, uint binding);
-    DLL_EXPORT void											              MaterialMemoryPoolSystem_FreeObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate, uint32 index);
-    DLL_EXPORT void                                                       MaterialMemoryPoolSystem_BakerResetMemoryPool();
-#ifdef __cplusplus
-}
-#endif

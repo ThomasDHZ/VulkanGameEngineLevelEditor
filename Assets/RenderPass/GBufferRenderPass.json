@@ -237,7 +237,7 @@
       }
     },
     {
-      "Name": "GBuffer Attachment 4: PackedSheenSSS",
+      "Name": "GBuffer Attachment 4: FeatureA",
       "RenderedTextureId": "9d6aa488-0dd5-4678-a2bd-2e4f93125a52",
       "MipMapCount": 1,
       "TextureType": 4,
@@ -269,7 +269,7 @@
       }
     },
     {
-      "Name": "GBuffer Attachment 5: Unused Attachment",
+      "Name": "GBuffer Attachment 5: FeatureB",
       "RenderedTextureId": "30994c6d-772e-4622-b4dd-7f5e6fa475ad",
       "MipMapCount": 1,
       "TextureType": 4,
@@ -301,8 +301,8 @@
       }
     },
     {
-      "Name": "GBuffer Attachment 6: ParallaxInfo",
-      "RenderedTextureId": "cc998bff-1df2-4839-b43f-6b85f7593568",
+      "Name": "GBuffer Attachment 6: FeatureC",
+      "RenderedTextureId": "6452db9d-7601-48c4-9f89-9cba28804789",
       "MipMapCount": 1,
       "TextureType": 4,
       "TextureUsageType": 4,
@@ -528,7 +528,7 @@
       }
     },
     {
-      "TextureAttachment": "Attachment 4: PackedSheenSSS",
+      "TextureAttachment": "Attachment 4: FeatureA",
       "Color": {
         "Float32_0": 0.0,
         "Float32_1": 0.0,
@@ -537,7 +537,7 @@
       }
     },
     {
-      "TextureAttachment": "Attachment 5: Unused Attachment",
+      "TextureAttachment": "Attachment 5: FeatureB",
       "Color": {
         "Float32_0": 0.0,
         "Float32_1": 0.0,
@@ -546,7 +546,7 @@
       }
     },
     {
-      "TextureAttachment": "Attachment 6: ParallaxInfo",
+      "TextureAttachment": "Attachment 6: FeatureC",
       "Color": {
         "Float32_0": 0.0,
         "Float32_1": 0.0,

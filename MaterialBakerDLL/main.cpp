@@ -1,7 +1,5 @@
 #include "VulkanWindow.h"
-#include "SystemClock.h"
 #include <iostream>
-#include "FrameTimer.h"
 #include "GameSystem.h"
 #include "EngineConfigSystem.h"
 #include <ImGuiSystem.h>
@@ -12,6 +10,13 @@
 
 int main(int argc, char** argv)
 {
-    materialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\AnimeGirlImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\Textures\\AnimeGirlMaterial");
-    return 0;
+    if (!debugSystem.IsRenderDocInjected()) debugSystem.SetRootDirectory("../Assets");
+    
+    vulkan.VulkanSetUp(configSystem.WindowResolution, configSystem.RenderResolution);
+    bufferSystem.SetUpVmaAllocation();
+    memoryPoolSystem.StartUp();
+ //   materialBakerSystem.BakeMaterial("AnimeGirlImportMaterial.json");
+    materialBakerSystem.BakeMaterial("LightIconImportMaterial.json");
+  // materialBakerSystem.BakeMaterial("MegaManShotImportMaterial.json");
+   // materialBakerSystem.BakeMaterial("SparkManTileSetImportMaterial.json");
 }
