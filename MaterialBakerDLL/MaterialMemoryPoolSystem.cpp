@@ -14,9 +14,9 @@ void MaterialMemoryPoolSystem::StartUp()
             MemorySubPoolHeader[type] = MemoryPoolSubBufferHeader
             {
                 .ActiveCount = 0,
-                .Count = BakerMaterialCapacity,
+                .Capacity = BakerMaterialCapacity,
                 .Size = sizeof(ImportMaterial),
-                .IsActive = Vector<byte>(BakerMaterialCapacity, 0x00),
+                .IsSlotActive = Vector<byte>(BakerMaterialCapacity, 0x00),
                 .FreeIndices = Vector<uint32>(),
                 .IsDirty = true
             };
@@ -27,51 +27,31 @@ void MaterialMemoryPoolSystem::StartUp()
             MemorySubPoolHeader[type] = MemoryPoolSubBufferHeader
             {
                 .ActiveCount = 0,
-                .Count = BakerTexture2DCapacity,
+                .Capacity = BakerTexture2DCapacity,
                 .Size = sizeof(TextureMetadataHeader),
-                .IsActive = Vector<byte>(BakerTexture2DCapacity, 0x00),
+                .IsSlotActive = Vector<byte>(BakerTexture2DCapacity, 0x00),
                 .FreeIndices = Vector<uint32>(),
                 .IsDirty = true
             };
             break;
         }
-        /*  case MaterialBakerMemoryPoolTypes::BakerTexture3DMetadataBuffer:
-          {
-              MemorySubPoolHeader[type] = MemoryPoolSubBufferHeader
-              {
-                  .ActiveCount = 0,
-                  .Count = BakerTexture3DCapacity,
-                  .Size = sizeof(TextureMetadataHeader),
-                  .IsActive = Vector<byte>(BakerTexture3DCapacity, 0x00),
-                  .FreeIndices = Vector<uint32>(),
-                  .IsDirty = true
-              };
-              break;
-          }
-          case MaterialBakerMemoryPoolTypes::BakerTextureCubeMapMetadataBuffer:
-          {
-              MemorySubPoolHeader[type] = MemoryPoolSubBufferHeader
-              {
-                  .ActiveCount = 0,
-                  .Count = BakerTextureCubeMapCapacity,
-                  .Size = sizeof(TextureMetadataHeader),
-                  .IsActive = Vector<byte>(BakerTextureCubeMapCapacity, 0x00),
-                  .FreeIndices = Vector<uint32>(),
-                  .IsDirty = true
-              };
-              break;
-          }*/
         }
     }
+
     UpdateMemoryPoolHeader(BakerMaterialBuffer, BakerMaterialCapacity);
 
-    Vector<byte> GpuDataBufferMemoryPool2 = Vector<byte>(sizeof(MaterialBakerBufferHeader) + MaterialMemoryPoolSize, 0xFF);
+    Vector<byte> GpuDataBufferMemoryPool2 =
+        Vector<byte>(sizeof(MaterialBakerBufferHeader) + MaterialMemoryPoolSize, 0xFF);
     memcpy(GpuDataBufferMemoryPool2.data(), &MaterialPoolHeader, sizeof(MaterialBakerBufferHeader));
-    MaterialBakerBufferId = bufferSystem.CreateDynamicBuffer(GpuDataBufferMemoryPool2.data(), GpuDataBufferMemoryPool2.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+
+    MaterialBakerBufferId = bufferSystem.CreateDynamicBuffer(
+        GpuDataBufferMemoryPool2.data(),
+        GpuDataBufferMemoryPool2.size(),
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+
     VulkanBuffer& buffer = bufferSystem.FindVulkanBuffer(MaterialBakerBufferId);
     MaterialBufferPtr = buffer.BufferMappedData();
     vmaFlushAllocation(bufferSystem.VmaAllocatorHandle(), buffer.BufferAllocation(), 0, GpuDataBufferMemoryPool2.size());
-
     CreateMaterialBakerBindlessDescriptorSet();
 }
 
@@ -79,16 +59,21 @@ void MaterialMemoryPoolSystem::ResizeMemoryPool(MaterialBakerMemoryPoolTypes mem
 {
     void* oldMappedPtr = MaterialBufferPtr;
     uint32 oldBufferId = MaterialBakerBufferId;
-    auto   oldSubHeaders = MemorySubPoolHeader;
+    auto oldSubHeaders = MemorySubPoolHeader;
 
     UpdateMemoryPoolHeader(memoryPoolToUpdate, resizeCount);
+
     size_t newTotalSize = sizeof(MaterialBakerBufferHeader) + MaterialMemoryPoolSize;
-    uint32 newBufferId = bufferSystem.CreateDynamicBuffer(nullptr, newTotalSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    uint32 newBufferId = bufferSystem.CreateDynamicBuffer(
+        nullptr,
+        newTotalSize,
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
     VulkanBuffer& newBuf = bufferSystem.FindVulkanBuffer(newBufferId);
     MaterialBufferPtr = newBuf.BufferMappedData();
 
     std::memcpy(MaterialBufferPtr, &MaterialPoolHeader, sizeof(MaterialBakerBufferHeader));
+
     for (const auto& [type, sub] : MemorySubPoolHeader)
     {
         const auto& oldSub = oldSubHeaders[type];
@@ -102,10 +87,10 @@ void MaterialMemoryPoolSystem::ResizeMemoryPool(MaterialBakerMemoryPoolTypes mem
     }
 
     vmaFlushAllocation(bufferSystem.VmaAllocatorHandle(), newBuf.BufferAllocation(), 0, newTotalSize);
+
     if (oldBufferId != UINT32_MAX)
     {
-        //vkQueueWaitIdle(vulkanSystem.GraphicsQueue);  
-        //bufferSystem.DestroyBuffer(bufferSystem.FindVulkanBuffer(oldBufferId));
+        bufferSystem.DestroyBuffer(bufferSystem.FindVulkanBuffer(oldBufferId));
     }
 
     MaterialBakerBufferId = newBufferId;
@@ -113,71 +98,87 @@ void MaterialMemoryPoolSystem::ResizeMemoryPool(MaterialBakerMemoryPoolTypes mem
     IsHeaderDirty = true;
 }
 
-
 void MaterialMemoryPoolSystem::UpdateMemoryPoolHeader(MaterialBakerMemoryPoolTypes memoryPoolTypeToUpdate, uint32 newPoolSize)
 {
-    for (int x = memoryPoolTypeToUpdate; x < static_cast<int>(MaterialBakerMemoryPoolTypes::BakerEndofPool); x++)
+    for (int x = static_cast<int>(memoryPoolTypeToUpdate);
+        x < static_cast<int>(MaterialBakerMemoryPoolTypes::BakerEndofPool);
+        x++)
     {
         const MaterialBakerMemoryPoolTypes memoryPoolType = (MaterialBakerMemoryPoolTypes)x;
-        const MaterialBakerMemoryPoolTypes lastMemoryPoolType = (x == 0) ? MaterialBakerMemoryPoolTypes::BakerEndofPool : (MaterialBakerMemoryPoolTypes)(x - 1);
+        const MaterialBakerMemoryPoolTypes lastMemoryPoolType = (x == 0)
+            ? MaterialBakerMemoryPoolTypes::BakerEndofPool
+            : (MaterialBakerMemoryPoolTypes)(x - 1);
+
         const MemoryPoolSubBufferHeader oldMemoryPoolSubHeader = MemorySubPoolHeader[memoryPoolType];
+
         MemorySubPoolHeader[memoryPoolType] = MemoryPoolSubBufferHeader
         {
            .ActiveCount = MemorySubPoolHeader[memoryPoolType].ActiveCount,
-           .Offset = lastMemoryPoolType == MaterialBakerMemoryPoolTypes::BakerEndofPool ? sizeof(MaterialBakerBufferHeader) : MemorySubPoolHeader[lastMemoryPoolType].Offset + (MemorySubPoolHeader[lastMemoryPoolType].Count * MemorySubPoolHeader[lastMemoryPoolType].Size),
-           .Count = memoryPoolType == memoryPoolTypeToUpdate ? newPoolSize : MemorySubPoolHeader[memoryPoolType].Count,
+           .Offset = lastMemoryPoolType == MaterialBakerMemoryPoolTypes::BakerEndofPool
+                ? sizeof(MaterialBakerBufferHeader)
+                : MemorySubPoolHeader[lastMemoryPoolType].Offset
+                    + (MemorySubPoolHeader[lastMemoryPoolType].Capacity * MemorySubPoolHeader[lastMemoryPoolType].Size),
+           .Capacity = memoryPoolType == memoryPoolTypeToUpdate
+                ? newPoolSize
+                : MemorySubPoolHeader[memoryPoolType].Capacity,
            .Size = MemorySubPoolHeader[memoryPoolType].Size,
-           .IsActive = memoryPoolType == memoryPoolTypeToUpdate ? Vector<byte>(newPoolSize, 0x00) : MemorySubPoolHeader[memoryPoolType].IsActive,
+           .IsSlotActive = memoryPoolType == memoryPoolTypeToUpdate
+                ? Vector<byte>(newPoolSize, 0x00)
+                : MemorySubPoolHeader[memoryPoolType].IsSlotActive,
            .FreeIndices = MemorySubPoolHeader[memoryPoolType].FreeIndices,
            .IsDirty = true
         };
-        if (memoryPoolType == (MaterialBakerMemoryPoolTypes)x) memcpy(MemorySubPoolHeader[memoryPoolType].IsActive.data(), oldMemoryPoolSubHeader.IsActive.data(), oldMemoryPoolSubHeader.ActiveCount);
+
+        const uint32 bytesToCopy = std::min(
+            oldMemoryPoolSubHeader.ActiveCount,
+            static_cast<uint32>(MemorySubPoolHeader[memoryPoolType].IsSlotActive.size()));
+        if (bytesToCopy > 0 && !oldMemoryPoolSubHeader.IsSlotActive.empty())
+        {
+            memcpy(MemorySubPoolHeader[memoryPoolType].IsSlotActive.data(),
+                oldMemoryPoolSubHeader.IsSlotActive.data(),
+                bytesToCopy);
+        }
     }
-    MemoryPoolSubBufferHeader lastHeader = MemorySubPoolHeader[(MaterialBakerMemoryPoolTypes)((MaterialBakerMemoryPoolTypes)MaterialBakerMemoryPoolTypes::BakerEndofPool - 1)];
-    MaterialMemoryPoolSize = lastHeader.Offset + (lastHeader.Size * lastHeader.Count);
+
+    MemoryPoolSubBufferHeader lastHeader =
+        MemorySubPoolHeader[(MaterialBakerMemoryPoolTypes)((int)MaterialBakerMemoryPoolTypes::BakerEndofPool - 1)];
+    MaterialMemoryPoolSize = lastHeader.Offset + (lastHeader.Size * lastHeader.Capacity);
 
     MaterialPoolHeader = MaterialBakerBufferHeader
     {
         .MaterialOffset = MemorySubPoolHeader[BakerMaterialBuffer].Offset,
-        .MaterialCount = MemorySubPoolHeader[BakerMaterialBuffer].Count,
+        .MaterialCount = MemorySubPoolHeader[BakerMaterialBuffer].ActiveCount,
         .MaterialSize = MemorySubPoolHeader[BakerMaterialBuffer].Size,
         .Texture2DOffset = MemorySubPoolHeader[BakerTexture2DMetadataBuffer].Offset,
-        .Texture2DCount = MemorySubPoolHeader[BakerTexture2DMetadataBuffer].Count,
+        .Texture2DCount = MemorySubPoolHeader[BakerTexture2DMetadataBuffer].ActiveCount,
         .Texture2DSize = MemorySubPoolHeader[BakerTexture2DMetadataBuffer].Size,
-        //.Texture3DOffset = MemorySubPoolHeader[BakerTexture3DMetadataBuffer].Offset,
-        //.Texture3DCount = MemorySubPoolHeader[BakerTexture3DMetadataBuffer].Count,
-        //.Texture3DSize = MemorySubPoolHeader[BakerTexture3DMetadataBuffer].Size,
-        //.TextureCubeMapOffset = MemorySubPoolHeader[BakerTextureCubeMapMetadataBuffer].Offset,
-        //.TextureCubeMapCount = MemorySubPoolHeader[BakerTextureCubeMapMetadataBuffer].Count,
-        //.TextureCubeMapSize = MemorySubPoolHeader[BakerTextureCubeMapMetadataBuffer].Size
     };
 }
 
 uint32 MaterialMemoryPoolSystem::AllocateObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate)
 {
     MemoryPoolSubBufferHeader& subPoolHeader = MemorySubPoolHeader[memoryPoolToUpdate];
+
     if (!subPoolHeader.FreeIndices.empty())
     {
         uint32 index = subPoolHeader.FreeIndices.back();
         subPoolHeader.FreeIndices.pop_back();
-
-        subPoolHeader.IsActive[index] = 0x01;
+        subPoolHeader.IsSlotActive[index] = 0x01;
         if (index + 1 > subPoolHeader.ActiveCount)
         {
             subPoolHeader.ActiveCount = index + 1;
         }
-
         subPoolHeader.IsDirty = true;
         return index;
     }
 
-    if (subPoolHeader.ActiveCount == subPoolHeader.Count)
+    if (subPoolHeader.ActiveCount == subPoolHeader.Capacity)
     {
-        ResizeMemoryPool(memoryPoolToUpdate, subPoolHeader.Count * 2);
+        ResizeMemoryPool(memoryPoolToUpdate, subPoolHeader.Capacity * 2);
     }
 
     uint32 index = subPoolHeader.ActiveCount++;
-    subPoolHeader.IsActive[index] = 0x01;
+    subPoolHeader.IsSlotActive[index] = 0x01;
     subPoolHeader.IsDirty = true;
     return index;
 }
@@ -221,8 +222,10 @@ void MaterialMemoryPoolSystem::UpdateMemoryPool()
 ImportMaterial& MaterialMemoryPoolSystem::UpdateMaterial(uint32 index)
 {
     MemoryPoolSubBufferHeader& materialSubPool = MemorySubPoolHeader[BakerMaterialBuffer];
-    if (index >= materialSubPool.Count) throw std::out_of_range("Material index out of range: " + std::to_string(index) + " >= " + std::to_string(materialSubPool.Count));
-    if (index >= materialSubPool.IsActive.size() || !materialSubPool.IsActive[index]) throw std::runtime_error("Material slot inactive at index " + std::to_string(index));
+    if (index >= materialSubPool.Capacity)
+        throw std::out_of_range("Material index out of range: " + std::to_string(index) + " >= " + std::to_string(materialSubPool.Capacity));
+    if (index >= materialSubPool.IsSlotActive.size() || !materialSubPool.IsSlotActive[index])
+        throw std::runtime_error("Material slot inactive at index " + std::to_string(index));
 
     uint32 offset = materialSubPool.Offset + (index * sizeof(ImportMaterial));
     materialSubPool.IsDirty = true;
@@ -284,23 +287,6 @@ void MaterialMemoryPoolSystem::UpdateDataBufferDescriptorSet(uint32 vulkanBuffer
     vkUpdateDescriptorSets(vulkan.LogicalDevice(), 1, &descriptorUpdate, 0, nullptr);
 }
 
-void MaterialMemoryPoolSystem::FreeObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate, uint32 index)
-{
-    MemoryPoolSubBufferHeader& sub = MemorySubPoolHeader[memoryPoolToUpdate];
-    if (index >= sub.Count || !sub.IsActive[index])
-    {
-        return;
-    }
-
-    sub.IsActive[index] = 0x00;
-    sub.FreeIndices.push_back(index);
-    sub.IsDirty = true;
-    while (sub.ActiveCount > 0 && sub.IsActive[sub.ActiveCount - 1] == 0)
-    {
-        sub.ActiveCount--;
-    }
-}
-
 void MaterialMemoryPoolSystem::BakerResetMemoryPool()
 {
     MaterialMemoryPoolSize = UINT32_MAX;
@@ -317,6 +303,24 @@ const MemoryPoolLoader MaterialMemoryPoolSystem::GetMemoryPoolInfo()
         .GlobalBindlessDescriptorSet = MaterialBakerBindlessDescriptorSet,
         .GlobalBindlessDescriptorSetLayout = MaterialBakerBindlessDescriptorSetLayout
     };
+}
+
+void MaterialMemoryPoolSystem::FreeObject(MaterialBakerMemoryPoolTypes memoryPoolToUpdate, uint32 index)
+{
+    MemoryPoolSubBufferHeader& sub = MemorySubPoolHeader[memoryPoolToUpdate];
+    if (index >= sub.Capacity || index >= sub.IsSlotActive.size() || !sub.IsSlotActive[index])
+    {
+        return;
+    }
+
+    sub.IsSlotActive[index] = 0x00;
+    sub.FreeIndices.push_back(index);
+    sub.IsDirty = true;
+
+    while (sub.ActiveCount > 0 && sub.IsSlotActive[sub.ActiveCount - 1] == 0)
+    {
+        sub.ActiveCount--;
+    }
 }
 
 void MaterialMemoryPoolSystem::CreateMaterialBakerBindlessDescriptorSet()
