@@ -40,14 +40,10 @@ void MaterialMemoryPoolSystem::StartUp()
 
     UpdateMemoryPoolHeader(BakerMaterialBuffer, BakerMaterialCapacity);
 
-    Vector<byte> GpuDataBufferMemoryPool2 =
-        Vector<byte>(sizeof(MaterialBakerBufferHeader) + MaterialMemoryPoolSize, 0xFF);
+    Vector<byte> GpuDataBufferMemoryPool2 = Vector<byte>(sizeof(MaterialBakerBufferHeader) + MaterialMemoryPoolSize, 0xFF);
     memcpy(GpuDataBufferMemoryPool2.data(), &MaterialPoolHeader, sizeof(MaterialBakerBufferHeader));
 
-    MaterialBakerBufferId = bufferSystem.CreateDynamicBuffer(
-        GpuDataBufferMemoryPool2.data(),
-        GpuDataBufferMemoryPool2.size(),
-        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    MaterialBakerBufferId = bufferSystem.CreateDynamicBuffer( GpuDataBufferMemoryPool2.data(), GpuDataBufferMemoryPool2.size(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
     VulkanBuffer& buffer = bufferSystem.FindVulkanBuffer(MaterialBakerBufferId);
     MaterialBufferPtr = buffer.BufferMappedData();
@@ -100,50 +96,32 @@ void MaterialMemoryPoolSystem::ResizeMemoryPool(MaterialBakerMemoryPoolTypes mem
 
 void MaterialMemoryPoolSystem::UpdateMemoryPoolHeader(MaterialBakerMemoryPoolTypes memoryPoolTypeToUpdate, uint32 newPoolSize)
 {
-    for (int x = static_cast<int>(memoryPoolTypeToUpdate);
-        x < static_cast<int>(MaterialBakerMemoryPoolTypes::BakerEndofPool);
-        x++)
+    for (int x = static_cast<int>(memoryPoolTypeToUpdate); x < static_cast<int>(MaterialBakerMemoryPoolTypes::BakerEndofPool); x++)
     {
         const MaterialBakerMemoryPoolTypes memoryPoolType = (MaterialBakerMemoryPoolTypes)x;
-        const MaterialBakerMemoryPoolTypes lastMemoryPoolType = (x == 0)
-            ? MaterialBakerMemoryPoolTypes::BakerEndofPool
-            : (MaterialBakerMemoryPoolTypes)(x - 1);
-
+        const MaterialBakerMemoryPoolTypes lastMemoryPoolType = (x == 0) ? MaterialBakerMemoryPoolTypes::BakerEndofPool : (MaterialBakerMemoryPoolTypes)(x - 1);
         const MemoryPoolSubBufferHeader oldMemoryPoolSubHeader = MemorySubPoolHeader[memoryPoolType];
 
         MemorySubPoolHeader[memoryPoolType] = MemoryPoolSubBufferHeader
         {
            .ActiveCount = MemorySubPoolHeader[memoryPoolType].ActiveCount,
-           .Offset = lastMemoryPoolType == MaterialBakerMemoryPoolTypes::BakerEndofPool
-                ? sizeof(MaterialBakerBufferHeader)
-                : MemorySubPoolHeader[lastMemoryPoolType].Offset
-                    + (MemorySubPoolHeader[lastMemoryPoolType].Capacity * MemorySubPoolHeader[lastMemoryPoolType].Size),
-           .Capacity = memoryPoolType == memoryPoolTypeToUpdate
-                ? newPoolSize
-                : MemorySubPoolHeader[memoryPoolType].Capacity,
+           .Offset = lastMemoryPoolType == MaterialBakerMemoryPoolTypes::BakerEndofPool ? sizeof(MaterialBakerBufferHeader) : MemorySubPoolHeader[lastMemoryPoolType].Offset + (MemorySubPoolHeader[lastMemoryPoolType].Capacity * MemorySubPoolHeader[lastMemoryPoolType].Size),
+           .Capacity = memoryPoolType == memoryPoolTypeToUpdate ? newPoolSize : MemorySubPoolHeader[memoryPoolType].Capacity,
            .Size = MemorySubPoolHeader[memoryPoolType].Size,
-           .IsSlotActive = memoryPoolType == memoryPoolTypeToUpdate
-                ? Vector<byte>(newPoolSize, 0x00)
-                : MemorySubPoolHeader[memoryPoolType].IsSlotActive,
+           .IsSlotActive = memoryPoolType == memoryPoolTypeToUpdate ? Vector<byte>(newPoolSize, 0x00) : MemorySubPoolHeader[memoryPoolType].IsSlotActive,
            .FreeIndices = MemorySubPoolHeader[memoryPoolType].FreeIndices,
            .IsDirty = true
         };
 
-        const uint32 bytesToCopy = std::min(
-            oldMemoryPoolSubHeader.ActiveCount,
-            static_cast<uint32>(MemorySubPoolHeader[memoryPoolType].IsSlotActive.size()));
+        const uint32 bytesToCopy = std::min( oldMemoryPoolSubHeader.ActiveCount, static_cast<uint32>(MemorySubPoolHeader[memoryPoolType].IsSlotActive.size()));
         if (bytesToCopy > 0 && !oldMemoryPoolSubHeader.IsSlotActive.empty())
         {
-            memcpy(MemorySubPoolHeader[memoryPoolType].IsSlotActive.data(),
-                oldMemoryPoolSubHeader.IsSlotActive.data(),
-                bytesToCopy);
+            memcpy(MemorySubPoolHeader[memoryPoolType].IsSlotActive.data(), oldMemoryPoolSubHeader.IsSlotActive.data(), bytesToCopy);
         }
     }
 
-    MemoryPoolSubBufferHeader lastHeader =
-        MemorySubPoolHeader[(MaterialBakerMemoryPoolTypes)((int)MaterialBakerMemoryPoolTypes::BakerEndofPool - 1)];
+    MemoryPoolSubBufferHeader lastHeader = MemorySubPoolHeader[(MaterialBakerMemoryPoolTypes)((int)MaterialBakerMemoryPoolTypes::BakerEndofPool - 1)];
     MaterialMemoryPoolSize = lastHeader.Offset + (lastHeader.Size * lastHeader.Capacity);
-
     MaterialPoolHeader = MaterialBakerBufferHeader
     {
         .MaterialOffset = MemorySubPoolHeader[BakerMaterialBuffer].Offset,
@@ -222,10 +200,8 @@ void MaterialMemoryPoolSystem::UpdateMemoryPool()
 ImportMaterial& MaterialMemoryPoolSystem::UpdateMaterial(uint32 index)
 {
     MemoryPoolSubBufferHeader& materialSubPool = MemorySubPoolHeader[BakerMaterialBuffer];
-    if (index >= materialSubPool.Capacity)
-        throw std::out_of_range("Material index out of range: " + std::to_string(index) + " >= " + std::to_string(materialSubPool.Capacity));
-    if (index >= materialSubPool.IsSlotActive.size() || !materialSubPool.IsSlotActive[index])
-        throw std::runtime_error("Material slot inactive at index " + std::to_string(index));
+    if (index >= materialSubPool.Capacity) throw std::out_of_range("Material index out of range: " + std::to_string(index) + " >= " + std::to_string(materialSubPool.Capacity));
+    if (index >= materialSubPool.IsSlotActive.size() || !materialSubPool.IsSlotActive[index]) throw std::runtime_error("Material slot inactive at index " + std::to_string(index));
 
     uint32 offset = materialSubPool.Offset + (index * sizeof(ImportMaterial));
     materialSubPool.IsDirty = true;

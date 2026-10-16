@@ -1,0 +1,68 @@
+{
+  "Name": "SkyBoxPass",
+  "RenderPassId": "dbffd1c8-fdac-4b79-a192-465191af584f",
+  "RenderPipelineList": [
+    "Pipelines/SkyBoxPipeline.json"
+  ],
+  "RenderPassResolution": [ 0, 0 ],
+  "SubPassCount": 1,
+  "UseDefaultRenderResolution": false,
+  "UseCubeMapMultiView": false,
+  "IsRenderedToSwapchain": false,
+  "IsCubeMapRenderPass": false,
+  "InputTextureList": [ "d80e3a20-88fb-4a21-87bb-e38d2a214567" ],
+  "SampleCount": 1,
+  "RenderAttachmentList": [
+    {
+      "RenderedTextureId": "3ae704f8-1f8d-44ac-bc2a-7983a9a08fe7",
+      "MipMapCount": 1,
+      "RenderTextureType": 2,
+      "RenderAttachmentTypes": [ 0 ],
+      "Format": 97,
+      "LoadOp": 1,
+      "StoreOp": 0,
+      "FinalLayout": 5,
+      "UseSampler": true,
+      "UseMipMaps": false,
+      "SamplerCreateInfo": {
+        "SType": 31,
+        "MagFilter": 1,
+        "MinFilter": 1,
+        "MipmapMode": 1,
+        "AddressModeU": 2,
+        "AddressModeV": 2,
+        "AddressModeW": 2,
+        "MipLodBias": 0.0,
+        "AnisotropyEnable": true,
+        "MaxAnisotropy": 16.0,
+        "CompareEnable": false,
+        "CompareOp": 7,
+        "MinLod": 0.0,
+        "MaxLod": 1000.0,
+        "BorderColor": 2,
+        "UnnormalizedCoordinates": false
+      }
+    }
+  ],
+  "SubpassDependencyList": [
+    {
+      "SrcSubpass": 4294967295,
+      "DstSubpass": 0,
+      "SrcStageMask": 1024,
+      "DstStageMask": 1024,
+      "SrcAccessMask": 0,
+      "DstAccessMask": 256,
+      "DependencyFlags": 0
+    }
+  ],
+  "ClearValueList": [
+    {
+      "Color": {
+        "Float32_0": 0.0,
+        "Float32_1": 0.0,
+        "Float32_2": 0.0,
+        "Float32_3": 0.0
+      }
+    }
+  ]
+}

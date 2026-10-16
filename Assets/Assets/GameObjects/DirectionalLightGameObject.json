@@ -1,0 +1,60 @@
+{
+  "GameObjectType": 3,
+  "GameObjectLightPath": "Lights/DirectionalLightScript.json",
+  "MaterialId": "0A3ECCCB-D54B-4DCA-B5F1-02F5849076A2",
+  "GameObjectComponentList": [
+    {
+      "ComponentType": 5,
+      "LightColor": [ 0.50, 0.55, 0.50 ],
+      "LightDirection": [ 0.2, 0.1, 1.0 ],
+      "LightIntensity": 3.2,
+      "ShadowStrength": 0.70,
+      "ShadowBias": 0.015,
+      "ShadowSoftness": 0.30
+    },
+    {
+      "GameObjectPosition": [
+        0.0,
+        0.0
+      ],
+      "GameObjectRotation": [
+        0.0,
+        0.0
+      ],
+      "GameObjectScale": [
+        1.0,
+        1.0
+      ],
+      "ComponentType": 2
+    },
+    {
+      "ComponentType": 1,
+      "VramSpriteId": "3d2d93f5-1d59-4b0b-81fa-cf149d99e380"
+    },
+    {
+      "ComponentType": 7
+    }
+  ],
+  "GameObjectSprite": {
+    "VramSpriteId": "3d2d93f5-1d59-4b0b-81fa-cf149d99e380",
+    "SpriteLayer": 0,
+    "SpriteScale": [ 2.0, 2.0 ],
+    "SpritePixelSize": [
+      128,
+      128
+    ],
+    "SpriteColor": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "AnimationList": [
+      {
+        "AnimationId": 0,
+        "FrameHoldTime": 0.0,
+        "FrameList": [ [ 0, 0 ] ]
+      }
+    ]
+  }
+}

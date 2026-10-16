@@ -85,41 +85,42 @@ ImportMaterial MaterialBakerSystem::LoadMaterial(nlohmann::json& materialJson)
     uint materialId = materialMemoryPoolSystem.AllocateObject(BakerMaterialBuffer);
     ImportMaterial& material = materialMemoryPoolSystem.UpdateMaterial(materialId);
 
-    auto v3 = [](const nlohmann::json& a, float x, float y, float z) 
+    auto v3 = [](const nlohmann::json& a, float x, float y, float z)
         {
             if (a.is_array() && a.size() >= 3) return std::array<float, 3>{ a[0].get<float>(), a[1].get<float>(), a[2].get<float>() };
             return std::array<float, 3>{ x, y, z };
         };
 
-    auto Albedo = v3(materialJson["Albedo"], 1, 1, 1);
-    auto ClearcoatTint = v3(materialJson["ClearcoatTint"], 1, 1, 1);
-    auto SheenColor = v3(materialJson["SheenColor"], 1, 1, 1);
-    auto SSSColor = v3(materialJson["SubSurfaceScatteringColor"], 1, 0.45f, 0.35f);
-    auto AttenuationColor = v3(materialJson["AttenuationColor"], 1, 1, 1);
-    auto Emission = v3(materialJson["Emission"], 0, 0, 0);
+    auto Albedo = v3(materialJson.value("Albedo", nlohmann::json::array({ 1.0f, 1.0f, 1.0f })), 1, 1, 1);
+    auto ClearcoatTint = v3(materialJson.value("ClearcoatTint", nlohmann::json::array({ 1.0f, 1.0f, 1.0f })), 1, 1, 1);
+    auto SheenColor = v3(materialJson.value("SheenColor", nlohmann::json::array({ 1.0f, 1.0f, 1.0f })), 1, 1, 1);
+    auto SSSColor = v3(materialJson.value("SubSurfaceScatteringColor", nlohmann::json::array({ 1.0f, 1.0f, 1.0f })), 1, 1, 1);
+    auto AttenuationColor = v3(materialJson.value("AttenuationColor", nlohmann::json::array({ 0.0f, 0.0f, 0.0f })), 0, 0, 0);
+    auto Emission = v3(materialJson.value("Emission", nlohmann::json::array({ 0.0f, 0.0f, 0.0f })), 0, 0, 0);
 
     material.Metallic = materialJson.value("Metallic", 0.0f);
     material.Roughness = materialJson.value("Roughness", 0.5f);
     material.AmbientOcclusion = materialJson.value("AmbientOcclusion", 1.0f);
-    material.IOR = materialJson.value("IOR", 1.45f);
+    material.IOR = materialJson.value("IOR", 1.5f);
     material.NormalStrength = materialJson.value("NormalStrength", 1.0f);
-    material.Height = materialJson.value("HeightScale", 0.0f);
+    material.Height = materialJson.value("Height", 0.0f);
     material.CoatWeight = materialJson.value("ClearcoatWeight", 0.0f);
     material.CoatRoughness = materialJson.value("ClearcoatRoughness", 0.08f);
     material.CoatDarkening = materialJson.value("CoatDarkening", 1.0f);
     material.SheenWeight = materialJson.value("SheenWeight", 0.0f);
     material.SheenRoughness = materialJson.value("SheenRoughness", 0.5f);
     material.SSSWeight = materialJson.value("SSSWeight", 0.0f);
-    material.SSSProfile = materialJson.value("SSSProfile", 0.0f);
-    material.Thickness = materialJson.value("Thickness", 0.5f);
+    material.SSSProfile = materialJson.value("SSSProfile", 0.5f);
+    material.Thickness = materialJson.value("Thickness", 0.0f);
     material.TransmissionWeight = materialJson.value("TransmissionWeight", 0.0f);
     material.AttenuationDistance = materialJson.value("AttenuationDistance", 1.0f);
     material.Anisotropy = materialJson.value("Anisotropy", 0.0f);
     material.AnisotropyRotation = materialJson.value("AnisotropyRotation", 0.0f);
     material.ThinFilmWeight = materialJson.value("ThinFilmWeight", 0.0f);
     material.ThinFilmThickness = materialJson.value("ThinFilmThickness", 0.5f);
-    material.EmissionIntensity = materialJson.value("EmissionIntensity", 0.0f);
-    material.AlphaCutOff = materialJson.value("AlphaCutoff", 0.1f);
+    material.EmissionIntensity = materialJson.value("EmissionIntensity", 1.0f);
+    material.AlphaCutOff = materialJson.value("AlphaCutoff", 0.5f);
+
     material.AlbedoMap = TextureExists(materialJson, "AlbedoMap");
     material.NormalMap = TextureExists(materialJson, "NormalMap");
     material.HeightMap = TextureExists(materialJson, "HeightMap");
@@ -160,6 +161,7 @@ uint MaterialBakerSystem::TextureExists(nlohmann::json& j, const char* key)
 
 uint MaterialBakerSystem::LoadTexture(nlohmann::json& json)
 {
+    auto a = json.dump();
     TextureLoader loader = json.get<TextureLoader>();
     TextureList.emplace_back(textureSystem.LoadTexture(loader));
     return AddToMaterialMemoryPool(TextureList.back());

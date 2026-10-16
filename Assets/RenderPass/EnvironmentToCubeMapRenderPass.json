@@ -42,9 +42,11 @@
         "PipelinePackageId": "1af890da-3ca5-4172-a8e1-5703f74a66b9",
         "ShaderPushConstant": null,
         "PushConstantUpdates": [],
+        "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
-        "OffScreenRenderPass": true
+        "OffScreenRenderPass": true,
+        "AlphaRenderPass": false
       }
     ]
   ],
@@ -109,7 +111,7 @@
         "Float32_0": 0.0,
         "Float32_1": 0.0,
         "Float32_2": 0.0,
-        "Float32_3": 0.0
+        "Float32_3": 1.0
       }
     }
   ]
