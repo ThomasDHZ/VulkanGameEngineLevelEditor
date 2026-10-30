@@ -36,7 +36,7 @@ void MaterialBakerSystem::BakeMaterial(const String& importMaterialJson)
     {
         for (int y = 0; y < pushConstantRules.size(); y++)
         {
-            if (pushConstantRules[y].Variable == "MaterialBakerSubPassIndex") pushConstantRules[y].Value[0] = std::to_string(x);
+          //  if (pushConstantRules[y].Variable == "MaterialBakerSubPassIndex") pushConstantRules[y].Value.is = std::to_string(x);
         }
 
         textureSystem.GenerateTexture(AssetBakerRenderPassId, &pushConstantRules);

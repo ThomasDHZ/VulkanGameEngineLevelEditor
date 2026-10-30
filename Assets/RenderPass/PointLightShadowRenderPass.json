@@ -1,7 +1,7 @@
 {
   "Name": "PointLightShadowRenderPass",
   "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
-  "RenderPassResolution": [ 4096, 4096 ],
+  "RenderPassResolution": [ 8192, 8192 ],
   "RenderFlags": {
     "UseGlobalBindlessSet": true,
     "UseVkMultiview": false,
@@ -11,46 +11,86 @@
   },
   "ShaderList": [
     {
-      "ShaderId": "61d337e4-e9c1-4479-8a84-af89b4207c84",
+      "ShaderId": "600ce35a-de2c-4b94-ac29-95527cc3c0dd",
       "ShaderFile": "Shaders/GBufferLevelShader2DPointDepthVert.spv",
       "ShaderStage": 1
     },
     {
-      "ShaderId": "92f30c71-5d13-4ff5-99cf-140879eda853",
+      "ShaderId": "b745c266-c801-4d5b-a51c-24a754a08d3d",
       "ShaderFile": "Shaders/GBufferLevelShader2DPointDepthFrag.spv",
       "ShaderStage": 16
     },
     {
-      "ShaderId": "3101a941-f1a2-4739-9160-37fbfd9134ca",
+      "ShaderId": "62c5246b-70be-422e-adb1-080a5db51d7c",
       "ShaderFile": "Shaders/GBufferSpriteInstanceDepthPointShaderVert.spv",
       "ShaderStage": 1
     },
     {
-      "ShaderId": "7afc2c67-50c3-40fc-8cbb-4859394e9e99",
+      "ShaderId": "198d25df-50ea-4a3a-92d4-096eeecac2eb",
       "ShaderFile": "Shaders/GBufferSpriteInstanceDepthPointShaderFrag.spv",
+      "ShaderStage": 16
+    },
+    {
+      "ShaderId": "681731fb-4b18-4b27-b363-9d30d4a06838",
+      "ShaderFile": "Shaders/GBufferLevelShader2DPointDepthTintVert.spv",
+      "ShaderStage": 1
+    },
+    {
+      "ShaderId": "c535f12f-99ef-4f7f-9e23-9d0f4cd1bd97",
+      "ShaderFile": "Shaders/GBufferLevelShader2DPointDepthTintFrag.spv",
+      "ShaderStage": 16
+    },
+    {
+      "ShaderId": "d34cfa63-4b4f-4186-8bd5-a783fca9a325",
+      "ShaderFile": "Shaders/GBufferSpriteInstanceDepthPointTintShaderVert.spv",
+      "ShaderStage": 1
+    },
+    {
+      "ShaderId": "2bdff05a-dfd2-4976-82e4-a3ee86c42273",
+      "ShaderFile": "Shaders/GBufferSpriteInstanceDepthPointTintShaderFrag.spv",
       "ShaderStage": 16
     }
   ],
   "PipelineList": [
-    "Pipelines/GBufferLevelShader2DDepthPipeline.json",
-    "Pipelines/GBufferSpriteInstanceDepthPipeline.json"
+    "Pipelines/GBufferLevelShader2DPointDepthPipeline.json",
+    "Pipelines/GBufferSpriteInstancePointDepthPipeline.json",
+    "Pipelines/GBufferLevelShader2DPointDepthTintPipeline.json",
+    "Pipelines/GBufferSpriteInstancePointDepthTintPipeline.json"
   ],
   "PipelinePackageList": [
     {
-      "PipelinePackageId": "e4d22a68-bef0-4bd0-8c04-97d96fc36af1",
+      "PipelinePackageId": "127a4e45-4cd1-4217-a4f6-bb4053e50ef2",
       "PipelineList": [
         {
           "PipelineType": 0,
-          "PipelineId": "c09e7dbf-96a1-410f-a24d-02d474fa30bb"
+          "PipelineId": "ac466d3f-9363-4b89-94d8-532830bedda9"
         }
       ]
     },
     {
-      "PipelinePackageId": "1412295f-f5f4-4e3c-802a-9ab77ec63485",
+      "PipelinePackageId": "29e6e57a-1223-4233-a802-a5e074dd9d47",
       "PipelineList": [
         {
           "PipelineType": 0,
-          "PipelineId": "3cc09cd6-e356-4b6e-bab3-a62f1fa36176"
+          "PipelineId": "12429b1b-aba8-48b2-85c0-6de7876bf05c"
+        }
+      ]
+    },
+    {
+      "PipelinePackageId": "cd51a71d-72a5-4892-89aa-0ddff97c66b1",
+      "PipelineList": [
+        {
+          "PipelineType": 0,
+          "PipelineId": "e0fcffc0-c6d3-4d11-9e1d-d56a5da5b773"
+        }
+      ]
+    },
+    {
+      "PipelinePackageId": "38675f25-5739-4da2-884b-e41337ee5563",
+      "PipelineList": [
+        {
+          "PipelineType": 0,
+          "PipelineId": "621dad4b-ab5c-4a7a-a9ad-d23464b79950"
         }
       ]
     }
@@ -59,22 +99,108 @@
     [
       {
         "MeshType": 1,
-        "PipelinePackageId": "e4d22a68-bef0-4bd0-8c04-97d96fc36af1",
-        "ShaderPushConstant": "directionalLightSceneDataDepthBuffer",
+        "RenderPassDrawFlags": 66,
+        "PipelinePackageId": "127a4e45-4cd1-4217-a4f6-bb4053e50ef2",
+        "ShaderPushConstant": "pointLightSceneDataDepthBuffer",
+        "PushConstantUpdates": [
+          {
+            "PushConstantType": 0,
+            "Value": [ 5 ],
+            "Variable": "PointLightViewIndex",
+            "VariableType": 2
+          }
+        ],
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
+        "CustomDrawCommand": "drawPointLightDepthViews",
+        "CustomDrawContext": {
+          "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
+          "TextureAttachmentId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
+          "TileSize": 1024
+        },
         "OffScreenRenderPass": false,
+        "UseCustomDrawCommand": true,
         "AlphaRenderPass": false
       },
       {
         "MeshType": 2,
-        "PipelinePackageId": "1412295f-f5f4-4e3c-802a-9ab77ec63485",
-        "ShaderPushConstant": null,
+        "RenderPassDrawFlags": 68,
+        "PipelinePackageId": "29e6e57a-1223-4233-a802-a5e074dd9d47",
+        "ShaderPushConstant": "pointLightSceneDataDepthBuffer",
+        "PushConstantUpdates": [
+          {
+            "PushConstantType": 0,
+            "Value": [ 5 ],
+            "Variable": "PointLightViewIndex",
+            "VariableType": 2
+          }
+        ],
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
+        "CustomDrawCommand": "drawPointLightDepthViews",
+        "CustomDrawContext": {
+          "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
+          "TextureAttachmentId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
+          "TileSize": 1024
+        },
         "OffScreenRenderPass": false,
+        "UseCustomDrawCommand": true,
+        "AlphaRenderPass": false
+      }
+    ],
+    [
+      {
+        "MeshType": 1,
+        "RenderPassDrawFlags": 66,
+        "PipelinePackageId": "cd51a71d-72a5-4892-89aa-0ddff97c66b1",
+        "ShaderPushConstant": "pointLightSceneDataDepthBuffer",
+        "PushConstantUpdates": [
+          {
+            "PushConstantType": 0,
+            "Value": [ 5 ],
+            "Variable": "PointLightViewIndex",
+            "VariableType": 2
+          }
+        ],
+        "InputAttachmentList": [],
+        "InputTextureList": [],
+        "OutputTextureList": [],
+        "CustomDrawCommand": "drawPointLightDepthViews",
+        "CustomDrawContext": {
+          "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
+          "TextureAttachmentId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
+          "TileSize": 1024
+        },
+        "OffScreenRenderPass": false,
+        "UseCustomDrawCommand": true,
+        "AlphaRenderPass": false
+      },
+      {
+        "MeshType": 2,
+        "RenderPassDrawFlags": 68,
+        "PipelinePackageId": "38675f25-5739-4da2-884b-e41337ee5563",
+        "ShaderPushConstant": "pointLightSceneDataDepthBuffer",
+        "PushConstantUpdates": [
+          {
+            "PushConstantType": 0,
+            "Value": [ 5 ],
+            "Variable": "PointLightViewIndex",
+            "VariableType": 2
+          }
+        ],
+        "InputAttachmentList": [],
+        "InputTextureList": [],
+        "OutputTextureList": [],
+        "CustomDrawCommand": "drawPointLightDepthViews",
+        "CustomDrawContext": {
+          "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
+          "TextureAttachmentId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
+          "TileSize": 1024
+        },
+        "OffScreenRenderPass": false,
+        "UseCustomDrawCommand": true,
         "AlphaRenderPass": false
       }
     ]
@@ -83,11 +209,11 @@
   "AttachmentList": [
     {
       "Name": "GBuffer Attachment 0: Depth",
-      "RenderedTextureId": "7b311a3a-135a-4e45-9b4e-aadeb8f36006",
+      "RenderedTextureId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
       "MipMapCount": 1,
       "TextureType": 1,
       "TextureUsageType": 12,
-      "RenderAttachmentTypes": [ 3 ],
+      "RenderAttachmentTypes": [ 3, 3 ],
       "Format": 126,
       "LoadOp": 1,
       "StoreOp": 0,
@@ -112,6 +238,38 @@
         "BorderColor": 2,
         "UnnormalizedCoordinates": false
       }
+    },
+    {
+      "Name": "GBuffer Attachment 1: Albedo",
+      "RenderedTextureId": "adafef66-6121-45b8-b1fe-745be31ede78",
+      "MipMapCount": 1,
+      "TextureType": 1,
+      "TextureUsageType": 14,
+      "RenderAttachmentTypes": [ 4, 0 ],
+      "Format": 43,
+      "LoadOp": 1,
+      "StoreOp": 0,
+      "FinalLayout": 5,
+      "UseSampler": true,
+      "UseMipMaps": false,
+      "SamplerCreateInfo": {
+        "SType": 31,
+        "MagFilter": 1,
+        "MinFilter": 1,
+        "MipmapMode": 1,
+        "AddressModeU": 2,
+        "AddressModeV": 2,
+        "AddressModeW": 2,
+        "MipLodBias": 0.0,
+        "AnisotropyEnable": false,
+        "MaxAnisotropy": 1.0,
+        "CompareEnable": false,
+        "CompareOp": 7,
+        "MinLod": 0.0,
+        "MaxLod": 1000.0,
+        "BorderColor": 1,
+        "UnnormalizedCoordinates": false
+      }
     }
   ],
   "SubpassDependencyList": [
@@ -119,18 +277,27 @@
       "SrcSubpass": 4294967295,
       "DstSubpass": 0,
       "SrcStageMask": 1,
-      "DstStageMask": 1024,
+      "DstStageMask": 1280,
       "SrcAccessMask": 0,
-      "DstAccessMask": 256,
+      "DstAccessMask": 1280,
       "DependencyFlags": 1
     },
     {
       "SrcSubpass": 0,
+      "DstSubpass": 1,
+      "SrcStageMask": 512,
+      "DstStageMask": 256,
+      "SrcAccessMask": 1024,
+      "DstAccessMask": 512,
+      "DependencyFlags": 1
+    },
+    {
+      "SrcSubpass": 1,
       "DstSubpass": 4294967295,
-      "SrcStageMask": 1024,
-      "DstStageMask": 128,
-      "SrcAccessMask": 256,
-      "DstAccessMask": 32,
+      "SrcStageMask": 1536,
+      "DstStageMask": 8192,
+      "SrcAccessMask": 1280,
+      "DstAccessMask": 0,
       "DependencyFlags": 1
     }
   ],
@@ -139,6 +306,14 @@
       "DepthStencil": {
         "depth": 1.0,
         "stencil": 0
+      }
+    },
+    {
+      "Color": {
+        "Float32_0": 1.0,
+        "Float32_1": 1.0,
+        "Float32_2": 1.0,
+        "Float32_3": 0.0
       }
     }
   ]

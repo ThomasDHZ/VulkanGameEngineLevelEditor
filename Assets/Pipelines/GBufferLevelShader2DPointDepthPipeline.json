@@ -1,0 +1,77 @@
+{
+  "Name": "GBufferLevelShader2DPointDepthPipeline",
+  "PipelineId": "ac466d3f-9363-4b89-94d8-532830bedda9",
+  "ShaderList": [
+    "600ce35a-de2c-4b94-ac29-95527cc3c0dd",
+    "b745c266-c801-4d5b-a51c-24a754a08d3d"
+  ],
+  "VertexType": 0,
+  "SubPassId": 0,
+  "ViewportList": [],
+  "ScissorList": [],
+  "PipelineColorBlendAttachmentStateList": [],
+  "PipelineColorBlendStateCreateInfoModel": {
+    "BlendConstants": { "FixedElementField": 0.0 },
+    "SType": 26,
+    "LogicOpEnable": false,
+    "LogicOp": 5,
+    "AttachmentCount": 0
+  },
+  "PipelineRasterizationStateCreateInfo": {
+    "sType": 23,
+    "depthClampEnable": 0,
+    "rasterizerDiscardEnable": 0,
+    "polygonMode": 0,
+    "cullMode": 0,
+    "frontFace": 0,
+    "depthBiasEnable": 0,
+    "depthBiasConstantFactor": 0.0,
+    "depthBiasClamp": 0.0,
+    "depthBiasSlopeFactor": 0.0,
+    "lineWidth": 1.0,
+    "flags": 0
+  },
+  "PipelineMultisampleStateCreateInfo": {
+    "sType": 24,
+    "rasterizationSamples": 1,
+    "sampleShadingEnable": false,
+    "minSampleShading": 0.0,
+    "alphaToCoverageEnable": false,
+    "alphaToOneEnable": false,
+    "flags": 0
+  },
+  "PipelineDepthStencilStateCreateInfo": {
+    "sType": 25,
+    "depthTestEnable": true,
+    "depthWriteEnable": true,
+    "depthCompareOp": 3,
+    "depthBoundsTestEnable": false,
+    "stencilTestEnable": false,
+    "front": {
+      "failOp": 0,
+      "passOp": 0,
+      "depthFailOp": 0,
+      "compareOp": 0,
+      "compareMask": 0,
+      "writeMask": 0,
+      "reference": 0
+    },
+    "back": {
+      "failOp": 0,
+      "passOp": 0,
+      "depthFailOp": 0,
+      "compareOp": 0,
+      "compareMask": 0,
+      "writeMask": 0,
+      "reference": 0
+    },
+    "minDepthBounds": 0.0,
+    "maxDepthBounds": 0.0,
+    "flags": 0
+  },
+  "PipelineInputAssemblyStateCreateInfo": {
+    "sType": 20,
+    "topology": 3,
+    "primitiveRestartEnable": 0
+  }
+}

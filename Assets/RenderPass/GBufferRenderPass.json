@@ -139,30 +139,53 @@
     [
       {
         "MeshType": 1,
+        "RenderPassDrawFlags": 66,
         "PipelinePackageId": "4a2850b3-7e58-4fb7-968b-370ba31929b0",
         "ShaderPushConstant": "sceneData",
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
-        "OffScreenRenderPass": false,
+        "CustomDrawCommand": null,
+        "CustomDrawContext": null,
+        "OffScreenRenderPass": true,
+        "UseCustomDrawCommand": false,
         "AlphaRenderPass": false
       },
       {
         "MeshType": 2,
+        "RenderPassDrawFlags": 68,
         "PipelinePackageId": "1027ed19-e1c6-4755-9bb4-005eee58c809",
         "ShaderPushConstant": null,
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
-        "OffScreenRenderPass": false,
+        "CustomDrawCommand": null,
+        "CustomDrawContext": null,
+        "OffScreenRenderPass": true,
+        "UseCustomDrawCommand": false,
         "AlphaRenderPass": false
       }
     ],
     [
       {
         "MeshType": 0,
+        "RenderPassDrawFlags": 128,
         "PipelinePackageId": "385c8a12-ece1-4017-86e1-58a301930b3a",
-        "ShaderPushConstant": null,
+        "ShaderPushConstant": "lightingPushConstant",
+        "PushConstantUpdates": [
+          {
+            "PushConstantType": 0,
+            "Value": [ 5 ],
+            "Variable": "PointLightViewIndex",
+            "VariableType": 2
+          },
+          {
+            "PushConstantType": 0,
+            "Value": [ 5 ],
+            "Variable": "PointLightViewIndex",
+            "VariableType": 2
+          }
+        ],
         "InputAttachmentList": [
           "b2914ff9-9014-4cea-8ad3-d32b81f5d127",
           "f1b90702-52d1-425f-83e1-85b6dbd41fe6",
@@ -177,35 +200,47 @@
         "InputTextureList": [],
         "ResolveTextureList": [],
         "OutputTextureList": [],
+        "CustomDrawCommand": null,
+        "CustomDrawContext": null,
         "OffScreenRenderPass": true,
+        "UseCustomDrawCommand": false,
         "AlphaRenderPass": false
       }
     ],
     [
       {
         "MeshType": 1,
+        "RenderPassDrawFlags": 66,
         "PipelinePackageId": "b0fb1ee0-0b07-4088-a558-6d22b10b2be5",
         "ShaderPushConstant": "sceneData",
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
-        "OffScreenRenderPass": false,
+        "CustomDrawCommand": null,
+        "CustomDrawContext": null,
+        "OffScreenRenderPass": true,
+        "UseCustomDrawCommand": false,
         "AlphaRenderPass": true
       },
       {
         "MeshType": 2,
+        "RenderPassDrawFlags": 68,
         "PipelinePackageId": "ac1fc14f-b73e-4d2e-96f1-c9b09899a144",
         "ShaderPushConstant": null,
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
-        "OffScreenRenderPass": false,
+        "CustomDrawCommand": null,
+        "CustomDrawContext": null,
+        "OffScreenRenderPass": true,
+        "UseCustomDrawCommand": false,
         "AlphaRenderPass": true
       }
     ],
     [
       {
         "MeshType": 0,
+        "RenderPassDrawFlags": 128,
         "PipelinePackageId": "340e9cde-1364-4a6d-a79e-236154900788",
         "ShaderPushConstant": null,
         "InputAttachmentList": [
@@ -215,7 +250,10 @@
         "InputTextureList": [],
         "ResolveTextureList": [],
         "OutputTextureList": [],
+        "CustomDrawCommand": null,
+        "CustomDrawContext": null,
         "OffScreenRenderPass": true,
+        "UseCustomDrawCommand": false,
         "AlphaRenderPass": false
       }
     ]

@@ -13,12 +13,13 @@ int main(int argc, char** argv)
     if (!debugSystem.IsRenderDocInjected()) debugSystem.SetRootDirectory("../Assets");
     
     vulkan.VulkanSetUp(configSystem.WindowResolution, configSystem.RenderResolution);
+    renderSystem.UsingImGui = false;
     bufferSystem.SetUpVmaAllocation();
     memoryPoolSystem.StartUp();
 
    // materialBakerSystem.BakeMaterial("AnimeGirlImportMaterial.json");
    // materialBakerSystem.BakeMaterial("WindowSpriteImportMaterial.json"); 
-    //materialBakerSystem.BakeMaterial("StainGlassWindowTestImportMaterial.json");
+  //  materialBakerSystem.BakeMaterial("StainGlassWindowTestImportMaterial.json");
  //  materialBakerSystem.BakeMaterial("LightIconImportMaterial.json");
   // materialBakerSystem.BakeMaterial("MegaManShotImportMaterial.json");
     materialBakerSystem.BakeMaterial("SparkManTileSetImportMaterial.json");
