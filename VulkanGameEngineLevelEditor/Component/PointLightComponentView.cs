@@ -1,5 +1,6 @@
 ﻿using GameScriptLibraryDLL.Components;
 using GlmSharp;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Xml;
 using VulkanEngineCS;
@@ -67,6 +68,18 @@ public unsafe class PointLightComponentView : ComponentView
     {
         get => ReadLight().ShadowSoftness;
         set { var l = ReadLight(); l.ShadowSoftness = value; WriteLight(l); }
+    }
+
+    public uint LightActive
+    {
+        get => ReadLight().LightActive;
+        set { var l = ReadLight(); l.LightActive = value; WriteLight(l); }
+    }
+
+    public int LightLayer
+    {
+        get => ReadLight().LightLayer;
+        set { var l = ReadLight(); l.LightLayer = value; WriteLight(l); }
     }
 
     GameScriptLibraryDLL.Components.PointLight ReadLight()

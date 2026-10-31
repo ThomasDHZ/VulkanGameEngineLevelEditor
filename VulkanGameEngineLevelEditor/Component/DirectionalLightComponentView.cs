@@ -1,5 +1,6 @@
 ﻿using GameScriptLibraryDLL.Components;
 using GlmSharp;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using VulkanEngineCS;
 using VulkanGameEngineLevelEditor.Attributes;
@@ -63,6 +64,12 @@ public unsafe class DirectionalLightComponentView : ComponentView
     {
         get => ReadLight().ShadowSoftness;
         set { var l = ReadLight(); l.ShadowSoftness = value; WriteLight(l); }
+    }
+
+    public uint LightActive
+    {
+        get => ReadLight().LightActive;
+        set { var l = ReadLight(); l.LightActive = value; WriteLight(l); }
     }
 
     GameScriptLibraryDLL.Components.DirectionalLight ReadLight()
