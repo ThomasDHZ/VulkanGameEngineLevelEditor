@@ -344,7 +344,7 @@ namespace VulkanGameEngineLevelEditor
                                         BeginInvoke(new Action(() =>
                                         {
                                             if (_shuttingDown || IsDisposed) return;
-                                            propertiesPanel.RefreshAllPanels(); // or RefreshVisiblePanels()
+                                            propertiesPanel.RefreshAllPanels();
                                         }));
                                     }
                                     catch (ObjectDisposedException) { }
