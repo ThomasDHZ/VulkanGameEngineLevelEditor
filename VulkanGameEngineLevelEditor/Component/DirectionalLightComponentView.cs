@@ -1,5 +1,6 @@
 ﻿using GameScriptLibraryDLL.Components;
 using GlmSharp;
+using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using VulkanEngineCS;
@@ -66,6 +67,7 @@ public unsafe class DirectionalLightComponentView : ComponentView
         set { var l = ReadLight(); l.ShadowSoftness = value; WriteLight(l); }
     }
 
+    [JsonIgnore]
     public uint LightActive
     {
         get => ReadLight().LightActive;

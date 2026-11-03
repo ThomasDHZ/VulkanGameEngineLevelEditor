@@ -4,6 +4,7 @@ using GameScriptLibraryDLL.GameObjects;
 using GlmSharp;
 using Microsoft.VisualBasic.ApplicationServices;
 using Newtonsoft.Json;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -17,6 +18,7 @@ using VulkanGameEngineLevelEditor.Component;
 using VulkanGameEngineLevelEditor.EditorEnhancements;
 using VulkanGameEngineLevelEditor.LevelEditor;
 using VulkanGameEngineLevelEditor.Model;
+using VulkanGameEngineLevelEditor.Registries;
 using VulkanGameEngineLevelEditor.Systems;
 using WeifenLuo.WinFormsUI.Docking;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -126,9 +128,6 @@ namespace VulkanGameEngineLevelEditor
 
                 Console.SetOut(writerOut);
                 Console.SetError(writerErr);
-
-                Console.WriteLine("=== Console successfully initialized ===");
-                Console.WriteLine("Console output should now work from all threads.");
             }
             catch (Exception ex)
             {
@@ -333,7 +332,7 @@ namespace VulkanGameEngineLevelEditor
 
                         if (selected != uint.MaxValue && vp.IsDragging)
                         {
-                            long now = Stopwatch.GetTimestamp(); 
+                            long now = Stopwatch.GetTimestamp();
                             if (now - _lastPropsRefreshTicks >= PropsRefreshIntervalTicks)
                             {
                                 _lastPropsRefreshTicks = now;
@@ -502,6 +501,28 @@ namespace VulkanGameEngineLevelEditor
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             MaterialBakerSystem.BakeMaterial("C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\ImportMaterials\\AnimeGirlImportMaterial.json", "C:\\Users\\DHZ\\Documents\\GitHub\\VulkanGameEngine\\Assets\\Textures\\AnimeGirlImportMaterial");
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            var level = new List<object>();
+            foreach (var gameObject in GameObjectSystem.GetGameObjectList())
+            {
+                var componentList = new List<ComponentView>();
+                foreach (var componentType in GameObjectSystem.GetGameObjectComponentList(gameObject.GameObjectId))
+                {
+                    var component = GameObjectSystem.GetGameObjectComponentPtr(gameObject.GameObjectId, componentType);
+                    var componentView = ComponentViewRegistry.TryCreate(gameObject.GameObjectId, componentType, component);
+                    if (componentView != null) componentList.Add(componentView);
+                }
+                level.Add(new
+                {
+                    GameObjectId = gameObject.GameObjectId,
+                    Components = componentList
+                });
+            }
+            var json = JsonConvert.SerializeObject(level);
+            int a = 234;
         }
     }
 }

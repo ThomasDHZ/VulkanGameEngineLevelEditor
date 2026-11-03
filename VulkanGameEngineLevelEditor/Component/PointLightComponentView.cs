@@ -1,5 +1,6 @@
 ﻿using GameScriptLibraryDLL.Components;
 using GlmSharp;
+using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Xml;
@@ -70,6 +71,7 @@ public unsafe class PointLightComponentView : ComponentView
         set { var l = ReadLight(); l.ShadowSoftness = value; WriteLight(l); }
     }
 
+    [JsonIgnore]
     public uint LightActive
     {
         get => ReadLight().LightActive;

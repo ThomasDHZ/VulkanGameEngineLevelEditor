@@ -1,3 +1,4 @@
+using GameScriptLibraryDLL.Components;
 using VulkanGameEngineLevelEditor.Registries;
 
 namespace VulkanGameEngineLevelEditor
