@@ -14,6 +14,7 @@ using VulkanEngineCoreCS;
 using VulkanEngineCoreCS.Models;
 using VulkanEngineCoreCS.Vulkan;
 using VulkanEngineCS;
+using VulkanEngineCS.Models;
 using VulkanGameEngineLevelEditor.Component;
 using VulkanGameEngineLevelEditor.EditorEnhancements;
 using VulkanGameEngineLevelEditor.LevelEditor;
@@ -505,6 +506,7 @@ namespace VulkanGameEngineLevelEditor
 
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
+            LevelSystem.SaveLevelData("af");
             var level = new List<object>();
             foreach (var gameObject in GameObjectSystem.GetGameObjectList())
             {

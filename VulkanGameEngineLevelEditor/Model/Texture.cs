@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using VulkanCS;
-using VulkanGameEngineLevelEditor.Enums;
+using VulkanEngineCS.Enum;
 
 namespace VulkanGameEngineLevelEditor.Model
 {
