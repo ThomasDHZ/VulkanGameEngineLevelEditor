@@ -1,8 +1,8 @@
 {
   "GameObjectType": 6,
-  "GameObjectDLLType": "GameScriptLibraryDLL.GameObjects.WindowTestScript, GameScriptLibraryDLL",
+  "GameObjectDllType": "GameScriptLibraryDLL.GameObjects.WindowTestScript, GameScriptLibraryDLL",
   "GameObjectLuaScript": null,
-  "GameObjectVariableStruct": [],
+  "GameObjectVariableList": [],
   "GameObjectComponentList": [
     {
       "ComponentType": 0

@@ -113,7 +113,7 @@ namespace VulkanGameEngineLevelEditor.LevelEditor
                 int x = 0;
                 foreach (var pipeline in pass.PipelinePackageList)
                 {
-                    string title = string.IsNullOrWhiteSpace(pipeline.Name) ? $"[{x}] guid={pipeline.PipelinePackageId}" : $"[{x}] {pipeline.Name}";
+                    string title = string.IsNullOrWhiteSpace(pipeline.PipelinePackageName) ? $"[{x}] guid={pipeline.PipelinePackageId}" : $"[{x}] {pipeline.PipelinePackageName}";
                     attsRoot.Nodes.Add(new TreeNode(title)
                     {
                         Tag = new RenderPassTreeNodeTag

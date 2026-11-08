@@ -89,6 +89,7 @@ namespace VulkanGameEngineLevelEditor
 
             LoadExports("../x64/Debug/VulkanEngineInterop.dll");
             string jsonContent = File.ReadAllText(@"C:\Users\DHZ\Documents\GitHub\VulkanGameEngine\Assets\RenderPass\GBufferRenderPass.json");
+            var a = Guid.Empty;
             RenderPassLoader awer = JsonConvert.DeserializeObject<RenderPassLoader>(jsonContent);
 
             this.Text = "Vulkan Level Editor - RenderPassEditorView";

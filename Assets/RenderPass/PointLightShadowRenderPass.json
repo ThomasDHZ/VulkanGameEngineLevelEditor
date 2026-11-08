@@ -2,13 +2,12 @@
   "Name": "PointLightShadowRenderPass",
   "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
   "RenderPassResolution": [ 8192, 8192 ],
-  "RenderFlags": {
     "UseGlobalBindlessSet": true,
     "UseVkMultiview": false,
     "RenderAsCubemap": false,
     "UseDefaultRenderResolution": false,
-    "UseFrameBufferResolution": false
-  },
+    "UseFrameBufferResolution": false,
+    "OneTimeDraw": false,
   "ShaderList": [
     {
       "ShaderId": "600ce35a-de2c-4b94-ac29-95527cc3c0dd",
@@ -105,16 +104,22 @@
         "PushConstantUpdates": [
           {
             "PushConstantType": 0,
-            "Value": [ 5 ],
             "Variable": "PointLightViewIndex",
-            "VariableType": 2
+            "PushConstantVariable": {
+              "Value": [ 5 ],
+              "VariableType": 2
+            },
+            "PushConstantRef": {
+              "AssetId": "{00000000-0000-0000-0000-000000000000}",
+              "TextureVar": 0
+            }
           }
         ],
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
         "CustomDrawCommand": "drawPointLightDepthViews",
-        "CustomDrawContext": {
+        "CustomDrawCommandContext": {
           "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
           "TextureAttachmentId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
           "TileSize": 1024
@@ -131,16 +136,22 @@
         "PushConstantUpdates": [
           {
             "PushConstantType": 0,
-            "Value": [ 5 ],
             "Variable": "PointLightViewIndex",
-            "VariableType": 2
+            "PushConstantVariable": {
+              "Value": [ 5 ],
+              "VariableType": 2
+            },
+            "PushConstantRef": {
+              "AssetId": "{00000000-0000-0000-0000-000000000000}",
+              "TextureVar": 0
+            }
           }
         ],
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
         "CustomDrawCommand": "drawPointLightDepthViews",
-        "CustomDrawContext": {
+        "CustomDrawCommandContext": {
           "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
           "TextureAttachmentId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
           "TileSize": 1024
@@ -159,16 +170,22 @@
         "PushConstantUpdates": [
           {
             "PushConstantType": 0,
-            "Value": [ 5 ],
             "Variable": "PointLightViewIndex",
-            "VariableType": 2
+            "PushConstantVariable": {
+              "Value": [ 5 ],
+              "VariableType": 2
+            },
+            "PushConstantRef": {
+              "AssetId": "{00000000-0000-0000-0000-000000000000}",
+              "TextureVar": 0
+            }
           }
         ],
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
         "CustomDrawCommand": "drawPointLightDepthViews",
-        "CustomDrawContext": {
+        "CustomDrawCommandContext": {
           "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
           "TextureAttachmentId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
           "TileSize": 1024
@@ -185,16 +202,22 @@
         "PushConstantUpdates": [
           {
             "PushConstantType": 0,
-            "Value": [ 5 ],
             "Variable": "PointLightViewIndex",
-            "VariableType": 2
+            "PushConstantVariable": {
+              "Value": [ 5 ],
+              "VariableType": 2
+            },
+            "PushConstantRef": {
+              "AssetId": "{00000000-0000-0000-0000-000000000000}",
+              "TextureVar": 0
+            }
           }
         ],
         "InputAttachmentList": [],
         "InputTextureList": [],
         "OutputTextureList": [],
         "CustomDrawCommand": "drawPointLightDepthViews",
-        "CustomDrawContext": {
+        "CustomDrawCommandContext": {
           "RenderPassId": "349025f5-392b-4fe4-808f-ec4fe99906e4",
           "TextureAttachmentId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
           "TileSize": 1024
@@ -208,97 +231,97 @@
   "SampleCount": 1,
   "AttachmentList": [
     {
-      "Name": "GBuffer Attachment 0: Depth",
+      "AttachmentName": "GBuffer Attachment 0: Depth",
       "RenderedTextureId": "167bb2c7-50b5-4efa-afa6-333f2461c0cf",
       "MipMapCount": 1,
       "TextureType": 1,
       "TextureUsageType": 12,
       "RenderAttachmentTypes": [ 3, 3 ],
-      "Format": 126,
+      "TextureByteFormat": 126,
       "LoadOp": 1,
       "StoreOp": 0,
       "FinalLayout": 5,
       "UseSampler": true,
       "UseMipMaps": false,
       "SamplerCreateInfo": {
-        "SType": 31,
-        "MagFilter": 1,
-        "MinFilter": 1,
-        "MipmapMode": 1,
-        "AddressModeU": 2,
-        "AddressModeV": 2,
-        "AddressModeW": 2,
-        "MipLodBias": 0.0,
-        "AnisotropyEnable": false,
-        "MaxAnisotropy": 1.0,
-        "CompareEnable": false,
-        "CompareOp": 7,
-        "MinLod": 0.0,
-        "MaxLod": 1.0,
-        "BorderColor": 2,
-        "UnnormalizedCoordinates": false
+        "sType": 31,
+        "magFilter": 1,
+        "minFilter": 1,
+        "mipmapMode": 1,
+        "addressModeU": 2,
+        "addressModeV": 2,
+        "addressModeW": 2,
+        "mipLodBias": 0.0,
+        "anisotropyEnable": false,
+        "maxAnisotropy": 1.0,
+        "compareEnable": false,
+        "compareOp": 7,
+        "minLod": 0.0,
+        "maxLod": 1.0,
+        "borderColor": 2,
+        "unnormalizedCoordinates": false
       }
     },
     {
-      "Name": "GBuffer Attachment 1: Albedo",
+      "AttachmentName": "GBuffer Attachment 1: Albedo",
       "RenderedTextureId": "adafef66-6121-45b8-b1fe-745be31ede78",
       "MipMapCount": 1,
       "TextureType": 1,
       "TextureUsageType": 14,
       "RenderAttachmentTypes": [ 4, 0 ],
-      "Format": 43,
+      "TextureByteFormat": 43,
       "LoadOp": 1,
       "StoreOp": 0,
       "FinalLayout": 5,
       "UseSampler": true,
       "UseMipMaps": false,
       "SamplerCreateInfo": {
-        "SType": 31,
-        "MagFilter": 1,
-        "MinFilter": 1,
-        "MipmapMode": 1,
-        "AddressModeU": 2,
-        "AddressModeV": 2,
-        "AddressModeW": 2,
-        "MipLodBias": 0.0,
-        "AnisotropyEnable": false,
-        "MaxAnisotropy": 1.0,
-        "CompareEnable": false,
-        "CompareOp": 7,
-        "MinLod": 0.0,
-        "MaxLod": 1000.0,
-        "BorderColor": 1,
-        "UnnormalizedCoordinates": false
+        "sType": 31,
+        "magFilter": 1,
+        "minFilter": 1,
+        "mipmapMode": 1,
+        "addressModeU": 2,
+        "addressModeV": 2,
+        "addressModeW": 2,
+        "mipLodBias": 0.0,
+        "anisotropyEnable": false,
+        "maxAnisotropy": 1.0,
+        "compareEnable": false,
+        "compareOp": 7,
+        "minLod": 0.0,
+        "maxLod": 1000.0,
+        "borderColor": 1,
+        "unnormalizedCoordinates": false
       }
     }
   ],
   "SubpassDependencyList": [
     {
-      "SrcSubpass": 4294967295,
-      "DstSubpass": 0,
-      "SrcStageMask": 1,
-      "DstStageMask": 1280,
-      "SrcAccessMask": 0,
-      "DstAccessMask": 1280,
-      "DependencyFlags": 1
+      "srcSubpass": 4294967295,
+      "dstSubpass": 0,
+      "srcStageMask": 1,
+      "dstStageMask": 1280,
+      "srcAccessMask": 0,
+      "dstAccessMask": 1280,
+      "dependencyFlags": 1
     },
     {
-      "SrcSubpass": 0,
-      "DstSubpass": 1,
-      "SrcStageMask": 512,
-      "DstStageMask": 256,
-      "SrcAccessMask": 1024,
-      "DstAccessMask": 512,
-      "DependencyFlags": 1
+      "srcSubpass": 0,
+      "dstSubpass": 1,
+      "srcStageMask": 512,
+      "dstStageMask": 256,
+      "srcAccessMask": 1024,
+      "dstAccessMask": 512,
+      "dependencyFlags": 1
     },
     {
-      "SrcSubpass": 1,
-      "DstSubpass": 4294967295,
-      "SrcStageMask": 1536,
-      "DstStageMask": 8192,
-      "SrcAccessMask": 1280,
-      "DstAccessMask": 0,
-      "DependencyFlags": 1
+      "srcSubpass": 1,
+      "dstSubpass": 4294967295,
+      "srcStageMask": 1536,
+      "dstStageMask": 8192,
+      "srcAccessMask": 1280,
+      "dstAccessMask": 0,
+      "dependencyFlags": 1
     }
   ],
   "ClearValueList": [
